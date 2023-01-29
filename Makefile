@@ -6,7 +6,7 @@
 #    By: ghanquer <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/01/29 17:43:02 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/01/29 17:44:51 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ CC = c++ $(CFLAGS)
 
 RM = rm -fr
 
-CFLAGS = -Wall -Wextra -Werror -Wshadow -Wconversion -g -std=c++98
+CFLAGS = -Wall -Wextra -Werror -Wconversion -Wpedantic -O3 -g -std=c++98
 
 .cpp.o:
 	$(CC) -c $< -o $(<:.cpp=.o)
