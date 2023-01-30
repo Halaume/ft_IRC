@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/30 17:13:32 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/01/30 18:33:39 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,31 +18,43 @@
 #include <sys/types.h>
 #include <sys/epoll.h>
 #include <netdb.h>
+#include <cstdlib>
+#include <csignal>
 
+int is_kill = 0;
+
+void	signal_handling(int sig)
+{
+	is_kill = sig;
+}
 
 int main(int argc, char **argv)
 {
 	if (argc != 3)
 		return (std::cerr << "Wrong number of arg" << std::endl, 1);
 
+	std::signal(SIGINT, signal_handling);
 	int sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (sct == EACCES)
+	if (sct == -1)
 		return (std::cerr << "Invalid socket" << std::endl, 1);
 
-	hostent * localHost = gethostbyname("");
-	char * localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
+	//	hostent * localHost = gethostbyname("");
+	//	char * localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
 
 	sockaddr_in server;
 
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_family = AF_INET;
 	server.sin_port = htons(atoi(argv[1]));
-	if (bind(sct, (sockaddr *)(&server), sizeof(server)))
+	//	addrinfo	*server_info = NULL;
+	//	if (getaddrinfo(localIP, argv[1], server_info, &server_info) != 0)
+	//		return (std::cerr << "Error getting addr_info" << std::endl, 1);
+
+	if (bind(sct, (sockaddr *)(&server), sizeof(server)))//server_info->ai_addrlen))
 		return (std::cerr << "Error connecting socket" << std::endl, 1);
 	if (listen(sct, 1) == -1)
 		return (std::cerr << "Error listening socket" << std::endl, 1);
-//	TODO POLL/EPOLL !
-//
+
 	epoll_event events[1];
 	epoll_event ev;
 	int	epollfd = epoll_create1(0);
@@ -52,21 +64,52 @@ int main(int argc, char **argv)
 	ev.data.fd = sct;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sct, &ev) == -1)
 		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-	int	wait_ret = epoll_wait(epollfd, events, 1, -1);
-	if (wait_ret == -1)
-		return (std::cerr << "Error on epoll wait" << std::endl, 1);
-	unsigned int server_size = sizeof(server);
-	for (int i = 0; i < wait_ret; i++)
+	int accepted = 0;
+	socklen_t server_length = sizeof(server);
+	while (true)
 	{
-		if (events[i].data.fd == sct)
+		if (is_kill == 1)
 		{
-			int accepted = accept(sct, (sockaddr *)(&server), &server_size);
-			if (accepted == -1)
-				return (std::cerr << "Error on accept" << std::endl, 1);
+			close(sct);
+			if (accepted != 0)
+				close(accepted);
+			exit(0);
+		}
+		int	wait_ret = epoll_wait(epollfd, events, 1, -1);
+		if (wait_ret == -1)
+		{
+			if (is_kill != 0)
+			{
+				close(sct);
+				if (accepted != 0)
+					close(accepted);
+				return (0);
+			}
+			return (std::cerr << "Error on epoll wait" << std::endl, 1);
+		}
+		for (int i = 0; i < wait_ret; i++)
+		{
+			if (events[i].data.fd == sct)
+			{
+				accepted = accept(sct, (sockaddr *)(&server), &server_length);
+				if (accepted == -1)
+					return (std::cerr << "Error on accept" << std::endl, 1);
+				//man do setnonblocking(accepted); mais jsp pourquoi ni si on a le droit
+				ev.events = EPOLLIN | EPOLLET; //A voir si on laisse le EPOLLET mais je suis pas persuader
+				ev.data.fd = accepted;
+				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, accepted, &ev) == - 1)
+					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+			}
+			//man do else
+			//{
+			//	do_use_fd(events[i].data.fd);
+			//}
+			//Aucune idee ce pourquoi ni de ce que c'est
+
 		}
 	}
 
-
+	close(accepted);
 	close(sct);
 
 	return (0);

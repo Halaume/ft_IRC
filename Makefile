@@ -6,17 +6,17 @@
 #    By: ghanquer <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/01/29 17:44:51 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/01/30 18:04:38 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = MutantStack
+NAME = ircserv
 
 INC_DIR =		./inc
 OBJ_DIR = 		obj
 SRC_DIR	= 		./src
 
-INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), MutantStack))
+INC =			#$(addsuffix .hpp, $(addprefix $(INC_DIR), ))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 
