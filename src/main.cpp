@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/31 16:00:49 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/01/31 17:38:40 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
+#include <fcntl.h>
 
 int is_kill = 0;
 
@@ -39,9 +40,6 @@ int main(int argc, char **argv)
 	if (sct == -1)
 		return (std::cerr << "Invalid socket" << std::endl, 1);
 
-	//	hostent * localHost = gethostbyname("");
-	//	char * localIP = inet_ntoa (*(struct in_addr *)*localHost->h_addr_list);
-
 	sockaddr_in server;
 
 	server.sin_addr.s_addr = INADDR_ANY;
@@ -49,10 +47,6 @@ int main(int argc, char **argv)
 	server.sin_port = htons(atoi(argv[1]));
 	if (server.sin_port == 0)
 		return (std::cerr << "Error port = 0" << std::endl, 1);
-
-	//	addrinfo	*server_info = NULL;
-	//	if (getaddrinfo(localIP, argv[1], server_info, &server_info) != 0)
-	//		return (std::cerr << "Error getting addr_info" << std::endl, 1);
 
 	if (bind(sct, (sockaddr *)(&server), sizeof(server)))//server_info->ai_addrlen))
 		return (std::cerr << "Error connecting socket" << std::endl, 1);
@@ -112,8 +106,8 @@ int main(int argc, char **argv)
 				accepted = accept(sct, (sockaddr *)(&server), &server_length);
 				if (accepted == -1)
 					return (std::cerr << "Error on accept" << std::endl, 1);
-				//man do setnonblocking(accepted); mais jsp pourquoi ni si on a le droit
-				ev.events = EPOLLIN | EPOLLET; //A voir si on laisse le EPOLLET mais je suis pas persuader
+				fcntl(accepted, F_SETFL, O_NONBLOCK);
+				ev.events = EPOLLIN | EPOLLET;
 				ev.data.fd = accepted;
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, accepted, &ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
@@ -122,18 +116,17 @@ int main(int argc, char **argv)
 			{
 				if (is_kill != 0)
 					return (close(sct), 0);
-				char buf[1024];
+				char buf[4096] = "";
 				std::cout << "PASSAGE" << std::endl;
 				while (read(events[i].data.fd, buf, 1) > 0)
 				{
+					write(events[i].data.fd, buf, strlen(buf));
 					if (is_kill != 0)
 						return (close(sct), 0);
 					std::cout << buf;
 				}
 				std::cout << "PASSE";
 				std::cout << std::endl;
-				//g tenter de renvoyer tout a mon client mais seg
-				//write(events[i].data.fd, buf, strlen(buf));
 			}
 		}
 	}
