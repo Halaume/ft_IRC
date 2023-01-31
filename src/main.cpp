@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/30 18:33:39 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/01/31 16:00:49 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <netdb.h>
 #include <cstdlib>
 #include <csignal>
+#include <cstring>
 
 int is_kill = 0;
 
@@ -46,6 +47,9 @@ int main(int argc, char **argv)
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_family = AF_INET;
 	server.sin_port = htons(atoi(argv[1]));
+	if (server.sin_port == 0)
+		return (std::cerr << "Error port = 0" << std::endl, 1);
+
 	//	addrinfo	*server_info = NULL;
 	//	if (getaddrinfo(localIP, argv[1], server_info, &server_info) != 0)
 	//		return (std::cerr << "Error getting addr_info" << std::endl, 1);
@@ -55,27 +59,33 @@ int main(int argc, char **argv)
 	if (listen(sct, 1) == -1)
 		return (std::cerr << "Error listening socket" << std::endl, 1);
 
-	epoll_event events[1];
+	epoll_event events[10];
 	epoll_event ev;
 	int	epollfd = epoll_create1(0);
+
 	if (epollfd == -1)
 		return (std::cerr << "Error on epoll create" << std::endl, 1);
 	ev.events = EPOLLIN;
 	ev.data.fd = sct;
+
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sct, &ev) == -1)
 		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
+
 	int accepted = 0;
 	socklen_t server_length = sizeof(server);
+
 	while (true)
 	{
-		if (is_kill == 1)
+		if (is_kill != 0)
 		{
 			close(sct);
 			if (accepted != 0)
 				close(accepted);
 			exit(0);
 		}
+		std::cout << "here wait";
 		int	wait_ret = epoll_wait(epollfd, events, 1, -1);
+		std::cout << "wait ret = " << wait_ret << std::endl;
 		if (wait_ret == -1)
 		{
 			if (is_kill != 0)
@@ -85,10 +95,18 @@ int main(int argc, char **argv)
 					close(accepted);
 				return (0);
 			}
+
 			return (std::cerr << "Error on epoll wait" << std::endl, 1);
 		}
-		for (int i = 0; i < wait_ret; i++)
+		for (int i = 0; i < wait_ret; ++i)
 		{
+			if (is_kill != 0)
+			{
+				close(sct);
+				if (accepted != 0)
+					close(accepted);
+				return (0);
+			}
 			if (events[i].data.fd == sct)
 			{
 				accepted = accept(sct, (sockaddr *)(&server), &server_length);
@@ -100,12 +118,23 @@ int main(int argc, char **argv)
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, accepted, &ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 			}
-			//man do else
-			//{
-			//	do_use_fd(events[i].data.fd);
-			//}
-			//Aucune idee ce pourquoi ni de ce que c'est
-
+			else
+			{
+				if (is_kill != 0)
+					return (close(sct), 0);
+				char buf[1024];
+				std::cout << "PASSAGE" << std::endl;
+				while (read(events[i].data.fd, buf, 1) > 0)
+				{
+					if (is_kill != 0)
+						return (close(sct), 0);
+					std::cout << buf;
+				}
+				std::cout << "PASSE";
+				std::cout << std::endl;
+				//g tenter de renvoyer tout a mon client mais seg
+				//write(events[i].data.fd, buf, strlen(buf));
+			}
 		}
 	}
 
