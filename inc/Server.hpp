@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 15:31:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 17:20:31 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Server
 		sockaddr_in						_server;
 		int								_sct;
 		char *							_passwd;
-		int								_listen;
 		int								_epollfd;
 		epoll_event						_events[10];
 		epoll_event						_ev;

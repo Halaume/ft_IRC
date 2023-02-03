@@ -6,17 +6,17 @@
 #    By: ghanquer <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/01 13:26:02 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/02/03 17:20:04 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-INC_DIR =		.#/inc/
+INC_DIR =		./inc/
 OBJ_DIR = 		obj
 SRC_DIR	= 		./src
 
-INC =			#$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User))
+INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 
@@ -37,9 +37,9 @@ CFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++9
 #	ls -l | awk '{print $9}' | grep -E ".cpp$"| sed "s/\.cpp/ \\\/g" | sed '$s/\\$//g'
 
 SRC_FT = main \
-#		 Server \
-#		 Channel \
-#		 User
+		 Server \
+		 Channel \
+		 User
 
 all: $(NAME)
 

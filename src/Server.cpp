@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 15:33:31 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 17:23:37 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,14 @@
 #include <fcntl.h>
 
 
-Server::Server(void): _channels(), _Users()
+Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _Users()
 {
+	this->_passwd = NULL;
 }
 
-Server::Server(const Server & copy): _channels(copy._channels), _Users(copy._Users)
+Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
 {
+	this->_passwd = copy._passwd;
 }
 
 Server::~Server(void)
@@ -73,6 +75,7 @@ int	Server::init(char **argv)
 
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, this->_sct, &this->_ev) == -1)
 		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
+	return (0);
 }
 
 int	Server::run(void)
@@ -128,5 +131,6 @@ int	Server::run(void)
 			}
 		}
 	}
+	return (1);
 
 }

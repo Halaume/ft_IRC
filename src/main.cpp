@@ -6,10 +6,11 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 15:31:17 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 17:19:33 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdlib.h>
 #include <iostream>
 #include <csignal>
 
@@ -31,12 +32,6 @@ int	check_kill(Server server)
 		//free_fun(server);
 		exit(0);
 	}
-	return (0);
-}
-
-int	enable_keepalive(int sock)
-{
-		return (-1);
 	return (0);
 }
 
