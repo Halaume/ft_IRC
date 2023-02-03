@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 17:23:37 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 17:27:45 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,14 +66,14 @@ int	Server::init(char **argv)
 	if (listen(this->_sct, 1) == -1)
 		return (close(this->_sct), std::cerr << "Error listening socket" << std::endl, 1);
 
-	int	epollfd = epoll_create1(0);
+	this->_epollfd = epoll_create1(0);
 
-	if (epollfd == -1)
+	if (this->_epollfd == -1)
 		return (std::cerr << "Error on epoll create" << std::endl, 1);
 	this->_ev.events = EPOLLIN;
 	this->_ev.data.fd = this->_sct;
 
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, this->_sct, &this->_ev) == -1)
+	if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, this->_sct, &this->_ev) == -1)
 		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
 	return (0);
 }
