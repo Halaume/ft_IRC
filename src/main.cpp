@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 19:07:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/03 19:32:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,41 @@
 #include "../inc/Command.hpp"
 
 
+std::vector<std::vector<std::string> > getCommandBlock(const std::string input)
+{
+	std::string commandline;
+	std::string token;
+	std::string striterator;
+	std::vector<std::string> v1;
+	std::vector<std::vector<std::string> > v0;
+	
+	striterator = input;
+	while (striterator != "")
+	{
+		commandline = striterator.substr(0, striterator.find("\r\n"));
+		striterator = striterator.substr(striterator.find("\r\n")+2, striterator.length());
+		v1.clear();
+		while (commandline != "")
+		{
+			token = commandline.substr(0, commandline.find(" "));
+			v1.push_back(token);
+			if (commandline.substr(commandline.find(" ") +1, commandline.length()).length() == commandline.length())
+				commandline = "";
+			else
+				commandline = commandline.substr(commandline.find(" ") +1, commandline.length());	
+		}
+		v0.push_back(v1);
+	}
+	for (int i = 0; i < (int)v0.size(); i++) {
+		for (int j = 0; j < (int)v0[i].size(); j++) 
+			std::cout << "|" << v0[i][j] << "|";
+		std::cout << std::endl;
+	}
+	return (v0);
+}
+
+
+
 int is_kill = 0;
 
 void	signal_handling(int sig)
@@ -41,131 +76,8 @@ int main(int argc, char **argv)
 
 	if (argc != 3)
 		return (std::cerr << "Wrong number of arg" << std::endl, 1);
-	
-	Server irc_server;
-	
-	// Print all commands
-	// for (int i = 0; i < (int)irc_server.getCommands().size(); i++)
-	// 	std::cout << irc_server.getCommands()[i] << std::endl;
-	
-	// std::string input = "PASSAGE\r\nCAP LS\r\nPASS pwd\r\nNICK iguscett\r\nUSER iguscett iguscett 127.0.0.1 :Iacopo GUSCETTI\r\n";
-	// std::cout << input;
-
-	std::string input = "PASS pwd lol ok\r\nPASSAGE\r\nCAP LS\r\nPASS pwd\r\n";
-	// std::string input = "PASSAGE\r\n";
-	std::cout << input;
-	std::cout << "_________\n";
-	
-	Command cmd(input);
-
-
-
-
-
-
-
-
-
-
-
-	// std::signal(SIGINT, signal_handling);
-	// int sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	// if (sct == -1)
-	// 	return (std::cerr << "Invalid socket" << std::endl, 1);
-
-	// sockaddr_in server;
-
-	// server.sin_addr.s_addr = INADDR_ANY;
-	// server.sin_family = AF_INET;
-	// server.sin_port = htons(atoi(argv[1]));
-	// if (server.sin_port == 0)
-	// 	return (std::cerr << "Error port = 0" << std::endl, 1);
-
-	// if (bind(sct, (sockaddr *)(&server), sizeof(server)))//server_info->ai_addrlen))
-	// 	return (std::cerr << "Error connecting socket" << std::endl, 1);
-	// if (listen(sct, 1) == -1)
-	// 	return (std::cerr << "Error listening socket" << std::endl, 1);
-
-	// epoll_event events[10];
-	// epoll_event ev;
-	// int	epollfd = epoll_create1(0);
-
-	// if (epollfd == -1)
-	// 	return (std::cerr << "Error on epoll create" << std::endl, 1);
-	// ev.events = EPOLLIN;
-	// ev.data.fd = sct;
-
-	// if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sct, &ev) == -1)
-	// 	return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-
-	// int accepted = 0;
-	// socklen_t server_length = sizeof(server);
-
-	// while (true)
-	// {
-	// 	if (is_kill != 0)
-	// 	{
-	// 		close(sct);
-	// 		if (accepted != 0)
-	// 			close(accepted);
-	// 		exit(0);
-	// 	}
-	// 	std::cout << "here wait";
-	// 	int	wait_ret = epoll_wait(epollfd, events, 1, -1);
-	// 	std::cout << "wait ret = " << wait_ret << std::endl;
-	// 	if (wait_ret == -1)
-	// 	{
-	// 		if (is_kill != 0)
-	// 		{
-	// 			close(sct);
-	// 			if (accepted != 0)
-	// 				close(accepted);
-	// 			return (0);
-	// 		}
-
-	// 		return (std::cerr << "Error on epoll wait" << std::endl, 1);
-	// 	}
-	// 	for (int i = 0; i < wait_ret; ++i)
-	// 	{
-	// 		if (is_kill != 0)
-	// 		{
-	// 			close(sct);
-	// 			if (accepted != 0)
-	// 				close(accepted);
-	// 			return (0);
-	// 		}
-	// 		if (events[i].data.fd == sct)
-	// 		{
-	// 			accepted = accept(sct, (sockaddr *)(&server), &server_length);
-	// 			if (accepted == -1)
-	// 				return (std::cerr << "Error on accept" << std::endl, 1);
-	// 			fcntl(accepted, F_SETFL, O_NONBLOCK);
-	// 			ev.events = EPOLLIN | EPOLLET;
-	// 			ev.data.fd = accepted;
-	// 			if (epoll_ctl(epollfd, EPOLL_CTL_ADD, accepted, &ev) == - 1)
-	// 				return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
-	// 		}
-	// 		else
-	// 		{
-	// 			if (is_kill != 0)
-	// 				return (close(sct), 0);
-	// 			char buf[4096] = "";
-	// 			std::cout << "PASSAGE" << std::endl;
-	// 			while (read(events[i].data.fd, buf, 1) > 0)
-	// 			{
-	// 				write(events[i].data.fd, buf, strlen(buf));
-	// 				if (is_kill != 0)
-	// 					return (close(sct), 0);
-	// 				std::cout << buf;
-	// 			}
-	// 			std::cout << "PASSE";
-	// 			std::cout << std::endl;
-	// 		}
-	// 	}
-	// }
-
-	// close(accepted);
-	// close(sct);
-
+	std::string input;
+	input = "PASS pwd\r\nPASSAGE\r\nNICK iguscett\r\n";
+	getCommandBlock(input);
 	return (0);
 }
