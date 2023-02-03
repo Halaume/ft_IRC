@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 19:32:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/03 19:33:54 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ std::vector<std::vector<std::string> > getCommandBlock(const std::string input)
 		}
 		v0.push_back(v1);
 	}
+	
+	// Print command blocks
 	for (int i = 0; i < (int)v0.size(); i++) {
 		for (int j = 0; j < (int)v0[i].size(); j++) 
 			std::cout << "|" << v0[i][j] << "|";
