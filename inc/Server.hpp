@@ -6,31 +6,20 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/31 18:57:55 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 15:31:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-//--------From my tests---------
-#include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
 #include <sys/epoll.h>
-#include <netdb.h>
-#include <cstdlib>
-#include <csignal>
-#include <cstring>
-#include <fcntl.h>
-//------------------------------
-
 #include <map>
 #include <string>
 #include "Channel.hpp"
+#include <list>
+#include <netinet/in.h>
+#include "User.hpp"
 
 class Server
 {
@@ -39,8 +28,18 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 		Server &	operator=(const Server & src);
+		int			init(char **);
+		int			run(void);
 	private:
+		sockaddr_in						_server;
+		int								_sct;
+		char *							_passwd;
+		int								_listen;
+		int								_epollfd;
+		epoll_event						_events[10];
+		epoll_event						_ev;
 		std::map<Channel, std::string>	_channels;
+		std::list<User>					_Users;
 };
 
 #endif
