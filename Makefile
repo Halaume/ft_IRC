@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ghanquer <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/01/30 18:04:38 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/02/03 17:26:39 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ CC = c++ $(CFLAGS)
 
 RM = rm -fr
 
-CFLAGS = -Wall -Wextra -Werror -Wconversion -Wpedantic -O3 -g -std=c++98
+CFLAGS = -Wall -Wextra -Werror  -O3 -g -std=c++98 #-Wconversion -Wpedantic
 
 .cpp.o:
 	$(CC) -c $< -o $(<:.cpp=.o)
@@ -36,7 +36,7 @@ CFLAGS = -Wall -Wextra -Werror -Wconversion -Wpedantic -O3 -g -std=c++98
 #HOW TO LIST .cpp
 #	ls -l | awk '{print $9}' | grep -E ".cpp$"| sed "s/\.cpp/ \\\/g" | sed '$s/\\$//g'
 
-SRC_FT = main
+SRC_FT = main Server Command
 
 all: $(NAME)
 
