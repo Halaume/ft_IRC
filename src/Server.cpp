@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 15:31:49 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/03 15:33:31 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	Server::init(char **argv)
 	this->_server.sin_family = AF_INET;
 	this->_server.sin_port = htons(atoi(argv[1]));
 	if (this->_server.sin_port == 0)
-		return (std::cerr << "Error port = 0" << std::endl, 1);
+		return (std::cerr << "Error on port" << std::endl, 1);
 
 	if (bind(this->_sct, (sockaddr *)(&this->_server), sizeof(this->_server)))//server_info->ai_addrlen))
 		return (close(this->_sct), std::cerr << "Error connecting socket" << std::endl, 1);
