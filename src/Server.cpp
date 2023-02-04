@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 18:33:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/04 19:28:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ int	Server::init(char **argv)
 
 	if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, this->_sct, &this->_ev) == -1)
 		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
+
+	// Create user and set fd
 	return (0);
 }
 
@@ -88,10 +90,12 @@ int	Server::run(void)
 	int yes = 1;//	For SO_KEEPALIVE
 	socklen_t server_length = sizeof(this->_server);
 
-	_users_list.insert(_users_list.begin(), User());
-	
-	_users_list.begin()->setUserName("test");
-	printUsersList();
+	// _users_list.insert(_users_list.begin(), User());
+	// _users_list.begin()->setfd(5);
+	// this->getUser(5)->setfd(8);
+	// _users_list.begin()->setfd(6);
+	// std::cout << "fd user from list:" << this->getUser(5).getfd() << std::endl;
+	// printUsersList();
 
 	while (true)
 	{
@@ -114,9 +118,9 @@ int	Server::run(void)
 				if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, accepted, &this->_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 				std::cout << "fd socket: " << _ev.data.fd << std::endl;
+				
 				//ADD accepted to User list
-
-				// ADD User
+				//*****************************************
 			}
 			else
 			{
@@ -135,6 +139,7 @@ int	Server::run(void)
 				char buf[1] = "";
 				
 				std::cout << "fd: " << _events[i].data.fd << std::endl;
+				
 				while (read(this->_events[i].data.fd, buf, 1) > 0)
 					//while (recv(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT) > 0)
 				{
@@ -170,4 +175,16 @@ void Server::printUsersList(void)
     	std::cout << "User name:" << it->getUserName() << " fd:" << it->getfd() << std::endl;
 	}
 
+}
+
+
+// GETTERS
+User* Server::getUser(int fd) {
+	std::list<User>::iterator it;
+	for (it = _users_list.begin(); it != _users_list.end(); ++it) {
+		if (it->getfd() == fd)
+			return (&(*it));
+	}
+	// Exception si User pas trouve?
+	return (&(*it));
 }

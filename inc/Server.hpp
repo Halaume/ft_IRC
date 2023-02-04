@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 18:16:48 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/04 19:17:51 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ class Server
 		int			run(void);
 
 		void printUsersList(void);
+
+		// GETTERS
+		User*		getUser(int fd);
 		
 	private:
 		sockaddr_in						_server;
