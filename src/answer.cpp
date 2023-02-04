@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/03 16:19:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 12:18:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 14:54:17 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ std::map<std::string, typedef std::string (*fptr)(Command, Server &)>	insert_all
 	my_map.insert("INVITE", &fun_INVITE);
 	my_map.insert("KILL", &fun_KILL);
 	my_map.insert("RESTART", &fun_RESTART);
+	my_map.insert("PING", &fun_PING);
 
 }
 

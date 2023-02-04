@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 12:17:53 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 14:53:01 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,3 +29,4 @@ std::string	fun_KICK(Command my_cmd, Server &my_server);
 std::string	fun_INVITE(Command my_cmd, Server &my_server);
 std::string	fun_KILL(Command my_cmd, Server &my_server);
 std::string	fun_RESTART(Command my_cmd, Server &my_server);
+std::string	fun_PING(Command my_cmd, Server &my_server);
