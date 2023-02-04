@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/31 18:57:54 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 16:36:07 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 
 #include <string>
 #include "Channel.hpp"
+#include <list>
+
+class Channel;
 
 class User
 {
@@ -24,11 +27,12 @@ class User
 		~User(void);
 		User &	operator=(const User & src);
 	private:
-		std::string	_userName;
-		std::string	_realName;
-		std::string	_client;
-		int			_chanConnected;
-		Channel		_channels[10];//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		int						_fd;
+		std::string				_currCmd;
+		std::string				_userName;
+		std::string				_realName;
+		std::string				_client;
+		std::list<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };
 

@@ -6,17 +6,21 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
+<<<<<<< HEAD
 #    Updated: 2023/02/03 17:26:39 by iguscett         ###   ########.fr        #
+=======
+#    Updated: 2023/02/04 16:32:58 by iguscett         ###   ########.fr        #
+>>>>>>> main
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-INC_DIR =		./inc
+INC_DIR =		./inc/
 OBJ_DIR = 		obj
 SRC_DIR	= 		./src
 
-INC =			#$(addsuffix .hpp, $(addprefix $(INC_DIR), ))
+INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User )) #Command))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 
@@ -28,7 +32,11 @@ CC = c++ $(CFLAGS)
 
 RM = rm -fr
 
+<<<<<<< HEAD
 CFLAGS = -Wall -Wextra -Werror  -O3 -g -std=c++98 #-Wconversion -Wpedantic
+=======
+CFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++98
+>>>>>>> main
 
 .cpp.o:
 	$(CC) -c $< -o $(<:.cpp=.o)
@@ -36,7 +44,15 @@ CFLAGS = -Wall -Wextra -Werror  -O3 -g -std=c++98 #-Wconversion -Wpedantic
 #HOW TO LIST .cpp
 #	ls -l | awk '{print $9}' | grep -E ".cpp$"| sed "s/\.cpp/ \\\/g" | sed '$s/\\$//g'
 
+<<<<<<< HEAD
 SRC_FT = main Server Command
+=======
+SRC_FT = main \
+		 Server \
+		 Channel \
+		 User \
+		#  Command
+>>>>>>> main
 
 all: $(NAME)
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/01/31 18:57:56 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 16:36:53 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 
 #include <string>
 #include <list>
+#include "User.hpp"
+
+class User;
 
 class Channel
 {
@@ -30,7 +33,9 @@ class Channel
 		std::string				_chanPassword;
 		std::string				_modes;//	A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
 		int						_userConnected;
-		std::list<std::string>	_opList;
+		std::list<User>			_opList;
+		std::list<User>			_userLst;
+
 
 };
 

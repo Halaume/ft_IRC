@@ -6,22 +6,19 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/02/03 19:33:54 by iguscett         ###   ########.fr       */
+=======
+/*   Updated: 2023/02/03 17:25:48 by ghanquer         ###   ########.fr       */
+>>>>>>> main
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdlib.h>
 #include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/epoll.h>
-#include <netdb.h>
-#include <cstdlib>
 #include <csignal>
-#include <cstring>
-#include <fcntl.h>
+
+#include "../inc/Server.hpp"
 
 #include <vector>
 #include "../inc/Server.hpp"
@@ -72,14 +69,37 @@ void	signal_handling(int sig)
 	is_kill = sig;
 }
 
+int	check_kill(Server server)
+{
+	if (is_kill == 130)// CTRL + C
+	{
+		(void)server;
+		//Good free, exit pgm
+		//free_fun(server);
+		exit(0);
+	}
+	return (0);
+}
+
 int main(int argc, char **argv)
 {
 	(void)argv;
 
 	if (argc != 3)
 		return (std::cerr << "Wrong number of arg" << std::endl, 1);
+<<<<<<< HEAD
 	std::string input;
 	input = "PASS pwd\r\nPASSAGE\r\nNICK iguscett\r\n";
 	getCommandBlock(input);
 	return (0);
+=======
+
+	std::signal(SIGINT, signal_handling);
+
+	Server	my_serv;
+
+	if(my_serv.init(argv) != 0)
+		return (1);
+	return (my_serv.run());
+>>>>>>> main
 }
