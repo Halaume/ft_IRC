@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/03 17:27:45 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 11:53:57 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ int	Server::run(void)
 					//Here Parsing (Pour l'instant je recupere char par char donc faudras voir)
 					write(this->_events[i].data.fd, buf, strlen(buf));
 					write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
+					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
+					//write(this->_events[i].data.fd, answer, strlen(answer));
 					//send(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT);
 					//CHECK CTRL + C
 					std::cout << buf;
