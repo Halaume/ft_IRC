@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 16:52:44 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/04 16:53:51 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,14 +79,8 @@ int	check_kill(Server server)
 
 int main(int argc, char **argv)
 {
-	(void)argv;
-
 	if (argc != 3)
 		return (std::cerr << "Wrong number of arg" << std::endl, 1);
-	std::string input;
-	input = "PASS pwd\r\nPASSAGE\r\nNICK iguscett\r\n";
-	getCommandBlock(input);
-	return (0);
 
 	std::signal(SIGINT, signal_handling);
 

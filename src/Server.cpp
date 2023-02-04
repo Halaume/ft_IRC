@@ -6,11 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2023/02/03 17:24:42 by iguscett         ###   ########.fr       */
-=======
-/*   Updated: 2023/02/04 16:12:14 by iguscett         ###   ########.fr       */
->>>>>>> main
+/*   Updated: 2023/02/04 18:33:28 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,38 +25,19 @@
 #include <cstring>
 #include <fcntl.h>
 
-<<<<<<< HEAD
-std::string commandsList[] = {	"KICK",
-								"MODE",
-								"INVITE",
-								"TOPIC",
-								"PASS"
-								};
 
-// Server::Server(void): _channels()
-Server::Server(void)
-{
-	for (unsigned int i = 0; i < sizeof(commandsList) / sizeof(commandsList[0]); i++)
-		_commands.push_back(commandsList[i]);
-}
-
-
-// Server::Server(const Server & copy): _channels(copy._channels)
-// Server::Server(const Server & copy): _channels(copy._channels)
-// {
-// }
-=======
-
-Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _Users()
+Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _users_list
+()
 {
 	this->_passwd = NULL;
 }
 
-Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
+Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _users_list
+(copy._users_list
+)
 {
 	this->_passwd = copy._passwd;
 }
->>>>>>> main
 
 Server::~Server(void)
 {
@@ -73,13 +50,6 @@ Server &	Server::operator=(const Server & src)
 	return (*this);
 }
 
-<<<<<<< HEAD
-// _____GETTERS_____
-std::vector<std::string> Server::getCommands(void)
-{
-	return (_commands);
-}
-=======
 int	Server::init(char **argv)
 {
 	this->_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -113,9 +83,15 @@ int	Server::init(char **argv)
 
 int	Server::run(void)
 {
+	Command	currCmd(void);
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
 	socklen_t server_length = sizeof(this->_server);
+
+	_users_list.insert(_users_list.begin(), User());
+	
+	_users_list.begin()->setUserName("test");
+	printUsersList();
 
 	while (true)
 	{
@@ -137,7 +113,10 @@ int	Server::run(void)
 				this->_ev.data.fd = accepted;
 				if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, accepted, &this->_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+				std::cout << "fd socket: " << _ev.data.fd << std::endl;
 				//ADD accepted to User list
+
+				// ADD User
 			}
 			else
 			{
@@ -146,12 +125,16 @@ int	Server::run(void)
 					close(this->_events[i].data.fd);
 					epoll_ctl(this->_epollfd, EPOLL_CTL_DEL, this->_events[i].data.fd, &this->_events[i]);
 				}
+
 				/* TODO
 				 * CHECK CTRL + C
 				 * PARSING
 				 * RESPOND
 				 */
+				 
 				char buf[1] = "";
+				
+				std::cout << "fd: " << _events[i].data.fd << std::endl;
 				while (read(this->_events[i].data.fd, buf, 1) > 0)
 					//while (recv(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT) > 0)
 				{
@@ -159,7 +142,8 @@ int	Server::run(void)
 					//find right user with fd
 					//rightUser._currCmd.push_back(buf);
 					write(this->_events[i].data.fd, buf, strlen(buf));
-					write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
+					// write(this->_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
+					// write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
 					//if (fin _currcmd == \r\n)
 					//{
 					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
@@ -169,10 +153,21 @@ int	Server::run(void)
 					//CHECK CTRL + C
 					std::cout << buf;
 				}
+				// write(this->_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
 			}
 		}
 	}
 	return (1);
 
 }
->>>>>>> main
+
+
+void Server::printUsersList(void)
+{
+	std::list<User>::iterator it;
+	for (it = _users_list.begin(); it != _users_list.end(); ++it)
+	{
+    	std::cout << "User name:" << it->getUserName() << " fd:" << it->getfd() << std::endl;
+	}
+
+}
