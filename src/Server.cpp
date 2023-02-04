@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 13:03:21 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/04 16:12:14 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ int	Server::run(void)
 				this->_ev.data.fd = accepted;
 				if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, accepted, &this->_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+				//ADD accepted to User list
 			}
 			else
 			{
@@ -117,16 +118,21 @@ int	Server::run(void)
 				 * PARSING
 				 * RESPOND
 				 */
-				char buf[4096] = "";
+				char buf[1] = "";
 				while (read(this->_events[i].data.fd, buf, 1) > 0)
 					//while (recv(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT) > 0)
 				{
 					//Here Parsing (Pour l'instant je recupere char par char donc faudras voir)
+					//find right user with fd
+					//rightUser._currCmd.push_back(buf);
 					write(this->_events[i].data.fd, buf, strlen(buf));
 					write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
+					//if (fin _currcmd == \r\n)
+					//{
 					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
 					//write(this->_events[i].data.fd, answer, strlen(answer));
 					//send(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT);
+					//}
 					//CHECK CTRL + C
 					std::cout << buf;
 				}
