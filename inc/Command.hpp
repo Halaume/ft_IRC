@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 16:38:59 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/04 16:41:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ class Command
 		Command &	operator=(const Command & src);
 		
 	private:
-		User										_cmdUser;
-		std::vector<std::vector<std::string> >		_parsedCmd;
+		User						_cmdUser;
+		std::vector<std::string>	_parsedCmd;
 		
 		std::string	fun_CAP(Server &my_server);
 		std::string	fun_NICK(Server &my_server);
