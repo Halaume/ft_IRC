@@ -6,11 +6,12 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 17:28:45 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/05 15:54:47 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
+#include <sstream>
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 
@@ -37,7 +38,19 @@ Command &	Command::operator=(const Command & src)
 //std::string	Command::_fun_CAP(Server &my_server);
 //std::string	Command::_fun_NICK(Server &my_server);
 //std::string	Command::_fun_USER(Server &my_server);
-//std::string	Command::_fun_PASS(Server &my_server);
+std::string	Command::_fun_PASS(Server &my_server)
+{
+	std::stringstream ret;
+	if (this->_parsedCmd.size() < 2)
+	{
+		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
+		return (ret.str());
+	}
+	if (this->_cmdUser.getRegistered())
+		return (":You may not reregister\r\n");
+	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
+	return ("");
+}
 //std::string	Command::_fun_JOIN(Server &my_server);
 //std::string	Command::_fun_PRIVMSG(Server &my_server);
 //std::string	Command::_fun_OPER(Server &my_server);
@@ -50,29 +63,6 @@ Command &	Command::operator=(const Command & src)
 //std::string	Command::_fun_KILL(Server &my_server);
 //std::string	Command::_fun_RESTART(Server &my_server);
 //std::string	Command::_fun_PING(Server &my_server);
-
-/*std::map<std::string, std::string (*fptr)(Server &)>	insert_all_cmd()
-  {
-  std::map<std::string, fptr>	my_map;
-
-  my_map.insert(std::make_pair("CAP", &_fun_CAP));
-  my_map.insert(std::make_pair("NICK", &_fun_NICK));
-  my_map.insert(std::make_pair("USER", &_fun_USER));
-  my_map.insert(std::make_pair("PASS", &_fun_PASS));
-  my_map.insert(std::make_pair("JOIN", &_fun_JOIN));
-  my_map.insert(std::make_pair("PRIVMSG", &_fun_PRIVMSG));
-  my_map.insert(std::make_pair("OPER", &_fun_OPER));
-  my_map.insert(std::make_pair("QUIT", &_fun_QUIT));
-  my_map.insert(std::make_pair("ERROR", &_fun_ERROR));
-  my_map.insert(std::make_pair("MODE", &_fun_MODE));
-  my_map.insert(std::make_pair("TOPIC", &_fun_TOPIC));
-  my_map.insert(std::make_pair("KICK", &_fun_KICK));
-  my_map.insert(std::make_pair("INVITE", &_fun_INVITE));
-  my_map.insert(std::make_pair("KILL", &_fun_KILL));
-  my_map.insert(std::make_pair("RESTART", &_fun_RESTART));
-  my_map.insert(std::make_pair("PING", &_fun_PING));
-
-  }*/
 
 std::string	Command::_answer(Server &my_server)
 {
