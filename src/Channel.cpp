@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:31:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:46:35 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,37 @@ void Channel::addUser(User newUser, Server &my_server)
 	}
 	if (!connected)
 		this->_userLst.insert(this->_userLst.end(), newUser);
+	my_server.send(newUser.getfd(), "RPL_TOPIC");
+	it = this->_userLst.begin();
+	while (it != this->_userLst.end())
+		my_server.send(it->getfd(), "RPL_NAMREPLY");
+}
+
+void Channel::addUser(User newUser, Server &my_server, std::string passwd)
+{
+	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
+	bool	connected = false;
+	std::list<User>::iterator	it = this->_userLst.begin();
+
+	while (it != this->_userLst.end() && *it != newUser)
+		it++;
+	if (*it == newUser)
+		connected = true;
+	if (!connected && newUser.getNbChan() == 10)
+	{
+		my_server.send(newUser.getfd(), "ERR_TOOMANYCHANNELS");
+		return ;
+	}
+	if (!connected)
+	{
+		if (this->_chanPassword != "" && passwd == this->_chanPassword)
+			this->_userLst.insert(this->_userLst.end(), newUser);
+		else
+		{
+			my_server.send(newUser.getfd(), "ERR_BADCHANNELKEY");
+			return ;
+		}
+	}
 	my_server.send(newUser.getfd(), "RPL_TOPIC");
 	it = this->_userLst.begin();
 	while (it != this->_userLst.end())

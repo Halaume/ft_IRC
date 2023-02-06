@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:30:06 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:42:32 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Channel
 		Channel &	operator=(const Channel & src);
 		std::string	getChanName(void) const;
 		void		addUser(User, Server&);
+		void		addUser(User, Server&, std::string);
 	private:
 		std::string				_chanName;
 		std::string				_chanPassword;

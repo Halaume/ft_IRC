@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:30:25 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:43:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,13 @@ void	Command::_fun_JOIN(Server &my_server)
 	{
 		Channel	tmp = my_server.findChan(*it);
 		it++;
-		tmp.addUser(this->_cmdUser, my_server);
+		if (itpasswd != passwd.end())
+		{
+			tmp.addUser(this->_cmdUser, my_server, *itpasswd);
+			itpasswd++;
+		}
+		else
+			tmp.addUser(this->_cmdUser, my_server);
 	}
 }
 
@@ -240,7 +246,7 @@ void	Command::_answer(Server &my_server)
 		}
 		default:
 		{
-			my_server.send("Command not found");
+			my_server.send(this->_cmdUser.getfd(), "Command not found");
 			break;
 		}
 	}
