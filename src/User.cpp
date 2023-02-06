@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 12:15:31 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:35:57 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,21 @@ User &	User::operator=(const User & src)
 	return (*this);
 }
 
+bool	User::operator==(User test) const
+{
+	return (this->_fd == test._fd);
+}
+
+bool	User::operator!=(User test) const
+{
+	return (!(*this == test));
+}
+
+int		User::getfd(void) const
+{
+	return (this->_fd);
+}
+
 bool	User::getRegistered(void) const
 {
 	return (this->_registered);
@@ -55,4 +70,9 @@ void	User::setUserName(std::string username)
 void	User::setRealName(std::string realname)
 {
 	this->_realName = realname;
+}
+
+int	User::getNbChan(void)
+{
+	return (static_cast<int>(this->_channels.size()));
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 12:13:53 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:18:46 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 #include <string>
 #include "Channel.hpp"
-#include <list>
+#include <vector>
 
 class Channel;
 
@@ -26,11 +26,15 @@ class User
 		User(const User &copy);
 		~User(void);
 		User &	operator=(const User & src);
+		bool	operator==(User) const;
+		bool	operator!=(User) const;
+		int		getfd(void) const;
 		bool	getRegistered(void) const;
 		void	setRegistered(bool);
 		void	setPasswd(std::string);
 		void	setUserName(std::string);
 		void	setRealName(std::string);
+		int		getNbChan(void);
 	private:
 		int						_fd;
 		bool					_registered;
@@ -39,7 +43,7 @@ class User
 		std::string				_userName;
 		std::string				_realName;
 		std::string				_client;
-		std::list<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		std::vector<Channel>	_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };
 

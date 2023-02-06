@@ -6,11 +6,12 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 15:37:07 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 16:33:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
 #include <string>
 #include <iostream>
 #include <unistd.h>
@@ -24,6 +25,7 @@
 #include <csignal>
 #include <cstring>
 #include <fcntl.h>
+#include <vector>
 
 
 Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
@@ -45,6 +47,16 @@ Server &	Server::operator=(const Server & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
+}
+
+Channel &	Server::findChan(std::string channel)
+{
+	std::vector<Channel>::iterator	it = this->_channels.begin();
+	while (it != this->_channels.end() && it->getChanName() != channel)
+		it++;
+	if (it == this->_channels.end())
+		it = this->_channels.insert(this->_channels.end(), Channel(channel));
+	return (*it);
 }
 
 int	Server::init(char **argv)
@@ -125,8 +137,6 @@ int	Server::run(void)
 					//Here Parsing (Pour l'instant je recupere char par char donc faudras voir)
 					//find right user with fd
 					//rightUser._currCmd.push_back(buf);
-					write(this->_events[i].data.fd, buf, strlen(buf));
-					write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
 					//if (fin _currcmd == \r\n)
 					//{
 					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
@@ -141,4 +151,10 @@ int	Server::run(void)
 	}
 	return (1);
 
+}
+
+void	Server::send(int fd, std::string buf)
+{
+	//send(fd, buf, buf.size(), MSG_DONTWAIT);
+	write(fd, buf.c_str(), buf.size());
 }
