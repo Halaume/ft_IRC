@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 15:48:48 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 12:15:31 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,22 @@ bool	User::getRegistered(void) const
 	return (this->_registered);
 }
 
+void	User::setRegistered(bool registered)
+{
+	this->_registered = registered;
+}
+
 void	User::setPasswd(std::string passwd)
 {
 	this->_passwd = passwd;
+}
+
+void	User::setUserName(std::string username)
+{
+	this->_userName = username;
+}
+
+void	User::setRealName(std::string realname)
+{
+	this->_realName = realname;
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 15:45:44 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 12:13:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,10 @@ class User
 		~User(void);
 		User &	operator=(const User & src);
 		bool	getRegistered(void) const;
+		void	setRegistered(bool);
 		void	setPasswd(std::string);
+		void	setUserName(std::string);
+		void	setRealName(std::string);
 	private:
 		int						_fd;
 		bool					_registered;

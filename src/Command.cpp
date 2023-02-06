@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 15:54:47 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/06 12:40:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,24 @@ Command &	Command::operator=(const Command & src)
 
 //std::string	Command::_fun_CAP(Server &my_server);
 //std::string	Command::_fun_NICK(Server &my_server);
-//std::string	Command::_fun_USER(Server &my_server);
+std::string	Command::_fun_USER(Server &my_server)
+{
+	std::stringstream ret;
+	if (this->_parsedCmd.size() < 5)
+	{
+		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
+		return (ret.str());
+	}
+	if (this->_cmdUser.getRegistered())
+		return (":You may not reregister\r\n");
+	this->_cmdUser.setUserName(this->_parsedCmd[1]);
+//	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
+	this->_cmdUser.setRealName(this->_parsedCmd[4]);
+	this->_cmdUser.setRegistered(true);
+	return ("");
+
+}
+
 std::string	Command::_fun_PASS(Server &my_server)
 {
 	std::stringstream ret;
