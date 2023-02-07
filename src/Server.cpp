@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:43:34 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:53:52 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ int	Server::init(char **argv)
 
 	this->_server.sin_addr.s_addr = INADDR_ANY;
 	this->_server.sin_family = AF_INET;
-	this->_server.sin_port = htons(atoi(argv[1]));
+	this->_server.sin_port = htons(static_cast<short>(atoi(argv[1])));
 	if (this->_server.sin_port == 0)
 		return (std::cerr << "Error on port" << std::endl, 1);
 
@@ -156,7 +156,9 @@ int	Server::run(void)
 
 void	Server::send(int fd, std::vector<unsigned char> buf)
 {
+	long int ret;
 	//send(fd, buf, buf.size(), MSG_DONTWAIT);
 	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
-		write(fd, &buf[i], 1);
+		ret = write(fd, &buf[i], 1);
+	(void)ret;
 }

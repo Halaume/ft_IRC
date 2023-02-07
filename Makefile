@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/07 15:43:32 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/02/07 15:49:06 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ OBJ =			$(SRC:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 
 OBJ_DIRS =		$(OBJ_DIR)
 
-CXX = c++ $(CXXFLAGS)
+CXX = g++ $(CXXFLAGS)
 
 RM = rm -fr
 

@@ -6,13 +6,13 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:02:55 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:55:10 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
 #include <sstream>
-#include <list>
+#include <vector>
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "utils.cpp"
@@ -107,12 +107,12 @@ void	Command::_fun_JOIN(Server &my_server)
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
-	std::list<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
+	std::vector<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
 
 
-	std::list<std::vector<unsigned char>>::iterator	it = chan.begin();
-	std::list<std::vector<unsigned char>>				passwd;
-	std::list<std::vector<unsigned char>>::iterator	itpasswd;
+	std::vector<std::vector<unsigned char>>::iterator	it = chan.begin();
+	std::vector<std::vector<unsigned char>>				passwd;
+	std::vector<std::vector<unsigned char>>::iterator	itpasswd;
 
 	if (this->_parsedCmd.size() == 3)
 	{

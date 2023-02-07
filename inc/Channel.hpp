@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:03:25 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:52:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #define CHANNEL_HPP
 
 #include <string>
-#include <list>
 #include <map>
 #include <vector>
 #include "User.hpp"
@@ -39,8 +38,8 @@ class Channel
 		std::vector<unsigned char>	_chanPassword;
 		std::map<char, bool>		_modes;//	A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
 		int							_userConnected;
-		std::list<User>				_opList;
-		std::list<User>				_userLst;
+		std::vector<User>			_opList;
+		std::vector<User>			_userLst;
 		std::vector<User>			_banLst;
 
 

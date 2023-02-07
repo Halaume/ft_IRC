@@ -6,18 +6,18 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:03:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:52:42 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
-#include <list>
+#include <vector>
 #include <utility>
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "utils.cpp"
 
-Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opList()
+Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opvector()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));
@@ -32,11 +32,11 @@ Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opList(
 	this->_modes.insert(std::make_pair('k', false));
 }
 
-Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected), _opList(copy._opList)
+Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected), _opvector(copy._opvector)
 {
 }
 
-Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected(), _opList()
+Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected(), _opvector()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));
@@ -72,7 +72,7 @@ void Channel::addUser(User newUser, Server &my_server)
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
 	std::vector<unsigned char>	sender;
-	std::list<User>::iterator	it = this->_userLst.begin();
+	std::vector<User>::iterator	it = this->_userLst.begin();
 
 	while (it != this->_userLst.end() && *it != newUser)
 		it++;
@@ -100,7 +100,7 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
-	std::list<User>::iterator	it = this->_userLst.begin();
+	std::vector<User>::iterator	it = this->_userLst.begin();
 	std::vector<unsigned char>	sender;
 
 	while (it != this->_userLst.end() && *it != newUser)

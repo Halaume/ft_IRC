@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:21:39 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:54:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@ void	insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
 	for (std::vector<unsigned char>::size_type i = 0; to_insert[i]; i++)
 		my_vec.push_back(static_cast<unsigned char>(to_insert[i]));
 }
-// TODO REfaire cette fonction
-std::list<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> str)
+
+std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> str)
 {
-	std::list<std::vector<unsigned char> >	ret;
+	std::vector<std::vector<unsigned char> >	ret;
 	std::vector<unsigned char>::iterator	n = str.begin();
 	std::vector<unsigned char>::iterator	prev;
 	while (n != str.end())
