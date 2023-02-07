@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:52:42 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:01:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "../inc/Channel.hpp"
 #include "utils.cpp"
 
-Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opvector()
+Channel::Channel(void): _chanName(), _chanPassword(), _userConnected()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));
@@ -32,11 +32,11 @@ Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opvecto
 	this->_modes.insert(std::make_pair('k', false));
 }
 
-Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected), _opvector(copy._opvector)
+Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected)
 {
 }
 
-Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected(), _opvector()
+Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));

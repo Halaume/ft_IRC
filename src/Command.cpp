@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:55:10 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:05:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,11 @@
 #include "../inc/Command.hpp"
 #include "utils.cpp"
 
-Command::Command(void)
+Command::Command(void): _cmdUser(), _parsedCmd()
 {
 }
 
-Command::Command(const Command &copy)
+Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy._parsedCmd)
 {
 
 }
@@ -107,12 +107,12 @@ void	Command::_fun_JOIN(Server &my_server)
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
-	std::vector<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
+	std::vector<std::vector<unsigned char> >	chan = splitOnComa(this->_parsedCmd[1]);
 
 
-	std::vector<std::vector<unsigned char>>::iterator	it = chan.begin();
-	std::vector<std::vector<unsigned char>>				passwd;
-	std::vector<std::vector<unsigned char>>::iterator	itpasswd;
+	std::vector<std::vector<unsigned char> >::iterator	it = chan.begin();
+	std::vector<std::vector<unsigned char> >				passwd;
+	std::vector<std::vector<unsigned char> >::iterator	itpasswd;
 
 	if (this->_parsedCmd.size() == 3)
 	{

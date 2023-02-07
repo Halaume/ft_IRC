@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/07 15:49:06 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/02/07 17:03:34 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ OBJ =			$(SRC:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 
 OBJ_DIRS =		$(OBJ_DIR)
 
-CXX = g++ $(CXXFLAGS)
+CXX = c++ $(CXXFLAGS)
 
 RM = rm -fr
 
@@ -40,7 +40,8 @@ SRC_FT = main \
 		 Server \
 		 Channel \
 		 User \
-		#  Command
+		 Command \
+		 utils
 
 all: $(NAME)
 

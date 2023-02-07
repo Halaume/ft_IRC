@@ -6,16 +6,12 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:54:44 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:11:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <vector>
 #include <string>
-#include "../inc/Server.hpp"
-#include "../inc/Command.hpp"
-#include "../inc/User.hpp"
-#include "../inc/Channel.hpp"
 
 void	insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
 {
@@ -36,9 +32,9 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 		while (*n != ',')
 			n++;
 		if (n == str.end())
-			ret.insert(ret.end(), prev, str.end());
+			ret.insert(ret.end(), std::vector<unsigned char>(prev, str.end()));
 		else
-			ret.insert(ret.end(), prev, n - 1);
+			ret.insert(ret.end(), std::vector<unsigned char>(prev, n));
 	}
 	return (ret);
 }
