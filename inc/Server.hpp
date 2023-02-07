@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 17:13:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:51:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 #include "User.hpp"
 #include "Command.hpp"
 #include "Channel.hpp"
+
+class Command;
 
 class Server
 {

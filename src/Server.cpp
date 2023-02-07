@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 17:14:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:52:14 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,14 @@
 #include <csignal>
 #include <cstring>
 #include <fcntl.h>
+// #include "../inc/Command.hpp"
 
-
-Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _users_list
-()
+Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _users_list()
 {
 	_passwd = NULL;
 }
 
-Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _users_list
-(copy._users_list
-)
+Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _users_list(copy._users_list)
 {
 	_passwd = copy._passwd;
 }
@@ -53,18 +50,18 @@ Server &	Server::operator=(const Server & src)
 int	Server::init(char **argv)
 {
 	// TO DO: always protect close functions
-	_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // SOCK_STREAM|SOCK_NONBLOCK
 	if (_sct == -1)
-		return (std::cerr << "Invalid socket" << std::endl, 1);
+		return (std::cerr << "Invalid socket" << std::endl, 1); 
 	bzero(&_server, sizeof(_server));
 	
 	_passwd = argv[2];
 
-	_server.sin_addr.s_addr = htonl(INADDR_ANY);
+	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
-	_server.sin_port = htons(atoi(argv[1]));
+	_server.sin_port = htons(atoi(argv[1])); // check if negative? or any other char
 	if (_server.sin_port == 0)
-		return (close(_sct), std::cerr << "Error on port" << std::endl, 1); // close socket
+		return (close(_sct), std::cerr << "Error on port" << std::endl, 1);
 
 	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))//server_info->ai_addrlen))
 		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
@@ -80,19 +77,22 @@ int	Server::init(char **argv)
 
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-	std::cout << _epollfd << std::endl;
-
-	// Create user and set fd
+	
+	std::cout << "0 : epoll fd: " << _epollfd << std::endl;
 	
 	return (0);
 }
 
 int	Server::run(void)
 {
-	Command	currCmd(void);
+	// TO DO: always protect close functions
+	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
 	socklen_t server_length = sizeof(_server);
+	std::string command;
+	const char* str;
+
 
 	// _users_list.insert(_users_list.begin(), User());
 	// _users_list.begin()->setfd(5);
@@ -103,6 +103,8 @@ int	Server::run(void)
 
 	while (true)
 	{
+		command = "";
+		
 		//CHECK CTRL + C
 		int	wait_ret = epoll_wait(_epollfd, _events, 1, -1);
 		if (wait_ret == -1)
@@ -112,57 +114,51 @@ int	Server::run(void)
 			//CHECK CTRL + C
 			if (_events[i].data.fd == _sct)
 			{
+				std::cout << "1 : socket accept and event data fd:" << _events[i].data.fd << std::endl;
 				//CHECK CTRL + C
 				accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
 				if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)//Keepalive permet de garder la connexion apres utilisation
 					return (std::cerr << "Error on accept" << std::endl, 1);
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
+				std::cout << "1.1 : accepted fd:" << accepted << std::endl;
 				_ev.events = EPOLLIN | EPOLLET;
 				_ev.data.fd = accepted;
 				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
-				std::cout << "fd socket: " << _ev.data.fd << std::endl;
 				
-				//ADD accepted to User list
-				//*****************************************
+
 			}
 			else
 			{
+				// TODO
+				// CHECK CTRL + C
+				// PARSING
+				// RESPOND via send(_events[i].data.fd, str, strlen(str), 0); // Add flags? MSG_DONTWAIT
+				std::cout << "2 : data fd:" << _events[i].data.fd << std::endl << std::endl;
+				
+				// Hang up
 				if (_events[i].events & EPOLLHUP)
 				{
 					close(_events[i].data.fd);
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[i].data.fd, &_events[i]);
 				}
 
-				/* TODO
-				 * CHECK CTRL + C
-				 * PARSING
-				 * RESPOND
-				 */
-				 
-				char buf[1] = "";
-				
-				std::cout << "fd: " << _events[i].data.fd << std::endl;
-				
-				while (read(_events[i].data.fd, buf, 1) > 0)
-					//while (recv(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT) > 0)
+				unsigned char buf[1] = "";
+				while (recv(_events[i].data.fd, buf, 1, 0) > 0)// add flags? MSG_DONTWAIT
 				{
-					//Here Parsing (Pour l'instant je recupere char par char donc faudras voir)
-					//find right user with fd
-					//rightUser._currCmd.push_back(buf);
-					write(_events[i].data.fd, buf, strlen(buf));
-					// write(_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
+					// write(_events[i].data.fd, buf, 1);//strlen((char*)buf));
 					// write(_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
-					//if (fin _currcmd == \r\n)
-					//{
-					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
-					//write(_events[i].data.fd, answer, strlen(answer));
-					//send(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT);
-					//}
-					//CHECK CTRL + C
-					std::cout << buf;
+					command += *buf;
+					std::cout << *buf;
 				}
-				// write(_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
+				
+				//Here Parsing
+				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
+				str = command.c_str();
+				std::cout << std::endl << "str:\n" << str << std::endl;
+				
+				// currCmd.parseCommand(command);
+				
 			}
 		}
 	}

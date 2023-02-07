@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 17:36:27 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:42:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
+
+		void	parseCommand(std::string);
 		
 	private:
 		int							_fdCmd;

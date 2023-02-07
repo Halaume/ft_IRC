@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/05 15:00:08 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/07 17:52:34 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,6 +40,7 @@ SRC_FT = main \
 		 Server \
 		 Channel \
 		 User \
+		 Command
 		#  Command
 
 all: $(NAME)
