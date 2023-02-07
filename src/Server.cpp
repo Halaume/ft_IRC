@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/05 14:59:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/05 17:14:32 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,14 @@
 Server::Server(void): _server(), _sct(), _epollfd(), _ev(), _channels(), _users_list
 ()
 {
-	this->_passwd = NULL;
+	_passwd = NULL;
 }
 
 Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct),_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _users_list
 (copy._users_list
 )
 {
-	this->_passwd = copy._passwd;
+	_passwd = copy._passwd;
 }
 
 Server::~Server(void)
@@ -52,34 +52,38 @@ Server &	Server::operator=(const Server & src)
 
 int	Server::init(char **argv)
 {
-	this->_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (this->_sct == -1)
+	// TO DO: always protect close functions
+	_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (_sct == -1)
 		return (std::cerr << "Invalid socket" << std::endl, 1);
+	bzero(&_server, sizeof(_server));
+	
+	_passwd = argv[2];
 
-	this->_passwd = argv[2];
+	_server.sin_addr.s_addr = htonl(INADDR_ANY);
+	_server.sin_family = AF_INET;
+	_server.sin_port = htons(atoi(argv[1]));
+	if (_server.sin_port == 0)
+		return (close(_sct), std::cerr << "Error on port" << std::endl, 1); // close socket
 
-	this->_server.sin_addr.s_addr = INADDR_ANY;
-	this->_server.sin_family = AF_INET;
-	this->_server.sin_port = htons(atoi(argv[1]));
-	if (this->_server.sin_port == 0)
-		return (std::cerr << "Error on port" << std::endl, 1);
+	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))//server_info->ai_addrlen))
+		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
+	if (listen(_sct, 1) == -1)
+		return (close(_sct), std::cerr << "Error listening socket" << std::endl, 1);
 
-	if (bind(this->_sct, (sockaddr *)(&this->_server), sizeof(this->_server)))//server_info->ai_addrlen))
-		return (close(this->_sct), std::cerr << "Error connecting socket" << std::endl, 1);
-	if (listen(this->_sct, 1) == -1)
-		return (close(this->_sct), std::cerr << "Error listening socket" << std::endl, 1);
+	_epollfd = epoll_create1(0);
 
-	this->_epollfd = epoll_create1(0);
-
-	if (this->_epollfd == -1)
+	if (_epollfd == -1)
 		return (std::cerr << "Error on epoll create" << std::endl, 1);
-	this->_ev.events = EPOLLIN;
-	this->_ev.data.fd = this->_sct;
+	_ev.events = EPOLLIN;
+	_ev.data.fd = _sct;
 
-	if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, this->_sct, &this->_ev) == -1)
-		return (std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
+	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
+		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
+	std::cout << _epollfd << std::endl;
 
 	// Create user and set fd
+	
 	return (0);
 }
 
@@ -88,34 +92,34 @@ int	Server::run(void)
 	Command	currCmd(void);
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
-	socklen_t server_length = sizeof(this->_server);
+	socklen_t server_length = sizeof(_server);
 
 	// _users_list.insert(_users_list.begin(), User());
 	// _users_list.begin()->setfd(5);
-	// this->getUser(5)->setfd(8);
+	// getUser(5)->setfd(8);
 	// _users_list.begin()->setfd(6);
-	// std::cout << "fd user from list:" << this->getUser(5).getfd() << std::endl;
+	// std::cout << "fd user from list:" << getUser(5).getfd() << std::endl;
 	// printUsersList();
 
 	while (true)
 	{
 		//CHECK CTRL + C
-		int	wait_ret = epoll_wait(this->_epollfd, this->_events, 1, -1);
+		int	wait_ret = epoll_wait(_epollfd, _events, 1, -1);
 		if (wait_ret == -1)
 			return (std::cerr << "Error on epoll wait" << std::endl, 1);
 		for (int i = 0; i < wait_ret; ++i)
 		{
 			//CHECK CTRL + C
-			if (this->_events[i].data.fd == this->_sct)
+			if (_events[i].data.fd == _sct)
 			{
 				//CHECK CTRL + C
-				accepted = accept(this->_sct, (sockaddr *)(&this->_server), &server_length);
+				accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
 				if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)//Keepalive permet de garder la connexion apres utilisation
 					return (std::cerr << "Error on accept" << std::endl, 1);
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
-				this->_ev.events = EPOLLIN | EPOLLET;
-				this->_ev.data.fd = accepted;
-				if (epoll_ctl(this->_epollfd, EPOLL_CTL_ADD, accepted, &this->_ev) == - 1)
+				_ev.events = EPOLLIN | EPOLLET;
+				_ev.data.fd = accepted;
+				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 				std::cout << "fd socket: " << _ev.data.fd << std::endl;
 				
@@ -124,10 +128,10 @@ int	Server::run(void)
 			}
 			else
 			{
-				if (this->_events[i].events & EPOLLHUP)
+				if (_events[i].events & EPOLLHUP)
 				{
-					close(this->_events[i].data.fd);
-					epoll_ctl(this->_epollfd, EPOLL_CTL_DEL, this->_events[i].data.fd, &this->_events[i]);
+					close(_events[i].data.fd);
+					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[i].data.fd, &_events[i]);
 				}
 
 				/* TODO
@@ -140,28 +144,33 @@ int	Server::run(void)
 				
 				std::cout << "fd: " << _events[i].data.fd << std::endl;
 				
-				while (read(this->_events[i].data.fd, buf, 1) > 0)
+				while (read(_events[i].data.fd, buf, 1) > 0)
 					//while (recv(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT) > 0)
 				{
 					//Here Parsing (Pour l'instant je recupere char par char donc faudras voir)
 					//find right user with fd
 					//rightUser._currCmd.push_back(buf);
-					write(this->_events[i].data.fd, buf, strlen(buf));
-					// write(this->_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
-					// write(this->_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
+					write(_events[i].data.fd, buf, strlen(buf));
+					// write(_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
+					// write(_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
 					//if (fin _currcmd == \r\n)
 					//{
 					//std::string	answer = answer(parsed); Where "Parsed = DATA from Iac"
-					//write(this->_events[i].data.fd, answer, strlen(answer));
+					//write(_events[i].data.fd, answer, strlen(answer));
 					//send(events[i].data.fd, buf, strlen(buf), MSG_DONTWAIT);
 					//}
 					//CHECK CTRL + C
 					std::cout << buf;
 				}
-				// write(this->_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
+				// write(_events[i].data.fd, "OK connected to server", strlen("OK connected to server"));
 			}
 		}
 	}
+
+		// if (close(g_serv.getEpollfd()) == -1) {
+	// 	std::cerr << "Failed to close epoll file descriptor\n";
+	// }
+	
 	return (1);
 
 }
@@ -179,6 +188,15 @@ void Server::printUsersList(void)
 
 
 // GETTERS
+
+int Server::getSct(void) {
+	return (_sct);
+}
+
+int Server::getEpollfd(void) {
+	return (_epollfd);
+}
+
 User* Server::getUser(int fd) {
 	std::list<User>::iterator it;
 	for (it = _users_list.begin(); it != _users_list.end(); ++it) {

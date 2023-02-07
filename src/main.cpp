@@ -6,10 +6,11 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 16:53:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/05 17:15:34 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
 #include <csignal>
@@ -20,6 +21,7 @@
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 
+Server	g_serv;
 
 std::vector<std::vector<std::string> > getCommandBlock(const std::string input)
 {
@@ -62,6 +64,13 @@ int is_kill = 0;
 
 void	signal_handling(int sig)
 {
+	if (close(g_serv.getSct()) == -1) {
+		std::cerr << "Failed to close socket\n";
+	}
+	if (close(g_serv.getEpollfd()) == -1) {
+		std::cerr << "Failed to close epoll file descriptor\n";
+		// return 1
+	}
 	is_kill = sig;
 }
 
@@ -84,9 +93,11 @@ int main(int argc, char **argv)
 
 	std::signal(SIGINT, signal_handling);
 
-	Server	my_serv;
-
-	if(my_serv.init(argv) != 0)
+	if(g_serv.init(argv) != 0)
 		return (1);
-	return (my_serv.run());
+	// if (close(g_serv.getEpollfd()) == -1) {
+	// 	std::cerr << "Failed to close epoll file descriptor\n";
+	// }
+	return (g_serv.run());
+	// return 0;
 }
