@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 17:52:14 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/07 19:41:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,10 +89,10 @@ int	Server::run(void)
 	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
+	int i;
 	socklen_t server_length = sizeof(_server);
-	std::string command;
-	const char* str;
-
+	std::vector<std::vector<unsigned char> > command;
+	std::vector<unsigned char> v;
 
 	// _users_list.insert(_users_list.begin(), User());
 	// _users_list.begin()->setfd(5);
@@ -102,9 +102,7 @@ int	Server::run(void)
 	// printUsersList();
 
 	while (true)
-	{
-		command = "";
-		
+	{	
 		//CHECK CTRL + C
 		int	wait_ret = epoll_wait(_epollfd, _events, 1, -1);
 		if (wait_ret == -1)
@@ -134,7 +132,11 @@ int	Server::run(void)
 				// CHECK CTRL + C
 				// PARSING
 				// RESPOND via send(_events[i].data.fd, str, strlen(str), 0); // Add flags? MSG_DONTWAIT
-				std::cout << "2 : data fd:" << _events[i].data.fd << std::endl << std::endl;
+
+				// for (int i = 0; i < (int)command.size(); i++)
+				// 	command[i].clear();
+				command.clear();
+				v.clear();
 				
 				// Hang up
 				if (_events[i].events & EPOLLHUP)
@@ -144,18 +146,27 @@ int	Server::run(void)
 				}
 
 				unsigned char buf[1] = "";
+				i = 0;
 				while (recv(_events[i].data.fd, buf, 1, 0) > 0)// add flags? MSG_DONTWAIT
 				{
-					// write(_events[i].data.fd, buf, 1);//strlen((char*)buf));
-					// write(_events[i].data.fd, "PING :test\r\n", strlen("PING :test\r\n"));
-					command += *buf;
+					v.push_back(*buf);
 					std::cout << *buf;
 				}
-				
+				command.push_back(v);
+				std::cout << "v:\n____\n";
+				for (int i = 0; i < (int)command.size(); i++) 
+				{
+					for (int j = 0; j < (int)command[i].size(); j++)
+						std::cout << command[i][j];
+				}
+
+
+					
 				//Here Parsing
+				
 				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
-				str = command.c_str();
-				std::cout << std::endl << "str:\n" << str << std::endl;
+				// str = command.c_str();
+				// std::cout << std::endl << "str:\n" << str << std::endl;
 				
 				// currCmd.parseCommand(command);
 				
