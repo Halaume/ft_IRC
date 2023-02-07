@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:18:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 14:15:10 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,19 +31,19 @@ class User
 		int		getfd(void) const;
 		bool	getRegistered(void) const;
 		void	setRegistered(bool);
-		void	setPasswd(std::string);
-		void	setUserName(std::string);
-		void	setRealName(std::string);
+		void	setPasswd(std::vector<unsigned char>);
+		void	setUserName(std::vector<unsigned char>);
+		void	setRealName(std::vector<unsigned char>);
 		int		getNbChan(void);
 	private:
-		int						_fd;
-		bool					_registered;
-		std::string				_passwd;
-		std::string				_currCmd;
-		std::string				_userName;
-		std::string				_realName;
-		std::string				_client;
-		std::vector<Channel>	_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		int							_fd;
+		bool						_registered;
+		std::vector<unsigned char>	_passwd;
+		std::string					_currCmd;
+		std::vector<unsigned char>	_userName;
+		std::vector<unsigned char>	_realName;
+		std::string					_client;
+		std::vector<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };
 

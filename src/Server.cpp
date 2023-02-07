@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 13:56:36 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:43:34 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <vector>
+#include "utils.cpp"
 
 
 Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
@@ -49,7 +50,7 @@ Server &	Server::operator=(const Server & src)
 	return (*this);
 }
 
-Channel &	Server::findChan(std::string channel)
+Channel &	Server::findChan(std::vector<unsigned char> channel)
 {
 	std::vector<Channel>::iterator	it = this->_channels.begin();
 	while (it != this->_channels.end() && it->getChanName() != channel)
@@ -149,12 +150,13 @@ int	Server::run(void)
 			}
 		}
 	}
-	return (1);
 
+	return (1);
 }
 
 void	Server::send(int fd, std::vector<unsigned char> buf)
 {
 	//send(fd, buf, buf.size(), MSG_DONTWAIT);
-	write(fd, buf.c_str(), buf.size());
+	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
+		write(fd, &buf[i], 1);
 }

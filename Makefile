@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/04 16:32:58 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/07 15:43:32 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,14 +24,14 @@ OBJ =			$(SRC:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 
 OBJ_DIRS =		$(OBJ_DIR)
 
-CC = c++ $(CFLAGS)
+CXX = c++ $(CXXFLAGS)
 
 RM = rm -fr
 
-CFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++98
 
 .cpp.o:
-	$(CC) -c $< -o $(<:.cpp=.o)
+	$(CXX) -c $< -o $(<:.cpp=.o)
 
 #HOW TO LIST .cpp
 #	ls -l | awk '{print $9}' | grep -E ".cpp$"| sed "s/\.cpp/ \\\/g" | sed '$s/\\$//g'
@@ -50,11 +50,11 @@ $(OBJ_DIRS):
 	mkdir -p $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) -c $< -o $@
+	$(CXX) -c $< -o $@
 
 $(NAME): $(OBJ_DIRS) $(SRC) $(OBJ)
 	$(MAKE) $(OBJ)
-	$(CC) $(OBJ) -o $@
+	$(CXX) $(OBJ) -o $@
 
 clean:
 	@$(RM) $(OBJ_DIR)

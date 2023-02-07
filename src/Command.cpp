@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 13:55:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:02:55 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <list>
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
+#include "utils.cpp"
 
 Command::Command(void)
 {
@@ -38,19 +39,23 @@ Command &	Command::operator=(const Command & src)
 
 //std::vector<unsigned char>	Command::_fun_CAP(Server &my_server);
 //std::vector<unsigned char>	Command::_fun_NICK(Server &my_server);
+
+
 void	Command::_fun_USER(Server &my_server)
 {
-	std::stringstream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 5)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	if (this->_cmdUser.getRegistered())
 	{
-		my_server.send(this->_cmdUser.getfd(), ":You may not reregister\r\n");
+		insert_all(ret, ":You may not reregister\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	this->_cmdUser.setUserName(this->_parsedCmd[1]);
@@ -61,40 +66,24 @@ void	Command::_fun_USER(Server &my_server)
 
 void	Command::_fun_PASS(Server &my_server)
 {
-	std::stringstream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	if (this->_cmdUser.getRegistered())
 	{
-		my_server.send(this->_cmdUser.getfd(), ":You may not reregister\r\n");
+		insert_all(ret, ":You may not reregister\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
 }
 
-std::list<std::vector<unsigned char>>	splitOnComa(std::vector<unsigned char> str)
-{
-	std::list<std::vector<unsigned char>>	ret;
-	std::vector<unsigned char>::size_type	n = 0;
-	std::vector<unsigned char>::size_type	prev = 0;
-	while (n != std::vector<unsigned char>::npos)
-	{
-		if (n != 0)
-			n++;
-		prev = n;
-		n = str.find(',');
-		if (n == std::vector<unsigned char>::npos)
-			ret.insert(ret.end(), str.substr(prev, str.size() - prev));
-		else
-			ret.insert(ret.end(), str.substr(prev, n - 1));
-	}
-	return (ret);
-}
 
 void	Command::_fun_JOIN(Server &my_server)
 {
@@ -109,12 +98,13 @@ void	Command::_fun_JOIN(Server &my_server)
 	  RPL_TOPIC*/
 	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
 
-	std::vector<unsigned char>stream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	std::list<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
@@ -165,7 +155,7 @@ void	Command::_answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
-	while (i < 15 && this->_parsedCmd[0].compare(options[i]) != 0)
+	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
@@ -245,9 +235,6 @@ void	Command::_answer(Server &my_server)
 			break;
 		}
 		default:
-		{
-			my_server.send(this->_cmdUser.getfd(), "Command not found");
 			break;
-		}
 	}
 }

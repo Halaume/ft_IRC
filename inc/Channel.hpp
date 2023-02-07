@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:42:32 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 15:03:25 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,20 +28,20 @@ class Channel
 	public:
 		Channel(void);
 		Channel(const Channel &copy);
-		Channel(std::string chanName);
+		Channel(std::vector<unsigned char> chanName);
 		~Channel(void);
 		Channel &	operator=(const Channel & src);
-		std::string	getChanName(void) const;
+		std::vector<unsigned char>	getChanName(void) const;
 		void		addUser(User, Server&);
-		void		addUser(User, Server&, std::string);
+		void		addUser(User, Server&, std::vector<unsigned char>);
 	private:
-		std::string				_chanName;
-		std::string				_chanPassword;
-		std::map<char, bool>	_modes;//	A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
-		int						_userConnected;
-		std::list<User>			_opList;
-		std::list<User>			_userLst;
-		std::vector<User>		_banLst;
+		std::vector<unsigned char>	_chanName;
+		std::vector<unsigned char>	_chanPassword;
+		std::map<char, bool>		_modes;//	A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
+		int							_userConnected;
+		std::list<User>				_opList;
+		std::list<User>				_userLst;
+		std::vector<User>			_banLst;
 
 
 };

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:35:57 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 14:15:08 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,17 +57,17 @@ void	User::setRegistered(bool registered)
 	this->_registered = registered;
 }
 
-void	User::setPasswd(std::string passwd)
+void	User::setPasswd(std::vector<unsigned char> passwd)
 {
 	this->_passwd = passwd;
 }
 
-void	User::setUserName(std::string username)
+void	User::setUserName(std::vector<unsigned char> username)
 {
 	this->_userName = username;
 }
 
-void	User::setRealName(std::string realname)
+void	User::setRealName(std::vector<unsigned char> realname)
 {
 	this->_realName = realname;
 }
