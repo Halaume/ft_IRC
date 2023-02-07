@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:43:51 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 13:55:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
-//std::string	Command::_fun_CAP(Server &my_server);
-//std::string	Command::_fun_NICK(Server &my_server);
+//std::vector<unsigned char>	Command::_fun_CAP(Server &my_server);
+//std::vector<unsigned char>	Command::_fun_NICK(Server &my_server);
 void	Command::_fun_USER(Server &my_server)
 {
 	std::stringstream ret;
@@ -77,18 +77,18 @@ void	Command::_fun_PASS(Server &my_server)
 	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
 }
 
-std::list<std::string>	splitOnComa(std::string str)
+std::list<std::vector<unsigned char>>	splitOnComa(std::vector<unsigned char> str)
 {
-	std::list<std::string>	ret;
-	std::string::size_type	n = 0;
-	std::string::size_type	prev = 0;
-	while (n != std::string::npos)
+	std::list<std::vector<unsigned char>>	ret;
+	std::vector<unsigned char>::size_type	n = 0;
+	std::vector<unsigned char>::size_type	prev = 0;
+	while (n != std::vector<unsigned char>::npos)
 	{
 		if (n != 0)
 			n++;
 		prev = n;
 		n = str.find(',');
-		if (n == std::string::npos)
+		if (n == std::vector<unsigned char>::npos)
 			ret.insert(ret.end(), str.substr(prev, str.size() - prev));
 		else
 			ret.insert(ret.end(), str.substr(prev, n - 1));
@@ -109,7 +109,7 @@ void	Command::_fun_JOIN(Server &my_server)
 	  RPL_TOPIC*/
 	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
 
-	std::stringstream ret;
+	std::vector<unsigned char>stream ret;
 
 	if (this->_parsedCmd.size() < 2)
 	{
@@ -117,12 +117,12 @@ void	Command::_fun_JOIN(Server &my_server)
 		my_server.send(this->_cmdUser.getfd(), ret.str());
 		return ;
 	}
-	std::list<std::string>	chan = splitOnComa(this->_parsedCmd[1]);
+	std::list<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
 
 
-	std::list<std::string>::iterator	it = chan.begin();
-	std::list<std::string>				passwd;
-	std::list<std::string>::iterator	itpasswd;
+	std::list<std::vector<unsigned char>>::iterator	it = chan.begin();
+	std::list<std::vector<unsigned char>>				passwd;
+	std::list<std::vector<unsigned char>>::iterator	itpasswd;
 
 	if (this->_parsedCmd.size() == 3)
 	{
@@ -159,7 +159,7 @@ void	Command::_fun_RESTART(Server &my_server)
 	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
-//std::string	Command::_fun_PING(Server &my_server);
+//std::vector<unsigned char>	Command::_fun_PING(Server &my_server);
 
 void	Command::_answer(Server &my_server)
 {
