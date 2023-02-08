@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:52:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 17:05:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,6 @@ Server &	Server::operator=(const Server & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
-}
-
-std::list<User>	Server::getUser(void) const
-{
-	return (this->_Users);
 }
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
@@ -254,7 +249,7 @@ int Server::getEpollfd(void)
 	return (_epollfd);
 }
 
-std::list<User> Server::getUsers(void)
+std::list<User> Server::getUser(void) const
 {
 	return (this->_Users);
 }

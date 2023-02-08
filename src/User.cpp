@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:29:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 17:24:55 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int	User::getNbChan(void)
 	return (static_cast<int>(this->_channels.size()));
 }
 
-std::vector<Channel> User::getChannels(void)
+std::vector<Channel>& User::getChannels(void)
 {
 	return (this->_channels);
 }

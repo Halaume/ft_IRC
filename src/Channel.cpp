@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 11:50:38 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 17:23:51 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void Channel::addUser(User newUser, Server &my_server)
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
 	std::vector<unsigned char>	sender;
-	std::vector<User>::iterator	it = this->_userLst.begin();
+	std::list<User>::iterator	it = this->_userLst.begin();
 
 	while (it != this->_userLst.end() && *it != newUser)
 		it++;
@@ -100,7 +100,7 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
-	std::vector<User>::iterator	it = this->_userLst.begin();
+	std::list<User>::iterator	it = this->_userLst.begin();
 	std::vector<unsigned char>	sender;
 
 	while (it != this->_userLst.end() && *it != newUser)
@@ -133,4 +133,11 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 	insert_all(sender, "RPL_NAMREPLY\r\n");
 	while (it != this->_userLst.end())
 		my_server.send(it->getfd(), sender);
+}
+
+
+// Getters
+std::list<User>& Channel::getUsers(void)
+{
+	return (_userLst);
 }

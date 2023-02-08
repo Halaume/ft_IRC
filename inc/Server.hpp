@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 15:32:27 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/08 17:29:59 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ class Server
 		int			getEpollfd(void);
 		// User*		getUser(int fd);
 
-		std::list<User>			getUser(void) const;
+		std::list<User>				getUser(void) const;
 		Channel &					findChan(std::vector<unsigned char>);
 		void						send(int, std::vector<unsigned char>);
 		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);

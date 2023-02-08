@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:46:25 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 17:24:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class User
 		~User(void);
 		User &	operator=(const User & src);
 
-		std::vector<Channel> getChannels(void);
+		
 		
 		// GETTERS
 		// int					getfd(void) const;
@@ -46,6 +46,7 @@ class User
 		bool						operator==(User) const;
 		bool						operator!=(User) const;
 		
+		std::vector<Channel>& 		getChannels(void);
 		int							getfd(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
