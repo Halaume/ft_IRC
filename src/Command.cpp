@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:30:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 18:09:29 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,36 +41,6 @@ Command &	Command::operator=(const Command & src)
 		return (*this);
 	return (*this);
 }
-
-// void Command::parseCommand(std::string input)
-// {
-// 	std::string commandline;
-// 	std::string striterator;
-// 	// std::vector<std::string> v;
-
-// 	_parsedCmd.clear();
-// 	striterator = input;
-// 	while (striterator != "")
-// 	{
-// 		commandline = striterator.substr(0, striterator.find("\r\n"));
-// 		striterator = striterator.substr(striterator.find("\r\n")+2, striterator.length());
-// 		_parsedCmd.push_back(commandline);
-// 		// while (commandline != "")
-// 		// {
-// 		// 	token = commandline.substr(0, commandline.find(" "));
-// 		// 	v.push_back(token);
-// 		// 	if (commandline.substr(commandline.find(" ") +1, commandline.length()).length() == commandline.length())
-// 		// 		commandline = "";
-// 		// 	else
-// 		// 		commandline = commandline.substr(commandline.find(" ") +1, commandline.length());
-
-// 		std::cout << "Parsed cmd:\n____________\n";
-// 		for (int i = 0; i < (int)_parsedCmd.size(); i++)
-// 			std::cout << "line " << i << _parsedCmd[i] << "\n";
-
-// 		// }
-// 	}
-// }
 
 void	Command::_fun_CAP(Server &my_server)
 {

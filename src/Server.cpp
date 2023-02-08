@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:05:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 18:01:33 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ int	Server::run(void)
 	int yes = 1;//	For SO_KEEPALIVE
 	int k;
 	std::vector<std::vector<unsigned char> >::size_type i, j;
+	std::vector<std::vector<unsigned char> >::size_type m, n;
 	socklen_t server_length = sizeof(_server);
 	std::vector<std::vector<unsigned char> > command;
 	std::vector<std::vector<unsigned char> > scommand;
@@ -163,7 +164,9 @@ int	Server::run(void)
 					for (j = 0; j < command[i].size(); j++)
 						std::cout << command[i][j];
 				}
-				// Get scommand FUCKED UP
+				std::cout << "\n";
+				
+				// Get scommand
 				for (i = 0; i < command.size(); i++)
 				{
 					v.clear();
@@ -179,24 +182,10 @@ int	Server::run(void)
 							v.push_back(command[i][j]);
 					}
 					
-					// Print scommand
-					std::cout << "Print scommand____\n";
-					for (i = 0; i < scommand.size(); i++) 
-					{
-						std::cout << ">";
-						for (j = 0; j < scommand[i].size(); j++)
-							std::cout << scommand[i][j];
-						std::cout << "\n";
-					}	
-				}
 
-				// Parsing
-				
-				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
-				// str = command.c_str();
-				// std::cout << std::endl << "str:\n" << str << std::endl;
-				
-				// currCmd.parseCommand(command);
+
+					// Parse scommand
+				}
 				
 			}
 		}
@@ -204,6 +193,10 @@ int	Server::run(void)
 
 	return (1);
 }
+
+
+
+
 
 void	Server::send(int fd, std::vector<unsigned char> buf)
 {
@@ -266,3 +259,18 @@ std::list<User> Server::getUser(void) const
 // }
 
 
+
+
+
+
+
+// Print scommand
+// std::cout << "Print scommand____\n";
+// for (m = 0; m < scommand.size(); m++) 
+// {
+// 	std::cout << ">";
+// 	for (n = 0; n < scommand[m].size(); n++)
+// 		std::cout << scommand[m][n];
+// 	std::cout << "\n";
+// }
+// std::cout << "End scommand\n";
