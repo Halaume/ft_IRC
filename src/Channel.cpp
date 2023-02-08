@@ -6,17 +6,18 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:46:35 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 11:50:38 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
-#include <list>
+#include <vector>
 #include <utility>
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
+#include "../inc/utils.hpp"
 
-Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opList()
+Channel::Channel(void): _chanName(), _chanPassword(), _userConnected()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));
@@ -31,11 +32,11 @@ Channel::Channel(void): _chanName(), _chanPassword(), _userConnected(), _opList(
 	this->_modes.insert(std::make_pair('k', false));
 }
 
-Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected), _opList(copy._opList)
+Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected)
 {
 }
 
-Channel::Channel(std::string name): _chanName(name), _chanPassword(), _userConnected(), _opList()
+Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected()
 {
 	this->_modes.insert(std::make_pair('o', false));
 	this->_modes.insert(std::make_pair('p', false));
@@ -61,7 +62,7 @@ Channel &	Channel::operator=(const Channel & src)
 	return (*this);
 }
 
-std::string	Channel::getChanName(void) const
+std::vector<unsigned char>	Channel::getChanName(void) const
 {
 	return (this->_chanName);
 }
@@ -70,7 +71,8 @@ void Channel::addUser(User newUser, Server &my_server)
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
-	std::list<User>::iterator	it = this->_userLst.begin();
+	std::vector<unsigned char>	sender;
+	std::vector<User>::iterator	it = this->_userLst.begin();
 
 	while (it != this->_userLst.end() && *it != newUser)
 		it++;
@@ -78,22 +80,28 @@ void Channel::addUser(User newUser, Server &my_server)
 		connected = true;
 	if (!connected && newUser.getNbChan() == 10)
 	{
-		my_server.send(newUser.getfd(), "ERR_TOOMANYCHANNELS");
+		insert_all(sender, "ERR_TOMANYCHANNELS\r\n");
+		my_server.send(newUser.getfd(), sender);
 		return ;
 	}
 	if (!connected)
 		this->_userLst.insert(this->_userLst.end(), newUser);
-	my_server.send(newUser.getfd(), "RPL_TOPIC");
+	sender.clear();
+	insert_all(sender, "RPL_TOPIC\r\n");
+	my_server.send(newUser.getfd(), sender);
 	it = this->_userLst.begin();
+	sender.clear();
+	insert_all(sender, "RPL_NAMREPLY\r\n");
 	while (it != this->_userLst.end())
-		my_server.send(it->getfd(), "RPL_NAMREPLY");
+		my_server.send(newUser.getfd(), sender);
 }
 
-void Channel::addUser(User newUser, Server &my_server, std::string passwd)
+void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char> passwd)
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
-	std::list<User>::iterator	it = this->_userLst.begin();
+	std::vector<User>::iterator	it = this->_userLst.begin();
+	std::vector<unsigned char>	sender;
 
 	while (it != this->_userLst.end() && *it != newUser)
 		it++;
@@ -101,21 +109,28 @@ void Channel::addUser(User newUser, Server &my_server, std::string passwd)
 		connected = true;
 	if (!connected && newUser.getNbChan() == 10)
 	{
-		my_server.send(newUser.getfd(), "ERR_TOOMANYCHANNELS");
+		insert_all(sender, "ERR_TOOMANYCHANNELS\r\n");
+		my_server.send(newUser.getfd(), sender);
 		return ;
 	}
 	if (!connected)
 	{
-		if (this->_chanPassword != "" && passwd == this->_chanPassword)
+		if (this->_chanPassword.size() != 0 && passwd == this->_chanPassword)
 			this->_userLst.insert(this->_userLst.end(), newUser);
 		else
 		{
-			my_server.send(newUser.getfd(), "ERR_BADCHANNELKEY");
+			sender.clear();
+			insert_all(sender, "ERR_BADCHANNELKEY\r\n");
+			my_server.send(newUser.getfd(), sender);
 			return ;
 		}
 	}
-	my_server.send(newUser.getfd(), "RPL_TOPIC");
+	sender.clear();
+	insert_all(sender, "RPL_TOPIC\r\n");
+	my_server.send(newUser.getfd(), sender);
 	it = this->_userLst.begin();
+	sender.clear();
+	insert_all(sender, "RPL_NAMREPLY\r\n");
 	while (it != this->_userLst.end())
-		my_server.send(it->getfd(), "RPL_NAMREPLY");
+		my_server.send(it->getfd(), sender);
 }

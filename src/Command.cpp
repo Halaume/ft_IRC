@@ -11,16 +11,19 @@
 /* ************************************************************************** */
 
 #include <string>
+#include <iostream>
 #include <sstream>
-#include <list>
+#include <vector>
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
+#include "../inc/User.hpp"
+#include "../inc/utils.hpp"
 
-Command::Command(void)
+Command::Command(void): _cmdUser(), _parsedCmd()
 {
 }
 
-Command::Command(const Command &copy)
+Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy._parsedCmd)
 {
 
 }
@@ -36,21 +39,62 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
-//std::vector<unsigned char>	Command::_fun_CAP(Server &my_server);
-//std::vector<unsigned char>	Command::_fun_NICK(Server &my_server);
+// void Command::parseCommand(std::string input)
+// {
+// 	std::string commandline;
+// 	std::string striterator;
+// 	// std::vector<std::string> v;
+
+// 	_parsedCmd.clear();
+// 	striterator = input;
+// 	while (striterator != "")
+// 	{
+// 		commandline = striterator.substr(0, striterator.find("\r\n"));
+// 		striterator = striterator.substr(striterator.find("\r\n")+2, striterator.length());
+// 		_parsedCmd.push_back(commandline);
+// 		// while (commandline != "")
+// 		// {
+// 		// 	token = commandline.substr(0, commandline.find(" "));
+// 		// 	v.push_back(token);
+// 		// 	if (commandline.substr(commandline.find(" ") +1, commandline.length()).length() == commandline.length())
+// 		// 		commandline = "";
+// 		// 	else
+// 		// 		commandline = commandline.substr(commandline.find(" ") +1, commandline.length());
+
+// 		std::cout << "Parsed cmd:\n____________\n";
+// 		for (int i = 0; i < (int)_parsedCmd.size(); i++)
+// 			std::cout << "line " << i << _parsedCmd[i] << "\n";
+
+// 		// }
+// 	}
+// }
+
+void	Command::_fun_CAP(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_NICK(Server &my_server)
+{
+	(void)my_server;
+}
+
+
 void	Command::_fun_USER(Server &my_server)
 {
-	std::stringstream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 5)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	if (this->_cmdUser.getRegistered())
 	{
-		my_server.send(this->_cmdUser.getfd(), ":You may not reregister\r\n");
+		insert_all(ret, ":You may not reregister\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	this->_cmdUser.setUserName(this->_parsedCmd[1]);
@@ -61,40 +105,24 @@ void	Command::_fun_USER(Server &my_server)
 
 void	Command::_fun_PASS(Server &my_server)
 {
-	std::stringstream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	if (this->_cmdUser.getRegistered())
 	{
-		my_server.send(this->_cmdUser.getfd(), ":You may not reregister\r\n");
+		insert_all(ret, ":You may not reregister\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
 }
 
-std::list<std::vector<unsigned char>>	splitOnComa(std::vector<unsigned char> str)
-{
-	std::list<std::vector<unsigned char>>	ret;
-	std::vector<unsigned char>::size_type	n = 0;
-	std::vector<unsigned char>::size_type	prev = 0;
-	while (n != std::vector<unsigned char>::npos)
-	{
-		if (n != 0)
-			n++;
-		prev = n;
-		n = str.find(',');
-		if (n == std::vector<unsigned char>::npos)
-			ret.insert(ret.end(), str.substr(prev, str.size() - prev));
-		else
-			ret.insert(ret.end(), str.substr(prev, n - 1));
-	}
-	return (ret);
-}
 
 void	Command::_fun_JOIN(Server &my_server)
 {
@@ -109,20 +137,21 @@ void	Command::_fun_JOIN(Server &my_server)
 	  RPL_TOPIC*/
 	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
 
-	std::vector<unsigned char>stream ret;
+	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret << this->_parsedCmd[0] << " :Not enough parameters\r\n";
-		my_server.send(this->_cmdUser.getfd(), ret.str());
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
-	std::list<std::vector<unsigned char>>	chan = splitOnComa(this->_parsedCmd[1]);
+	std::vector<std::vector<unsigned char> >	chan = splitOnComa(this->_parsedCmd[1]);
 
 
-	std::list<std::vector<unsigned char>>::iterator	it = chan.begin();
-	std::list<std::vector<unsigned char>>				passwd;
-	std::list<std::vector<unsigned char>>::iterator	itpasswd;
+	std::vector<std::vector<unsigned char> >::iterator	it = chan.begin();
+	std::vector<std::vector<unsigned char> >				passwd;
+	std::vector<std::vector<unsigned char> >::iterator	itpasswd;
 
 	if (this->_parsedCmd.size() == 3)
 	{
@@ -142,6 +171,7 @@ void	Command::_fun_JOIN(Server &my_server)
 			tmp.addUser(this->_cmdUser, my_server);
 	}
 }
+
 
 
 void	Command::_fun_QUIT(Server &my_server)
@@ -185,24 +215,109 @@ void	Command::_fun_RESTART(Server &my_server)
 	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
-//void	Command::_fun_PRIVMSG(Server &my_server);
-//void	Command::_fun_OPER(Server &my_server);
-//void	Command::_fun_QUIT(Server &my_server);
-//void	Command::_fun_ERROR(Server &my_server);
-//void	Command::_fun_MODE(Server &my_server);
-//void	Command::_fun_TOPIC(Server &my_server);
-//void	Command::_fun_KICK(Server &my_server);
-//void	Command::_fun_INVITE(Server &my_server);
-//void	Command::_fun_KILL(Server &my_server);
+
+void	Command::_fun_PRIVMSG(Server &my_server)
+{
+	//RFC2812
+	/*Numeric Replies:
+
+           ERR_NORECIPIENT                 ERR_NOTEXTTOSEND
+           ERR_CANNOTSENDTOCHAN            ERR_NOTOPLEVEL
+           ERR_WILDTOPLEVEL                ERR_TOOMANYTARGETS
+           ERR_NOSUCHNICK
+           RPL_AWAY*/
+	std::vector<unsigned char> ret;
+	if (this->_parsedCmd.size() < 3)
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+//PAS SUR DE CELLE CI
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_TOMANYTARGETS\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
+	std::vector<unsigned char>	msg;
+	if (this->_parsedCmd[2][0] == ':')
+		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+	else
+		msg = this->_parsedCmd[2];
+	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
+	while (it != this->_parsedCmd.end())
+	{
+		msg.push_back(' ');
+		msg.insert(msg.end(), it->begin(), it->end());
+	}
+
+	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
+	if (it_receiver == my_server.getUser().end())
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_NOSUCHNICK\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	(void)my_server;
+}
+
+void	Command::_fun_OPER(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_QUIT(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_ERROR(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_MODE(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_TOPIC(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_KICK(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_INVITE(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_KILL(Server &my_server)
+{
+	(void)my_server;
+}
 
 
-//std::vector<unsigned char>	Command::_fun_PING(Server &my_server);
+void	Command::_fun_PING(Server &my_server)
+{
+//	std::vector<User>::iterator	it = my_server.getUsers().begin();
+	(void)my_server;
+}
 
 void	Command::_answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
-	while (i < 15 && this->_parsedCmd[0].compare(options[i]) != 0)
+	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
@@ -213,7 +328,6 @@ void	Command::_answer(Server &my_server)
 		}
 		case 1:
 		{
-			this->_fun_USER(my_server);
 			break;
 		}
 		case 2:
@@ -282,9 +396,6 @@ void	Command::_answer(Server &my_server)
 			break;
 		}
 		default:
-		{
-			my_server.send(this->_cmdUser.getfd(), "Command not found");
 			break;
-		}
 	}
 }

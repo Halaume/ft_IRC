@@ -16,12 +16,17 @@
 #include <sys/epoll.h>
 #include <vector>
 #include <string>
-#include "Channel.hpp"
 #include <list>
+
 #include <netinet/in.h>
+
+#include "Channel.hpp"
 #include "User.hpp"
 
+#define BUFFER_SIZE 3000
+
 class Channel;
+
 class User;
 
 class Server
@@ -31,12 +36,23 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 		Server &	operator=(const Server & src);
-		Channel &	findChan(std::string);
+		
 		int			init(char **);
 		int			run(void);
-		void		send(int fd, std::vector<unsigned char>);
-		std::list<User> getUsers(void);
-		
+
+
+		void printUsersList(void);
+
+		// GETTERS
+		int			getSct(void);
+		int			getEpollfd(void);
+		// User*		getUser(int fd);
+
+		std::list<User>			getUser(void) const;
+		Channel &					findChan(std::vector<unsigned char>);
+		void						send(int, std::vector<unsigned char>);
+		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);
+
 	private:
 		sockaddr_in						_server;
 		int								_sct;
@@ -45,7 +61,7 @@ class Server
 		epoll_event						_events[10];
 		epoll_event						_ev;
 		std::vector<Channel>			_channels;
-		std::list<User>					_Users;
+		std::list<User>				_Users;
 };
 
 #endif
