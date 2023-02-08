@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 19:41:50 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 16:12:19 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,9 +89,9 @@ int	Server::run(void)
 	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
-	int i;
 	socklen_t server_length = sizeof(_server);
 	std::vector<std::vector<unsigned char> > command;
+	std::vector<std::vector<unsigned char> > scommand;
 	std::vector<unsigned char> v;
 
 	// _users_list.insert(_users_list.begin(), User());
@@ -132,9 +132,6 @@ int	Server::run(void)
 				// CHECK CTRL + C
 				// PARSING
 				// RESPOND via send(_events[i].data.fd, str, strlen(str), 0); // Add flags? MSG_DONTWAIT
-
-				// for (int i = 0; i < (int)command.size(); i++)
-				// 	command[i].clear();
 				command.clear();
 				v.clear();
 				
@@ -145,24 +142,58 @@ int	Server::run(void)
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[i].data.fd, &_events[i]);
 				}
 
-				unsigned char buf[1] = "";
-				i = 0;
-				while (recv(_events[i].data.fd, buf, 1, 0) > 0)// add flags? MSG_DONTWAIT
+				// Read fdand get command
+				unsigned char buf[BUFFER_SIZE] = "";
+				while (recv(_events[i].data.fd, buf, BUFFER_SIZE, 0) > 0)// add flags? MSG_DONTWAIT
 				{
-					v.push_back(*buf);
-					std::cout << *buf;
+					for (int i = 0; i < BUFFER_SIZE; i++)
+					{
+						v.push_back(buf[i]);
+						if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
+						{
+							command.push_back(v);
+							v.clear();
+						}
+					}
 				}
-				command.push_back(v);
-				std::cout << "v:\n____\n";
+				
+				// Print command
+				std::cout << "Print command____\n";
 				for (int i = 0; i < (int)command.size(); i++) 
 				{
+					std::cout << ">";
 					for (int j = 0; j < (int)command[i].size(); j++)
 						std::cout << command[i][j];
 				}
-
-
+				
+				// Get scommand
+				for (int i = 0; i < (int)command.size(); i++)
+				{
+					v.clear();
+					scommand.clear();
+					for (int j = 0; j < (int)command[i].size(); j++)
+					{			
+						if (command[i][j] == ' ' || j == (int)command[i].size() - 2)
+						{
+							scommand.push_back(v);
+							v.clear();
+						}
+						else if (command[i][j] != ' ')
+							v.push_back(command[i][j]);
+					}
 					
-				//Here Parsing
+					// Print scommand
+					std::cout << "Print scommand____\n";
+					for (int i = 0; i < (int)scommand.size(); i++) 
+					{
+						std::cout << ">";
+						for (int j = 0; j < (int)scommand[i].size(); j++)
+							std::cout << scommand[i][j];
+						std::cout << "\n";
+					}	
+				}
+
+				// Parsing
 				
 				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
 				// str = command.c_str();
@@ -213,3 +244,4 @@ User* Server::getUser(int fd) {
 	// Exception si User pas trouve?
 	return (&(*it));
 }
+
