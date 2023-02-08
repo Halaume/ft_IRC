@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/07 17:03:34 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/02/08 11:53:51 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,9 +14,9 @@ NAME = ircserv
 
 INC_DIR =		./inc/
 OBJ_DIR = 		obj
-SRC_DIR	= 		./src
+SRC_DIR	= 		./src/
 
-INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User )) #Command))
+INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User Command utils)) #Command))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 

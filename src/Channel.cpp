@@ -6,7 +6,7 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 17:01:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 11:50:38 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <utility>
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
-#include "utils.cpp"
+#include "../inc/utils.hpp"
 
 Channel::Channel(void): _chanName(), _chanPassword(), _userConnected()
 {

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:53:33 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 15:10:37 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,13 @@ class Server
 		Server(void);
 		Server(const Server &copy);
 		~Server(void);
-		Server &	operator=(const Server & src);
-		Channel &	findChan(std::vector<unsigned char>);
-		int			init(char **);
-		int			run(void);
-		void		send(int, std::vector<unsigned char>);
+		Server &					operator=(const Server & src);
+		std::vector<User>			getUser(void) const;
+		Channel &					findChan(std::vector<unsigned char>);
+		int							init(char **);
+		int							run(void);
+		void						send(int, std::vector<unsigned char>);
+		std::vector<User>::iterator	findUser(std::vector<unsigned char> nick);
 	private:
 		sockaddr_in						_server;
 		int								_sct;

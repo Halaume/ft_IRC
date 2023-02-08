@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 14:15:10 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 14:53:15 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,17 @@ class User
 		User(void);
 		User(const User &copy);
 		~User(void);
-		User &	operator=(const User & src);
-		bool	operator==(User) const;
-		bool	operator!=(User) const;
-		int		getfd(void) const;
-		bool	getRegistered(void) const;
-		void	setRegistered(bool);
-		void	setPasswd(std::vector<unsigned char>);
-		void	setUserName(std::vector<unsigned char>);
-		void	setRealName(std::vector<unsigned char>);
-		int		getNbChan(void);
+		User &						operator=(const User & src);
+		bool						operator==(User) const;
+		bool						operator!=(User) const;
+		int							getfd(void) const;
+		bool						getRegistered(void) const;
+		std::vector<unsigned char>	getUserName(void) const;
+		void						setRegistered(bool);
+		void						setPasswd(std::vector<unsigned char>);
+		void						setUserName(std::vector<unsigned char>);
+		void						setRealName(std::vector<unsigned char>);
+		int							getNbChan(void);
 	private:
 		int							_fd;
 		bool						_registered;

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 17:05:44 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 15:10:39 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <vector>
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
-#include "utils.cpp"
+#include "../inc/utils.hpp"
 
 Command::Command(void): _cmdUser(), _parsedCmd()
 {
@@ -37,8 +37,15 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
-//std::vector<unsigned char>	Command::_fun_CAP(Server &my_server);
-//std::vector<unsigned char>	Command::_fun_NICK(Server &my_server);
+void	Command::_fun_CAP(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_NICK(Server &my_server)
+{
+	(void)my_server;
+}
 
 
 void	Command::_fun_USER(Server &my_server)
@@ -133,15 +140,96 @@ void	Command::_fun_JOIN(Server &my_server)
 	}
 }
 
-//void	Command::_fun_PRIVMSG(Server &my_server);
-//void	Command::_fun_OPER(Server &my_server);
-//void	Command::_fun_QUIT(Server &my_server);
-//void	Command::_fun_ERROR(Server &my_server);
-//void	Command::_fun_MODE(Server &my_server);
-//void	Command::_fun_TOPIC(Server &my_server);
-//void	Command::_fun_KICK(Server &my_server);
-//void	Command::_fun_INVITE(Server &my_server);
-//void	Command::_fun_KILL(Server &my_server);
+void	Command::_fun_PRIVMSG(Server &my_server)
+{
+	//RFC2812
+	/*Numeric Replies:
+
+           ERR_NORECIPIENT                 ERR_NOTEXTTOSEND
+           ERR_CANNOTSENDTOCHAN            ERR_NOTOPLEVEL
+           ERR_WILDTOPLEVEL                ERR_TOOMANYTARGETS
+           ERR_NOSUCHNICK
+           RPL_AWAY*/
+	std::vector<unsigned char> ret;
+	if (this->_parsedCmd.size() < 3)
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " :Not enough parameters\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+//PAS SUR DE CELLE CI
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_TOMANYTARGETS\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
+	std::vector<unsigned char>	msg;
+	if (this->_parsedCmd[2][0] == ':')
+		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+	else
+		msg = this->_parsedCmd[2];
+	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
+	while (it != this->_parsedCmd.end())
+	{
+		msg.push_back(' ');
+		msg.insert(msg.end(), it->begin(), it->end());
+	}
+
+	std::vector<User>::iterator	it_receiver = my_server.findUser(receiver);
+	if (it_receiver == my_server.getUser().end())
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_NOSUCHNICK\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	(void)my_server;
+}
+
+void	Command::_fun_OPER(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_QUIT(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_ERROR(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_MODE(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_TOPIC(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_KICK(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_INVITE(Server &my_server)
+{
+	(void)my_server;
+}
+
+void	Command::_fun_KILL(Server &my_server)
+{
+	(void)my_server;
+}
+
 
 void	Command::_fun_RESTART(Server &my_server)
 {
@@ -149,7 +237,11 @@ void	Command::_fun_RESTART(Server &my_server)
 	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
-//std::vector<unsigned char>	Command::_fun_PING(Server &my_server);
+void	Command::_fun_PING(Server &my_server)
+{
+//	std::vector<User>::iterator	it = my_server.getUsers().begin();
+	(void)my_server;
+}
 
 void	Command::_answer(Server &my_server)
 {
@@ -166,7 +258,6 @@ void	Command::_answer(Server &my_server)
 		}
 		case 1:
 		{
-			this->_fun_USER(my_server);
 			break;
 		}
 		case 2:

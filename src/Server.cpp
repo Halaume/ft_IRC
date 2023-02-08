@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 15:53:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 15:10:33 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <vector>
-#include "utils.cpp"
-
+#include "../inc/utils.hpp"
 
 Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
 {
@@ -48,6 +47,11 @@ Server &	Server::operator=(const Server & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
+}
+
+std::vector<User>	Server::getUser(void) const
+{
+	return (this->_Users);
 }
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
@@ -161,4 +165,14 @@ void	Server::send(int fd, std::vector<unsigned char> buf)
 	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
 		ret = write(fd, &buf[i], 1);
 	(void)ret;
+}
+
+std::vector<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
+{
+	for (std::vector<User>::iterator it = this->_Users.begin(); it != this->_Users.end(); it++)
+	{
+		if (it->getUserName() == nick)
+			return (it);
+	}
+	return (it)
 }

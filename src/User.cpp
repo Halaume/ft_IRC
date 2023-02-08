@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 14:15:08 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 14:54:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,11 @@ int		User::getfd(void) const
 bool	User::getRegistered(void) const
 {
 	return (this->_registered);
+}
+
+std::vector<unsigned char>	User::getUserName(void) const
+{
+	return (this->_userName);
 }
 
 void	User::setRegistered(bool registered)
