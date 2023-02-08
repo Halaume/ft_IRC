@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
 /*   Updated: 2023/02/08 16:29:24 by iguscett         ###   ########.fr       */
@@ -80,4 +80,9 @@ void	User::setRealName(std::vector<unsigned char> realname)
 int	User::getNbChan(void)
 {
 	return (static_cast<int>(this->_channels.size()));
+}
+
+std::vector<Channel> User::getChannels(void)
+{
+	return (this->_channels);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:49:02 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 16:06:17 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,50 @@ void	Command::_fun_JOIN(Server &my_server)
 	}
 }
 
+
+
+void	Command::_fun_QUIT(Server &my_server)
+{
+	std::vector<Channel>::iterator it = this->_cmdUser.getChannels.begin();
+	std::list<User>::iterator j;
+	
+	std::vector<unsigned char> ret;
+	int i = 1;
+	if (this->_parsedCmd.size() > 1)
+	{
+		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+		i++;
+		while (i < _parsedCmd.size())
+		{
+			ret.push_back(' ');
+			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+			i++;
+		}
+	}
+	
+	while (it != this->_cmdUser.getChannels.end())
+	{
+		j = i->getUsers().begin();
+		while (j != i->getUsers().end())
+		{
+			my_server.send(j->getfd(), ret);
+			j++;
+		}
+		it->erase(_cmdUser);
+		it++;
+	}
+	my_server->getUsers.remove(this->_cmdUser);
+	close(_cmdUser->getfd());
+}
+
+
+void	Command::_fun_RESTART(Server &my_server)
+{
+	(void)my_server;
+	//fun free -> fun server.init() -> break le run -> fun server.run()
+}
+
+
 void	Command::_fun_PRIVMSG(Server &my_server)
 {
 	//RFC2812
@@ -262,12 +306,6 @@ void	Command::_fun_KILL(Server &my_server)
 	(void)my_server;
 }
 
-
-void	Command::_fun_RESTART(Server &my_server)
-{
-	(void)my_server;
-	//fun free -> fun server.init() -> break le run -> fun server.run()
-}
 
 void	Command::_fun_PING(Server &my_server)
 {

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
 /*   Updated: 2023/02/08 16:52:23 by iguscett         ###   ########.fr       */
@@ -254,6 +254,11 @@ int Server::getEpollfd(void)
 	return (_epollfd);
 }
 
+std::list<User> Server::getUsers(void)
+{
+	return (this->_Users);
+}
+
 // User* Server::getUser(int fd)
 // {
 // 	std::list<User>::iterator it;
@@ -264,4 +269,5 @@ int Server::getEpollfd(void)
 // 	// Exception si User pas trouve?
 // 	return (&(*it));
 // }
+
 
