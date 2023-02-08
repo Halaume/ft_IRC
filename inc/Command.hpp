@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 16:41:40 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/07 17:42:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,13 @@
 #define COMMAND_HPP
 
 #include <string>
-#include "Channel.hpp"
-#include "User.hpp"
 #include <vector>
+
 #include "Server.hpp"
+#include "User.hpp"
+#include "Channel.hpp"
+
+class Server;
 
 class Command
 {
@@ -26,8 +29,11 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
+
+		void	parseCommand(std::string);
 		
 	private:
+		int							_fdCmd;
 		User						_cmdUser;
 		std::vector<std::string>	_parsedCmd;
 		

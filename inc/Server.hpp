@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/04 16:07:56 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 14:58:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,16 @@
 #include <sys/epoll.h>
 #include <map>
 #include <string>
-#include "Channel.hpp"
 #include <list>
 #include <netinet/in.h>
+
 #include "User.hpp"
+#include "Command.hpp"
+#include "Channel.hpp"
+
+#define BUFFER_SIZE 3000
+
+class Command;
 
 class Server
 {
@@ -30,6 +36,15 @@ class Server
 		Server &	operator=(const Server & src);
 		int			init(char **);
 		int			run(void);
+
+		void printUsersList(void);
+
+		// GETTERS
+		int			getSct(void);
+		int			getEpollfd(void);
+		User*		getUser(int fd);
+
+		
 	private:
 		sockaddr_in						_server;
 		int								_sct;
@@ -38,7 +53,7 @@ class Server
 		epoll_event						_events[10];
 		epoll_event						_ev;
 		std::map<Channel, std::string>	_channels;
-		std::list<User>					_Users;
+		std::list<User>					_users_list;
 };
 
 #endif

@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/05 15:06:53 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/08 16:15:33 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ CC = c++ $(CFLAGS)
 
 RM = rm -fr
 
-CFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++98
+CFLAGS = -Wall -Wextra -O3 -g -std=c++98 #-Wconversion -Wpedantic -Werror
 
 .cpp.o:
 	$(CC) -c $< -o $(<:.cpp=.o)
@@ -40,7 +40,7 @@ SRC_FT = main \
 		 Server \
 		 Channel \
 		 User \
-		#  Command
+		 Command
 
 all: $(NAME)
 
