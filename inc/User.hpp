@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/06 16:18:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/07 16:33:20 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class User
 		void	setUserName(std::string);
 		void	setRealName(std::string);
 		int		getNbChan(void);
+		std::vector<Channel> getChannels(void);
+		
 	private:
 		int						_fd;
 		bool					_registered;

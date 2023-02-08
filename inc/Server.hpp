@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/07 13:56:57 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/08 15:32:27 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,9 @@ class Server
 		Channel &	findChan(std::string);
 		int			init(char **);
 		int			run(void);
-		void		send(int, std::vector<unsigned char>);
+		void		send(int fd, std::vector<unsigned char>);
+		std::list<User> getUsers(void);
+		
 	private:
 		sockaddr_in						_server;
 		int								_sct;
