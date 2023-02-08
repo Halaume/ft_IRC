@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 14:58:42 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/08 16:48:17 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,20 @@
 #define SERVER_HPP
 
 #include <sys/epoll.h>
-#include <map>
+#include <vector>
 #include <string>
 #include <list>
+
 #include <netinet/in.h>
 
-#include "User.hpp"
-#include "Command.hpp"
 #include "Channel.hpp"
+#include "User.hpp"
 
 #define BUFFER_SIZE 3000
 
-class Command;
+class Channel;
+
+class User;
 
 class Server
 {
@@ -34,6 +36,7 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 		Server &	operator=(const Server & src);
+		
 		int			init(char **);
 		int			run(void);
 
@@ -42,9 +45,12 @@ class Server
 		// GETTERS
 		int			getSct(void);
 		int			getEpollfd(void);
-		User*		getUser(int fd);
+		// User*		getUser(int fd);
 
-		
+		std::list<User>			getUser(void) const;
+		Channel &					findChan(std::vector<unsigned char>);
+		void						send(int, std::vector<unsigned char>);
+		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);
 	private:
 		sockaddr_in						_server;
 		int								_sct;
@@ -52,8 +58,8 @@ class Server
 		int								_epollfd;
 		epoll_event						_events[10];
 		epoll_event						_ev;
-		std::map<Channel, std::string>	_channels;
-		std::list<User>					_users_list;
+		std::vector<Channel>			_channels;
+		std::list<User>				_Users;
 };
 
 #endif
