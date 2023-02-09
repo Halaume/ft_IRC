@@ -1,14 +1,14 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 19:52:02 by iguscett         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Backup                                             :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#              #
+#    Updated: 2023/02/09 18:57:30 by iguscett         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
@@ -117,13 +117,9 @@ int Server::accept_socket(int k)
 	return (0);
 }
 
-void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
+void Server::getGobalCmd(Command cmd, std::vector<unsigned char> v, int k)
 {
 	std::vector<std::vector<unsigned char> >::size_type i;
-
-	cmd->setFdUser(_events[k].data.fd);
-	cmd->_globalCmd.clear();
-	v.clear();
 	if (_events[k].events & EPOLLHUP)
 	{
 		close(_events[k].data.fd);
@@ -138,51 +134,20 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 			v.push_back(buf[i]);
 			if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
 			{
-				cmd->_globalCmd.push_back(v);
+				cmd._globalCmd.push_back(v);
 				v.clear();
 			}
 		}
-		bzero(buf, BUFFER_SIZE);
 	}	
-}
-
-void Server::printGlobalCommand(Command cmd)
-{
-	std::vector<std::vector<unsigned char> >::size_type i, j;
-	
-	std::cout << "--Print global command--\n";
-	for (i = 0; i < cmd._globalCmd.size(); i++) 
-	{
-		std::cout << ">";
-		for (j = 0; j < cmd._globalCmd[i].size(); j++)
-			std::cout << cmd._globalCmd[i][j];
-	}
-	std::cout << "\n";
-}
-
-void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
-{
-	std::vector<std::vector<unsigned char> >::size_type j;
-	
-	v.clear();
-	cmd->_parsedCmd.clear();
-	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
-	{			
-		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
-		{
-			cmd->_parsedCmd.push_back(v);
-			v.clear();
-		}
-		else if (cmd->_globalCmd[i][j] != ' ')
-			v.push_back(cmd->_globalCmd[i][j]);
-	}
 }
 
 int	Server::run(void)
 {
 	// TO DO: always protect close functions
 	int k;
-	std::vector<std::vector<unsigned char> >::size_type i;
+	std::vector<std::vector<unsigned char> >::size_type i, j;
+	std::vector<std::vector<unsigned char> >::size_type m, n; (void)m;(void)n;
+	
 	Command cmd;
 	std::vector<unsigned char> v;
 
@@ -195,38 +160,57 @@ int	Server::run(void)
 		for (k = 0; k < wait_ret; ++k)
 		{
 			if (_events[k].data.fd == _sct)
-				this->accept_socket(k);
+			{
+				if (this->accept_socket(k) == 1)
+					return (1);
+			}
 			else
 			{
-				this->getGobalCmd(&cmd, v, k);				// Get global command
-				this->printGlobalCommand(cmd);				// Print global command
+				cmd._globalCmd.clear();
+				v.clear();
+				
+				
+				// Print command
+				std::cout << "Print command____\n";
+				for (i = 0; i < cmd._globalCmd.size(); i++) 
+				{
+					std::cout << ">";
+					for (j = 0; j < cmd._globalCmd[i].size(); j++)
+						std::cout << cmd._globalCmd[i][j];
+				}
+				std::cout << "\n";
+				
 				// Parse command and execute
 				for (i = 0; i < cmd._globalCmd.size(); i++)
 				{
-					this->getParsedCmd(&cmd, v, i);
-					// v.clear();
-					// cmd._parsedCmd.clear();
-					// for (j = 0; j < cmd._globalCmd[i].size(); j++)
-					// {			
-					// 	if (cmd._globalCmd[i][j] == ' ' || j == cmd._globalCmd[i].size() - 2)
-					// 	{
-					// 		cmd._parsedCmd.push_back(v);
-					// 		v.clear();
-					// 	}
-					// 	else if (cmd._globalCmd[i][j] != ' ')
-					// 		v.push_back(cmd._globalCmd[i][j]);
+					v.clear();
+					cmd._parsedCmd.clear();
+					this->getGobalCmd(cmd, v, k);
+					for (j = 0; j < cmd._globalCmd[i].size(); j++)
+					{			
+						if (cmd._globalCmd[i][j] == ' ' || j == cmd._globalCmd[i].size() - 2)
+						{
+							cmd._parsedCmd.push_back(v);
+							v.clear();
+						}
+						else if (cmd._globalCmd[i][j] != ' ')
+							v.push_back(cmd._globalCmd[i][j]);
+					}
+					
+					// Global command is parsed
+					
+					// std::cout << "Parsed command:\n";
+					// for (m = 0; m < cmd._parsedCmd.size(); m++) 
+					// {
+						
+					// 	for (n = 0; n < cmd._parsedCmd[m].size(); n++)
+					// 		std::cout << cmd._parsedCmd[m][n];
+					// 	std::cout << " ";
 					// }
+					// std::cout << "\n";
 					
 					// Execute commands
 					std::cout << "______X-e-cute command______\n";
-					std::vector<std::vector<unsigned char> >::size_type m, n;
-					for (m = 0; m < cmd.getParsedCmd().size(); m++)
-					{
-						for (n = 0; n < cmd.getParsedCmd()[m].size(); n++)
-							std::cout << cmd.getParsedCmdChar(m, n);
-						std::cout << " ";
-					}
-					std::cout << std::endl;
 					cmd._answer(*this);
 
 					// if (i == 0)

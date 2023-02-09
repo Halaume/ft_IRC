@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:45:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 19:42:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 #include "Channel.hpp"
 #include "User.hpp"
-// #include "Command.hpp"
+#include "Command.hpp"
 
 #define BUFFER_SIZE 3000
 
@@ -42,6 +42,7 @@ class Server
 		
 		int			init(char **);
 		int			run(void);
+		int			accept_socket(int);
 
 
 		void printUsersList(void);
@@ -51,6 +52,11 @@ class Server
 		int			getEpollfd(void);
 		// User*		getUser(int fd);
 
+		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
+		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
+		
+		void 						printGlobalCommand(Command cmd);
+		
 		std::list<User>				getUser(void) const;
 		Channel &					findChan(std::vector<unsigned char>);
 		void						send(int, std::vector<unsigned char>);
@@ -64,7 +70,7 @@ class Server
 		epoll_event						_events[10];
 		epoll_event						_ev;
 		std::vector<Channel>			_channels;
-		std::list<User>				_Users;
+		std::list<User>					_Users;
 };
 
 #endif

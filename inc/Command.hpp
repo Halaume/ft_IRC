@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:45:53 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 19:46:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 class Server;
 
-class User;
+// class User;
 
 class Command
 {
@@ -33,8 +33,12 @@ class Command
 		Command &	operator=(const Command & src);
 
 		// Getters
-		std::vector<std::vector<unsigned char> > getGobalCmd();
-		std::vector<std::vector<unsigned char> > getParsedCmd();
+		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
+		std::vector<std::vector<unsigned char> >	getGobalCmd();
+		std::vector<std::vector<unsigned char> >	getParsedCmd();
+
+		// Setters
+		void	setFdUser(int);
 
 		
 		std::vector<std::vector<unsigned char> >	_globalCmd;
@@ -43,9 +47,9 @@ class Command
 		void										_answer(Server &);
 		
 	private:
-		User										_cmdUser;
+		// User										_cmdUser;
 		
-
+		int		_fdUser;
 		
 		void	_fun_CAP(Server &my_server);
 		void	_fun_NICK(Server &my_server);
