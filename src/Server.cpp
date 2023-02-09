@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:05:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 15:44:32 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,12 +239,17 @@ std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 
 // GETTERS
 
-int Server::getSct(void)
+std::vector<Channel>	Server::getChannel(void) const
+{
+	return (this->_channels);
+}
+
+int Server::getSct(void) const
 {
 	return (_sct);
 }
 
-int Server::getEpollfd(void)
+int Server::getEpollfd(void) const
 {
 	return (_epollfd);
 }

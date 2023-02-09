@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:45:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 15:30:43 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ class Command
 		void	_fun_KILL(Server &my_server);
 		void	_fun_RESTART(Server &my_server);
 		void	_fun_PING(Server &my_server);
+
+		void	do_chan(std::vector<unsigned char>, Server &my_server, std::vector<unsigned char>);
 
 };
 

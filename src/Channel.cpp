@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:23:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:23:12 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,34 @@ Channel &	Channel::operator=(const Channel & src)
 	return (*this);
 }
 
+bool	Channel::operator!=(const Channel & lhs) const
+{
+	return (this->_chanName != lhs._chanName);
+}
+
 std::vector<unsigned char>	Channel::getChanName(void) const
 {
 	return (this->_chanName);
+}
+
+std::list<User>::iterator	Channel::getOpListbg(void)
+{
+	return (this->_opList.begin());
+}
+
+std::list<User>::iterator	Channel::getOpListend(void)
+{
+	return (this->_opList.end());
+}
+
+std::list<User>::iterator	Channel::getUsrListbg(void)
+{
+	return (this->_userLst.begin());
+}
+
+std::list<User>::iterator	Channel::getUsrListend(void)
+{
+	return (this->_userLst.end());
 }
 
 void Channel::addUser(User newUser, Server &my_server)

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:29:59 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 15:44:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,9 @@ class Server
 		void printUsersList(void);
 
 		// GETTERS
-		int			getSct(void);
-		int			getEpollfd(void);
+		std::vector<Channel>	getChannel(void) const;
+		int						getSct(void) const;
+		int						getEpollfd(void) const;
 		// User*		getUser(int fd);
 
 		std::list<User>				getUser(void) const;

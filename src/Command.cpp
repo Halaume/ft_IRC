@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:30:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:23:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,36 +42,6 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
-// void Command::parseCommand(std::string input)
-// {
-// 	std::string commandline;
-// 	std::string striterator;
-// 	// std::vector<std::string> v;
-
-// 	_parsedCmd.clear();
-// 	striterator = input;
-// 	while (striterator != "")
-// 	{
-// 		commandline = striterator.substr(0, striterator.find("\r\n"));
-// 		striterator = striterator.substr(striterator.find("\r\n")+2, striterator.length());
-// 		_parsedCmd.push_back(commandline);
-// 		// while (commandline != "")
-// 		// {
-// 		// 	token = commandline.substr(0, commandline.find(" "));
-// 		// 	v.push_back(token);
-// 		// 	if (commandline.substr(commandline.find(" ") +1, commandline.length()).length() == commandline.length())
-// 		// 		commandline = "";
-// 		// 	else
-// 		// 		commandline = commandline.substr(commandline.find(" ") +1, commandline.length());
-
-// 		std::cout << "Parsed cmd:\n____________\n";
-// 		for (int i = 0; i < (int)_parsedCmd.size(); i++)
-// 			std::cout << "line " << i << _parsedCmd[i] << "\n";
-
-// 		// }
-// 	}
-// }
-
 void	Command::_fun_CAP(Server &my_server)
 {
 	(void)my_server;
@@ -82,7 +52,7 @@ void	Command::_fun_NICK(Server &my_server)
 	(void)my_server;
 }
 
-
+//TODO Si rate, vider toute la cmd stocker
 void	Command::_fun_USER(Server &my_server)
 {
 	std::vector<unsigned char> ret;
@@ -106,6 +76,7 @@ void	Command::_fun_USER(Server &my_server)
 	this->_cmdUser.setRegistered(true);
 }
 
+//TODO Si rate, vider toute la cmd stocker
 void	Command::_fun_PASS(Server &my_server)
 {
 	std::vector<unsigned char> ret;
@@ -124,22 +95,18 @@ void	Command::_fun_PASS(Server &my_server)
 		return ;
 	}
 	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
+//	if (this->_cmdUser.getPasswd() != my_server.getPasswd())
+//	{
+		//TODO free toute la suite des cmd
+		//send err_password incorrect
+//	}
 }
 
 
 void	Command::_fun_JOIN(Server &my_server)
 {
 	//RFC 2813/4.2.1
-	/*Numeric Replies:
-
-	  ERR_NEEDMOREPARAMS              ERR_BANNEDFROMCHAN
-	  ERR_INVITEONLYCHAN              ERR_BADCHANNELKEY
-	  ERR_CHANNELISFULL               ERR_BADCHANMASK
-	  ERR_NOSUCHCHANNEL               ERR_TOOMANYCHANNELS
-	  ERR_TOOMANYTARGETS              ERR_UNAVAILRESOURCE
-	  RPL_TOPIC*/
-	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
-
+	//TODO IF User == serverOp --> User = chanOp
 	std::vector<unsigned char> ret;
 
 	if (this->_parsedCmd.size() < 2)
@@ -153,7 +120,7 @@ void	Command::_fun_JOIN(Server &my_server)
 
 
 	std::vector<std::vector<unsigned char> >::iterator	it = chan.begin();
-	std::vector<std::vector<unsigned char> >				passwd;
+	std::vector<std::vector<unsigned char> >			passwd;
 	std::vector<std::vector<unsigned char> >::iterator	itpasswd;
 
 	if (this->_parsedCmd.size() == 3)
@@ -174,8 +141,6 @@ void	Command::_fun_JOIN(Server &my_server)
 			tmp.addUser(this->_cmdUser, my_server);
 	}
 }
-
-
 
 void	Command::_fun_QUIT(Server &my_server)
 {
@@ -213,6 +178,43 @@ void	Command::_fun_RESTART(Server &my_server)
 	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
+void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char>::iterator	it = dest.begin();
+	Channel									chan;
+	bool									is_op = false;
+
+	if (dest[0] != '#')
+	{
+		for (it = it + 1; it != dest.end(); it++)
+		{
+			if (*it == '#')
+				chan = my_server.findChan(std::vector<unsigned char>(it, dest.end()));
+			else if (*it == '@' || *it == '+')
+				is_op = true;
+			else if (*it != '@' || *it != '+')
+				return ;
+		}
+	}
+/*	else
+	{
+		dest.clear();
+		dest = this->_parsedCmd[0];
+		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
+		my_server.send(this->_cmdUser.getfd(), dest);
+		return ;
+	}*/
+	if (chan != *my_server.getChannel().end() && is_op)
+	{
+		for (std::list<User>::iterator	itc = chan.getOpListbg(); itc != chan.getOpListend(); itc++)
+			my_server.send(itc->getfd(), msg);
+	}
+	else
+	{
+		for (std::list<User>::iterator	itc = chan.getUsrListbg(); itc != chan.getUsrListend(); itc++)
+			my_server.send(itc->getfd(), msg);
+	}
+}
 
 void	Command::_fun_PRIVMSG(Server &my_server)
 {
@@ -227,20 +229,27 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	std::vector<unsigned char> ret;
 	if (this->_parsedCmd.size() < 3)
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " :Not enough parameters\r\n");
+		insert_all(ret, ":No text to send\r\n");
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 //PAS SUR DE CELLE CI
 	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " ERR_TOMANYTARGETS\r\n");
+		ret = this->_parsedCmd[0];// RET SHOULD BE <TARGET>
+		insert_all(ret, " :Duplicate recipients. No message delivered\r\n");
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
+	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
+	if (it_receiver == my_server.getUser().end())
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_NOSUCHNICK\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
 	std::vector<unsigned char>	msg;
 	if (this->_parsedCmd[2][0] == ':')
 		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
@@ -252,16 +261,15 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		msg.push_back(' ');
 		msg.insert(msg.end(), it->begin(), it->end());
 	}
-
-	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
-	if (it_receiver == my_server.getUser().end())
+	if (*(this->_parsedCmd[1].begin()) == '+' || *(this->_parsedCmd[1].begin()) == '&' || *(this->_parsedCmd[1].begin()) == '@' || *(this->_parsedCmd[1].begin()) == '%' || *(this->_parsedCmd[1].begin()) == '~')
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " ERR_NOSUCHNICK\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		do_chan(this->_parsedCmd[1], my_server, msg);
 		return ;
 	}
-	(void)my_server;
+	else
+	{
+		//TODO SEND TO A SPECIFIC USER
+	}
 }
 
 void	Command::_fun_OPER(Server &my_server)
@@ -321,6 +329,7 @@ void	Command::_answer(Server &my_server)
 		}
 		case 1:
 		{
+			this->_fun_USER(my_server);
 			break;
 		}
 		case 2:
