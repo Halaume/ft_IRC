@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:57:21 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 18:08:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,14 +189,17 @@ int	Server::run(void)
 					std::cout << "Parsed command:\n";
 					for (m = 0; m < cmd._parsedCmd.size(); m++) 
 					{
+						if (cmd._parsedCmd[m] == "PASS")
+							cmd._answer(*this);
 						for (n = 0; n < cmd._parsedCmd[m].size(); n++)
 							std::cout << cmd._parsedCmd[m][n];
 						std::cout << " ";
 					}
 					std::cout << "\n";
 					
-					if (i == 0)
-						::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
+					// if (i == 0)
+					// 	cmd._answer(*this);
+					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
 					
 					// cmd._answer(*this);
 
