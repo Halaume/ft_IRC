@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 18:09:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:48:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@
 #include "../inc/User.hpp"
 #include "../inc/utils.hpp"
 
-Command::Command(void): _cmdUser(), _parsedCmd()
+Command::Command(void):  _globalCmd(), _parsedCmd(), _cmdUser()
 {
 }
 
-Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy._parsedCmd)
+Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _cmdUser(copy._cmdUser)
 {
 
 }
@@ -44,6 +44,7 @@ Command &	Command::operator=(const Command & src)
 
 void	Command::_fun_CAP(Server &my_server)
 {
+	// Do something amazing
 	(void)my_server;
 }
 
@@ -361,4 +362,16 @@ void	Command::_answer(Server &my_server)
 		default:
 			break;
 	}
+}
+
+
+// Getters
+std::vector<std::vector<unsigned char> > Command::getGobalCmd()
+{
+	return (_globalCmd);
+}
+
+std::vector<std::vector<unsigned char> > Command::getParsedCmd()
+{
+	return (_parsedCmd);
 }

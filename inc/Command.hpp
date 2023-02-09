@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 16:45:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:45:53 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #include "Server.hpp"
 #include "Channel.hpp"
+// #include "User.hpp"
 
 class Server;
 
@@ -31,12 +32,20 @@ class Command
 		~Command(void);
 		Command &	operator=(const Command & src);
 
-		void	parseCommand(std::string);
+		// Getters
+		std::vector<std::vector<unsigned char> > getGobalCmd();
+		std::vector<std::vector<unsigned char> > getParsedCmd();
+
+		
+		std::vector<std::vector<unsigned char> >	_globalCmd;
+		std::vector<std::vector<unsigned char> >	_parsedCmd;
+
+		void										_answer(Server &);
 		
 	private:
 		User										_cmdUser;
-		std::vector<std::vector<unsigned char> >	_parsedCmd;
-		void										_answer(Server &);
+		
+
 		
 		void	_fun_CAP(Server &my_server);
 		void	_fun_NICK(Server &my_server);

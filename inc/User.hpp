@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:24:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:44:58 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 #define USER_HPP
 
 #include <string>
-#include "Channel.hpp"
 #include <vector>
+
+#include "Channel.hpp"
 
 class Channel;
 

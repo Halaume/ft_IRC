@@ -6,13 +6,14 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 18:01:33 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 17:57:21 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "../inc/Command.hpp"
+#include "../inc/utils.hpp"
 
 #include <string>
 #include <iostream>
@@ -107,8 +108,9 @@ int	Server::run(void)
 	std::vector<std::vector<unsigned char> >::size_type i, j;
 	std::vector<std::vector<unsigned char> >::size_type m, n;
 	socklen_t server_length = sizeof(_server);
-	std::vector<std::vector<unsigned char> > command;
-	std::vector<std::vector<unsigned char> > scommand;
+	// std::vector<std::vector<unsigned char> > command;
+	// std::vector<std::vector<unsigned char> > scommand;
+	Command cmd;
 	std::vector<unsigned char> v;
 
 	while (true)
@@ -134,58 +136,83 @@ int	Server::run(void)
 			}
 			else
 			{
-				command.clear();
+				cmd._globalCmd.clear();
 				v.clear();
-				// Hang up
 				if (_events[k].events & EPOLLHUP)
 				{
 					close(_events[k].data.fd);
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 				}
-				// Read fdand get command
 				unsigned char buf[BUFFER_SIZE] = "";
 				while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0)// add flags? MSG_DONTWAIT
 				{
+					// ::send(_events[k].data.fd, "001\r\n", 5, 0);
 					for (i = 0; i < BUFFER_SIZE; i++)
 					{
 						v.push_back(buf[i]);
 						if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
 						{
-							command.push_back(v);
+							cmd._globalCmd.push_back(v);
 							v.clear();
 						}
 					}
-				}
+				}	
+				
 				// Print command
 				std::cout << "Print command____\n";
-				for (i = 0; i < command.size(); i++) 
+				for (i = 0; i < cmd._globalCmd.size(); i++) 
 				{
 					std::cout << ">";
-					for (j = 0; j < command[i].size(); j++)
-						std::cout << command[i][j];
+					for (j = 0; j < cmd._globalCmd[i].size(); j++)
+						std::cout << cmd._globalCmd[i][j];
 				}
 				std::cout << "\n";
 				
-				// Get scommand
-				for (i = 0; i < command.size(); i++)
+				// Parse command
+				for (i = 0; i < cmd._globalCmd.size(); i++)
 				{
 					v.clear();
-					scommand.clear();
-					for (j = 0; j < command[i].size(); j++)
+					cmd._parsedCmd.clear();
+					for (j = 0; j < cmd._globalCmd[i].size(); j++)
 					{			
-						if (command[i][j] == ' ' || j == command[i].size() - 2)
+						if (cmd._globalCmd[i][j] == ' ' || j == cmd._globalCmd[i].size() - 2)
 						{
-							scommand.push_back(v);
+							cmd._parsedCmd.push_back(v);
 							v.clear();
 						}
-						else if (command[i][j] != ' ')
-							v.push_back(command[i][j]);
+						else if (cmd._globalCmd[i][j] != ' ')
+							v.push_back(cmd._globalCmd[i][j]);
 					}
 					
+					// Global command is parsed
+					
+					std::cout << "Parsed command:\n";
+					for (m = 0; m < cmd._parsedCmd.size(); m++) 
+					{
+						for (n = 0; n < cmd._parsedCmd[m].size(); n++)
+							std::cout << cmd._parsedCmd[m][n];
+						std::cout << " ";
+					}
+					std::cout << "\n";
+					
+					if (i == 0)
+						::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
+					
+					// cmd._answer(*this);
 
+
+
+					
+
+					
 
 					// Parse scommand
+					
 				}
+
+				// ::send(_events[k].data.fd, "001\r\n", 5, 0); // set return value and check it 
+
+				// send(_events[k].data.fd, RPL_WELCOME, 1, 0);
 				
 			}
 		}
