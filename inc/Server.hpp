@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 15:44:53 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:59:15 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,11 @@ class Server
 		int						getEpollfd(void) const;
 		// User*		getUser(int fd);
 
-		std::list<User>				getUser(void) const;
-		Channel &					findChan(std::vector<unsigned char>);
-		void						send(int, std::vector<unsigned char>);
-		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);
+		std::list<User>					getUser(void) const;
+		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
+		Channel &						findChan(std::vector<unsigned char>);
+		void							send(int, std::vector<unsigned char>);
+		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 
 	private:
 		sockaddr_in						_server;

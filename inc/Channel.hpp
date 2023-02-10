@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:23:13 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:40:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Channel
 		std::list<User>::iterator	getUsrListend(void);
 		void						addUser(User, Server&);
 		void						addUser(User, Server&, std::vector<unsigned char>);
+		bool						isOp(User) const;
 
 		// Getters
 		std::list<User>&			getUsers(void);

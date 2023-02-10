@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:23:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:59:46 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,7 +193,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			else if (*it == '@' || *it == '+')
 				is_op = true;
 			else if (*it != '@' || *it != '+')
-				return ;
+				return ;//MAYBE le commentaire en dessous, a voir
 		}
 	}
 /*	else
@@ -243,14 +243,8 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
 	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
-	if (it_receiver == my_server.getUser().end())
-	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " ERR_NOSUCHNICK\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
-		return ;
-	}
 	std::vector<unsigned char>	msg;
+
 	if (this->_parsedCmd[2][0] == ':')
 		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
 	else
@@ -261,14 +255,19 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		msg.push_back(' ');
 		msg.insert(msg.end(), it->begin(), it->end());
 	}
-	if (*(this->_parsedCmd[1].begin()) == '+' || *(this->_parsedCmd[1].begin()) == '&' || *(this->_parsedCmd[1].begin()) == '@' || *(this->_parsedCmd[1].begin()) == '%' || *(this->_parsedCmd[1].begin()) == '~')
-	{
-		do_chan(this->_parsedCmd[1], my_server, msg);
-		return ;
-	}
+	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~')
+		do_chan(receiver, my_server, msg);
 	else
 	{
-		//TODO SEND TO A SPECIFIC USER
+		std::list<User>::iterator	itu = my_server.findUser(receiver);
+		if (itu == my_server.getUser().end())
+		{
+			ret = this->_parsedCmd[0];
+			insert_all(ret, " ERR_NOSUCHNICK\r\n");
+			my_server.send(this->_cmdUser.getfd(), ret);
+		}
+		else
+			my_server.send(itu->getfd(), msg);
 	}
 }
 
@@ -294,7 +293,18 @@ void	Command::_fun_TOPIC(Server &my_server)
 
 void	Command::_fun_KICK(Server &my_server)
 {
-	(void)my_server;
+	std::vector<User>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
+	std::vector<unsigned char>	msg;
+
+	if ()
+	if (!tmp.isOp(this->_cmdUser))
+	{
+		msg = this->_cmdUser.getUserName();
+		msg.insert(msg.end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
+		insert_all(msg, " :You're not channel operator\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
 }
 
 void	Command::_fun_INVITE(Server &my_server)

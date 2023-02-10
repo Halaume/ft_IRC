@@ -6,15 +6,16 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:24:55 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:53:28 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
 #include "../inc/User.hpp"
 
-User::User(void): _fd(), _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
+User::User(void): _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
 {
+	this->_fd = 0;
 }
 
 User::User(const User & copy): _fd(copy._fd), _registered(copy._registered), _passwd(copy._passwd), _userName(copy._userName), _realName(copy._realName), _client(copy._client), _channels(copy._channels)

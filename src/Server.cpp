@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 15:44:32 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:59:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,15 @@ Server &	Server::operator=(const Server & src)
 		return (*this);
 	return (*this);
 }
+
+std::vector<Channel>::iterator	Server::findExistingChan(std::vector<unsigned char> channel)
+{
+	std::vector<Channel>::iterator	it = this->_channels.begin();
+	while (it != this->_channels.end() && it->getChanName() != channel)
+		it++;
+	return (it);
+}
+
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
 {

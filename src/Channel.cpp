@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:23:12 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/10 13:52:26 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,4 +165,12 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 std::list<User>& Channel::getUsers(void)
 {
 	return (_userLst);
+}
+
+bool	Channel::isOp(User usr) const
+{
+	for (std::list<User>::const_iterator it = this->_opList.begin(); it != this->_opList.end(); it++)
+		if (*it == usr)
+			return (true);
+	return (false);
 }
