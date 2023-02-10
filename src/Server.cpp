@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 19:52:02 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/10 15:17:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "../inc/utils.hpp"
 
 #include <string>
+ #include <string.h>
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -117,35 +118,6 @@ int Server::accept_socket(int k)
 	return (0);
 }
 
-void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
-{
-	std::vector<std::vector<unsigned char> >::size_type i;
-
-	cmd->setFdUser(_events[k].data.fd);
-	cmd->_globalCmd.clear();
-	v.clear();
-	if (_events[k].events & EPOLLHUP)
-	{
-		close(_events[k].data.fd);
-		epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
-	}
-	unsigned char buf[BUFFER_SIZE] = "";
-	while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0) // add flags? MSG_DONTWAIT
-	{
-		// ::send(_events[k].data.fd, "001\r\n", 5, 0);
-		for (i = 0; i < BUFFER_SIZE; i++)
-		{
-			v.push_back(buf[i]);
-			if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
-			{
-				cmd->_globalCmd.push_back(v);
-				v.clear();
-			}
-		}
-		bzero(buf, BUFFER_SIZE);
-	}	
-}
-
 void Server::printGlobalCommand(Command cmd)
 {
 	std::vector<std::vector<unsigned char> >::size_type i, j;
@@ -159,6 +131,59 @@ void Server::printGlobalCommand(Command cmd)
 	}
 	std::cout << "\n";
 }
+
+void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
+{
+	// std::vector<std::vector<unsigned char> >::size_type i;
+	int	firstRun = 1;
+	int isLastCr = 0;
+	
+	cmd->setFdUser(_events[k].data.fd);
+	cmd->_globalCmd.clear();
+	v.clear();
+	if (_events[k].events & EPOLLHUP)
+	{
+		close(_events[k].data.fd);
+		epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
+	}
+	unsigned char buf[BUFFER_SIZE] = "";
+	while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0) // add flags? MSG_DONTWAIT
+	{
+		// unsigned char buf[BUFFER_SIZE] = "";
+		// ::send(_events[k].data.fd, "001\r\n", 5, 0);
+		for (int i = 0; i < BUFFER_SIZE; i++)
+		{
+			if (!firstRun && i == 0 && isLastCr && buf[i] == '\n')
+			{
+				v.push_back(buf[i]);
+				cmd->_globalCmd.push_back(v);
+				v.clear();
+			}
+			else if (!firstRun && i == 0 && isLastCr && buf[i] != 'n')
+			{
+				isLastCr = 0;
+				v.push_back(buf[i]);
+			}
+			else if (i > 0 && v.back() == '\r' && buf[i] == '\n')
+			{
+				v.push_back(buf[i]);
+				cmd->_globalCmd.push_back(v);
+				v.clear();
+			}
+			else
+				v.push_back(buf[i]);
+			if (i == BUFFER_SIZE && buf[i] == '\r')
+				isLastCr = 1;
+			
+			
+		}
+		// bzero(buf, BUFFER_SIZE);
+		// memset(&buf[0], "", BUFFER_SIZE);
+		firstRun = 0;
+	}	
+}
+
+
 
 void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
 {
@@ -204,18 +229,6 @@ int	Server::run(void)
 				for (i = 0; i < cmd._globalCmd.size(); i++)
 				{
 					this->getParsedCmd(&cmd, v, i);
-					// v.clear();
-					// cmd._parsedCmd.clear();
-					// for (j = 0; j < cmd._globalCmd[i].size(); j++)
-					// {			
-					// 	if (cmd._globalCmd[i][j] == ' ' || j == cmd._globalCmd[i].size() - 2)
-					// 	{
-					// 		cmd._parsedCmd.push_back(v);
-					// 		v.clear();
-					// 	}
-					// 	else if (cmd._globalCmd[i][j] != ' ')
-					// 		v.push_back(cmd._globalCmd[i][j]);
-					// }
 					
 					// Execute commands
 					std::cout << "______X-e-cute command______\n";
@@ -233,22 +246,10 @@ int	Server::run(void)
 					// 	cmd._answer(*this);
 					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
 					
-					// cmd._answer(*this);
-
-
-
-					
-
-					
-
 					// Parse scommand
 					
 				}
 
-				// ::send(_events[k].data.fd, "001\r\n", 5, 0); // set return value and check it 
-
-				// send(_events[k].data.fd, RPL_WELCOME, 1, 0);
-				
 			}
 		}
 	}

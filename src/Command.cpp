@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 19:56:14 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/10 15:02:25 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,11 +297,11 @@ void	Command::_answer(Server &my_server)
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
 	
-	std::vector<std::vector<unsigned char> >::size_type m;
-	std::cout << "Command answer function parsed command[0]:";
-	for (m = 0; m < _parsedCmd[0].size(); m++)
-		std::cout << _parsedCmd[0][m] ;
-	std::cout << "|EOF" << std::endl;
+	// std::vector<std::vector<unsigned char> >::size_type m;
+	// std::cout << "Command answer function parsed command[0]:";
+	// for (m = 0; m < _parsedCmd[0].size(); m++)
+	// 	std::cout << _parsedCmd[0][m] ;
+	// std::cout << "|EOF" << std::endl;
 
 	
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
