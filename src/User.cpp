@@ -38,6 +38,11 @@ bool	User::operator==(User test) const
 	return (this->_fd == test._fd);
 }
 
+bool	User::operator==(std::vector<unsigned char> test) const
+{
+	return (this->_userName == test);
+}
+
 bool	User::operator!=(User test) const
 {
 	return (!(*this == test));

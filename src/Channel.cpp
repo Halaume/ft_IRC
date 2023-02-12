@@ -92,6 +92,11 @@ std::list<User>::iterator	Channel::getUsrListend(void)
 	return (this->_userLst.end());
 }
 
+std::list<User>	Channel::getUsrList(void)
+{
+	return (this->_userLst);
+}
+
 void Channel::addUser(User newUser, Server &my_server)
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK

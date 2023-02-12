@@ -44,6 +44,7 @@ class User
 		// void				setClient(std::string client);
 		
 		bool						operator==(User) const;
+		bool						operator==(std::vector<unsigned char>) const;
 		bool						operator!=(User) const;
 		
 		std::vector<Channel>& 		getChannels(void);

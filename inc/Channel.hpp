@@ -36,6 +36,7 @@ class Channel
 		std::list<User>::iterator	getOpListend(void);
 		std::list<User>::iterator	getUsrListbg(void);
 		std::list<User>::iterator	getUsrListend(void);
+		std::list<User>				getUsrList(void);
 		void						addUser(User, Server&);
 		void						addUser(User, Server&, std::vector<unsigned char>);
 		bool						isOp(User) const;

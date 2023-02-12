@@ -293,11 +293,25 @@ void	Command::_fun_TOPIC(Server &my_server)
 
 void	Command::_fun_KICK(Server &my_server)
 {
-	std::vector<User>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
-	std::vector<unsigned char>	msg;
+	std::vector<Channel>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
+	std::vector<unsigned char>		msg;
 
-	if ()
-	if (!tmp.isOp(this->_cmdUser))
+	if (this->_parsedCmd.size() < 3)
+	{
+		insert_all(msg, " ERR_NEEDMOREPARAM\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+
+	if (tmp == my_server.getChannel().end())
+	{
+		msg = this->_cmdUser.getUserName();
+		insert_all(msg, " ERR_NOSUCHCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+
+	if (!tmp->isOp(this->_cmdUser))
 	{
 		msg = this->_cmdUser.getUserName();
 		msg.insert(msg.end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
@@ -305,6 +319,39 @@ void	Command::_fun_KICK(Server &my_server)
 		my_server.send(this->_cmdUser.getfd(), msg);
 		return ;
 	}
+
+	std::list<User>::iterator		Usrlst = tmp->getUsrListbg();
+	while (Usrlst != tmp->getUsrListend() || *Usrlst == this->_cmdUser)
+		Usrlst++;
+	if (Usrlst == tmp->getUsrListend())
+	{
+		msg = this->_cmdUser.getUserName();
+		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(msg, " ERR_NOTONCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+	Usrlst = tmp->getUsrListbg();
+	while (Usrlst != tmp->getUsrListend() || *Usrlst == this->_parsedCmd[2])
+		Usrlst++;
+	if (Usrlst == tmp->getUsrListend())
+	{
+		msg = this->_cmdUser.getUserName();
+		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(msg, " ERR_USERNOTINCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+	if (tmp->isOp(*Usrlst))
+	{
+		msg = this->_cmdUser.getUserName();
+		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(msg, " ERR_CANNOTKICKADMIN\r\n");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+
+	tmp->getUsrList().erase(Usrlst);
 }
 
 void	Command::_fun_INVITE(Server &my_server)
