@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:24:55 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 15:00:06 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,11 @@ bool	User::getRegistered(void) const
 std::vector<unsigned char>	User::getUserName(void) const
 {
 	return (this->_userName);
+}
+
+std::vector<unsigned char>	User::getRealName(void) const
+{
+	return (this->_realName);
 }
 
 void	User::setRegistered(bool registered)

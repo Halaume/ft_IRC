@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:24:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/09 14:56:51 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,7 @@ class User
 		
 		
 		// GETTERS
-		// int					getfd(void) const;
 		// std::string			getCurrCmd(void) const;
-		// std::string			getUserName(void) const;
-		// std::string			getRealName(void) const;
 		// std::string			getClient(void) const;
 
 		// SETTERS
@@ -50,6 +47,7 @@ class User
 		int							getfd(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
+		std::vector<unsigned char>	getRealName(void) const;
 		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>);
 		void						setUserName(std::vector<unsigned char>);

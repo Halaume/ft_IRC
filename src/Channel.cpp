@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:23:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 15:59:48 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,16 @@ Channel &	Channel::operator=(const Channel & src)
 std::vector<unsigned char>	Channel::getChanName(void) const
 {
 	return (this->_chanName);
+}
+
+std::list<User>::iterator    Channel::getUsrListbg(void)
+{
+	return (this->_userLst.begin());
+}
+
+std::list<User>::iterator    Channel::getUsrListend(void)
+{
+	return (this->_userLst.end());
 }
 
 void Channel::addUser(User newUser, Server &my_server)

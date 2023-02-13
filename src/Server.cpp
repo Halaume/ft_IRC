@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:05:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 15:53:20 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,20 @@ Server &	Server::operator=(const Server & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
+}
+
+std::vector<Channel>         Server::getChannels(void) const
+{
+	return (this->_channels);
+}
+
+
+std::vector<Channel>::iterator    Server::findExistingChan(std::vector<unsigned char> channel)
+{
+    std::vector<Channel>::iterator    it = this->_channels.begin();
+    while (it != this->_channels.end() && it->getChanName() != channel)
+        it++;
+    return (it);
 }
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
@@ -217,6 +231,7 @@ void	Server::send(int fd, std::vector<unsigned char> buf)
 std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User>::iterator it;
+	
 	for (it = this->_Users.begin(); it != this->_Users.end(); it++)
 	{
 		if (it->getUserName() == nick)

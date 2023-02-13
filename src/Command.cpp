@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:30:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 15:56:27 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,34 +177,34 @@ void	Command::_fun_JOIN(Server &my_server)
 
 
 
-void	Command::_fun_QUIT(Server &my_server)
-{
-	std::vector<unsigned char> ret;
-	unsigned long i = 1;
+// void	Command::_fun_QUIT(Server &my_server)
+// {
+// 	std::vector<unsigned char> ret;
+// 	unsigned long i = 1;
 	
-	if (this->_parsedCmd.size() > 1)
-	{
-		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-		i++;
-		while (i < _parsedCmd.size())
-		{
-			ret.push_back(' ');
-			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-			i++;
-		}
-	}
+// 	if (this->_parsedCmd.size() > 1)
+// 	{
+// 		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+// 		i++;
+// 		while (i < _parsedCmd.size())
+// 		{
+// 			ret.push_back(' ');
+// 			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+// 			i++;
+// 		}
+// 	}
 	
-	for (std::vector<Channel>::iterator itc = _cmdUser.getChannels().begin(); itc != _cmdUser.getChannels().end(); itc++)
-	{
-		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
-			my_server.send(itu->getfd(), ret);
-		_cmdUser.getChannels().erase(itc);
-	}
+// 	for (std::vector<Channel>::iterator itc = _cmdUser.getChannels().begin(); itc != _cmdUser.getChannels().end(); itc++)
+// 	{
+// 		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
+// 			my_server.send(itu->getfd(), ret);
+// 		_cmdUser.getChannels().erase(itc);
+// 	}
 	
-	my_server.getUser().remove(this->_cmdUser);
-	close(_cmdUser.getfd());
+// 	my_server.getUser().remove(this->_cmdUser);
+// 	close(_cmdUser.getfd());
 	
-}
+// }
 
 
 void	Command::_fun_RESTART(Server &my_server)
@@ -241,16 +241,15 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
-	std::vector<unsigned char>	msg;
 	if (this->_parsedCmd[2][0] == ':')
-		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+		ret = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
 	else
-		msg = this->_parsedCmd[2];
+		ret = this->_parsedCmd[2];
 	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
 	while (it != this->_parsedCmd.end())
 	{
-		msg.push_back(' ');
-		msg.insert(msg.end(), it->begin(), it->end());
+		ret.push_back(' ');
+		ret.insert(ret.end(), it->begin(), it->end());
 	}
 
 	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
@@ -266,7 +265,19 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 
 void	Command::_fun_OPER(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> ret;
+	
+	if (_parsedCmd.size() < 3)
+	{
+		ret = this->_parsedCmd[0];
+		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	// else (_parsedCmd.size() == 3 && )
+	
+		
+	
 }
 
 void	Command::_fun_ERROR(Server &my_server)
@@ -279,9 +290,75 @@ void	Command::_fun_MODE(Server &my_server)
 	(void)my_server;
 }
 
+
+void	Command::_fun_QUIT(Server &my_server)
+{
+	std::vector<unsigned char> ret;
+	unsigned long i = 1;
+	
+	if (this->_parsedCmd.size() > 1)
+	{
+		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+		i++;
+		while (i < _parsedCmd.size())
+		{
+			ret.push_back(' ');
+			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+			i++;
+		}
+	}
+	
+	for (std::vector<Channel>::iterator itc = _cmdUser.getChannels().begin(); itc != _cmdUser.getChannels().end(); itc++)
+	{
+		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
+			my_server.send(itu->getfd(), ret);
+		_cmdUser.getChannels().erase(itc);
+	}
+	
+	my_server.getUser().remove(this->_cmdUser);
+	close(_cmdUser.getfd());
+	
+}
+
+
 void	Command::_fun_TOPIC(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> ret;
+	std::vector<Channel>::iterator itc = my_server.findExistingChan(_parsedCmd[1]);
+
+	ret = this->_parsedCmd[0];
+	if (_parsedCmd.size() < 2)
+	{
+		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	if (itc == my_server.getChannels().end())
+	{
+		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	std::list<User>::iterator        Usrlst = itc->getUsrListbg();
+	while (Usrlst != itc->getUsrListend() && *Usrlst != this->_cmdUser)
+        Usrlst++;
+    if (Usrlst == itc->getUsrListend())
+    {
+        ret = this->_cmdUser.getUserName();
+        ret.insert(ret.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+        insert_all(ret, " ERR_NOTONCHANNEL\r\n");
+        my_server.send(this->_cmdUser.getfd(), ret);
+        return ;
+    }
+	if (_parsedCmd.size() == 2)
+	{
+		insert_all(ret, " RPL_TOPIC\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+
+	
+	
 }
 
 void	Command::_fun_KICK(Server &my_server)
@@ -321,6 +398,7 @@ void	Command::_answer(Server &my_server)
 		}
 		case 1:
 		{
+			this->_fun_USER(my_server);
 			break;
 		}
 		case 2:

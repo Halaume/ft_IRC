@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:23:43 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 15:58:07 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,11 @@ class Channel
 		std::vector<unsigned char>	getChanName(void) const;
 		void		addUser(User, Server&);
 		void		addUser(User, Server&, std::vector<unsigned char>);
+		std::list<User>::iterator    getOpListbg(void);
+        std::list<User>::iterator    getOpListend(void);
+        std::list<User>::iterator    getUsrListbg(void);
+        std::list<User>::iterator    getUsrListend(void);
+	
 
 		// Getters
 		std::list<User>&			getUsers(void);
