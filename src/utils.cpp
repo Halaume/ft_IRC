@@ -6,12 +6,22 @@
 /*   By: ghanquer <ghanquer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 11:50:19 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 14:11:56 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <vector>
 #include <string>
+#include <unistd.h>
+#include "../inc/Server.hpp"
+
+void	free_fun(Server &my_server)
+{
+	my_server.getChannel().erase(my_server.getChannel().begin(), my_server.getChannel().end());
+	my_server.getUser().erase(my_server.getUser().begin(), my_server.getUser().end());
+	close(my_server.getSct());
+	close(my_server.getEpollfd());
+}
 
 void	insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
 {

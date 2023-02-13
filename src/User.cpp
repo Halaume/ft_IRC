@@ -6,11 +6,12 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 13:53:28 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 14:21:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
+#include <unistd.h>
 #include "../inc/User.hpp"
 
 User::User(void): _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
@@ -24,6 +25,13 @@ User::User(const User & copy): _fd(copy._fd), _registered(copy._registered), _pa
 
 User::~User(void)
 {
+	if (this->_fd != 0)
+		close(this->_fd);
+	this->_passwd.erase(this->_passwd.begin(), this->_passwd.end());
+	this->_userName.erase(this->_userName.begin(), this->_userName.end());
+	this->_realName.erase(this->_realName.begin(), this->_realName.end());
+	this->_channels.erase(this->_channels.begin(), this->_channels.end());
+
 }
 
 User &	User::operator=(const User & src)
@@ -91,4 +99,14 @@ int	User::getNbChan(void)
 std::vector<Channel>& User::getChannels(void)
 {
 	return (this->_channels);
+}
+
+bool	User::getOperator(void) const
+{
+	return (this->_operator);
+}
+
+void	User::setOperator(bool val)
+{
+	this->_operator = val;
 }

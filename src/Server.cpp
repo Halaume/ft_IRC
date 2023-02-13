@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 13:59:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 14:19:23 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct), _pa
 
 Server::~Server(void)
 {
+	free_fun(*this);
 }
 
 Server &	Server::operator=(const Server & src)
@@ -102,7 +103,8 @@ int	Server::init(char **argv)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
 	
 	std::cout << "0 : epoll fd: " << _epollfd << std::endl;
-	
+	this->_argv = argv;
+
 	return (0);
 }
 
@@ -251,6 +253,11 @@ std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 std::vector<Channel>	Server::getChannel(void) const
 {
 	return (this->_channels);
+}
+
+char ** Server::getArgv(void) const
+{
+	return (this->_argv);
 }
 
 int Server::getSct(void) const

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 13:52:26 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 14:27:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,12 @@ Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPasswor
 
 Channel::~Channel(void)
 {
+	this->_chanName.erase(this->_chanName.begin(), this->_chanName.end());
+	this->_chanPassword.erase(this->_chanPassword.begin(), this->_chanPassword.end());
+	this->_modes.erase(this->_modes.begin(), this->_modes.end());
+	this->_opList.erase(this->_opList.begin(), this->_opList.end());
+	this->_userLst.erase(this->_userLst.begin(), this->_userLst.end());
+	this->_banLst.erase(this->_banLst.begin(), this->_banLst.end());
 }
 
 Channel &	Channel::operator=(const Channel & src)

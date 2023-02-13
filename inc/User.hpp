@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 12:02:31 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 13:51:46 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,12 @@ class User
 		void						setUserName(std::vector<unsigned char>);
 		void						setRealName(std::vector<unsigned char>);
 		int							getNbChan(void);
+		bool						getOperator(void) const;
+		void						setOperator(bool);
 		
 	private:
 		int							_fd;
+		bool						_operator;
 		bool						_registered;
 		std::vector<unsigned char>	_passwd;
 		std::string					_currCmd;

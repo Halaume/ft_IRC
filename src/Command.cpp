@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 13:59:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 14:28:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy.
 
 Command::~Command(void)
 {
+	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
 }
 
 Command &	Command::operator=(const Command & src)
@@ -168,13 +169,21 @@ void	Command::_fun_QUIT(Server &my_server)
 	
 	my_server.getUser().remove(this->_cmdUser);
 	close(_cmdUser.getfd());
-	
 }
 
 
 void	Command::_fun_RESTART(Server &my_server)
 {
-	(void)my_server;
+	if (!this->_cmdUser.getOperator())
+	{
+		std::vector<unsigned char> msg = this->_cmdUser.getUserName();
+		insert_all(msg, " :Permission Denied- You're not an IRC operator");
+		my_server.send(this->_cmdUser.getfd(), msg);
+		return ;
+	}
+	free_fun(my_server);
+	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
+	my_server.init(my_server.getArgv());
 	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
@@ -242,7 +251,6 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
-	std::list<User>::iterator	it_receiver = my_server.findUser(receiver);
 	std::vector<unsigned char>	msg;
 
 	if (this->_parsedCmd[2][0] == ':')
@@ -351,7 +359,11 @@ void	Command::_fun_KICK(Server &my_server)
 		return ;
 	}
 
-	tmp->getUsrList().erase(Usrlst);
+	for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
+		msg.insert(msg.end(), it->begin(), it->end());
+	tmp->getUsrList().erase(Usrlst);//Retire le User du chann
+									//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
+	
 }
 
 void	Command::_fun_INVITE(Server &my_server)
