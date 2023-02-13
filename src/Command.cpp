@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 14:28:59 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 17:24:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy.
 
 Command::~Command(void)
 {
-	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
 }
 
 Command &	Command::operator=(const Command & src)
@@ -184,7 +183,6 @@ void	Command::_fun_RESTART(Server &my_server)
 	free_fun(my_server);
 	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
 	my_server.init(my_server.getArgv());
-	//fun free -> fun server.init() -> break le run -> fun server.run()
 }
 
 void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::vector<unsigned char> msg)
@@ -329,7 +327,7 @@ void	Command::_fun_KICK(Server &my_server)
 	}
 
 	std::list<User>::iterator		Usrlst = tmp->getUsrListbg();
-	while (Usrlst != tmp->getUsrListend() || *Usrlst == this->_cmdUser)
+	while (Usrlst != tmp->getUsrListend() && *Usrlst != this->_cmdUser)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
@@ -340,7 +338,7 @@ void	Command::_fun_KICK(Server &my_server)
 		return ;
 	}
 	Usrlst = tmp->getUsrListbg();
-	while (Usrlst != tmp->getUsrListend() || *Usrlst == this->_parsedCmd[2])
+	while (Usrlst != tmp->getUsrListend() && !(*Usrlst == this->_parsedCmd[2])) // TODO A CHANGER
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{

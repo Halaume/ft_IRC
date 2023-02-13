@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 14:19:23 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/13 17:16:13 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,7 @@ int	Server::run(void)
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
 				std::cout << "1.1 : accepted fd:" << accepted << std::endl;
 				_ev.events = EPOLLIN | EPOLLET;
+//				_evout.events = EPOLLOUT | EPOLLET; TODO Une deuxieme epoll_events pour le epollOUT
 				_ev.data.fd = accepted;
 				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
@@ -200,7 +201,6 @@ int	Server::run(void)
 						std::cout << "\n";
 					}	
 				}
-
 				// Parsing
 				
 				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
@@ -219,9 +219,17 @@ int	Server::run(void)
 void	Server::send(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
-	//send(fd, buf, buf.size(), MSG_DONTWAIT);
+//TODO prep pour le out : enlever le in into ajouter le out
+//	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, accepted, &_ev2) == - 1)
+//		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+//					events->EpollOUT;
+
+	//send(fd, buf, buf.size(), CHECKDISCORDCHAKALITO);
 	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
 		ret = write(fd, &buf[i], 1);
+	//si sct PT aka ret == -1, close sct sinon epolin le retour
+//	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, accepted, &_ev) == - 1)
+//		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 	(void)ret;
 }
 
@@ -235,7 +243,6 @@ std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 	}
 	return (it);
 }
-
 
 // void Server::printUsersList(void)
 // {
