@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 15:56:27 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/14 17:53:51 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,7 +314,6 @@ void	Command::_fun_QUIT(Server &my_server)
 			my_server.send(itu->getfd(), ret);
 		_cmdUser.getChannels().erase(itc);
 	}
-	
 	my_server.getUser().remove(this->_cmdUser);
 	close(_cmdUser.getfd());
 	
@@ -324,7 +323,8 @@ void	Command::_fun_QUIT(Server &my_server)
 void	Command::_fun_TOPIC(Server &my_server)
 {
 	std::vector<unsigned char> ret;
-	std::vector<Channel>::iterator itc = my_server.findExistingChan(_parsedCmd[1]);
+	std::vector<Channel>::iterator		itc = my_server.findExistingChan(_parsedCmd[1]);
+	std::list<User>::iterator			Usrlst = itc->getUsrListbg();
 
 	ret = this->_parsedCmd[0];
 	if (_parsedCmd.size() < 2)
@@ -333,13 +333,14 @@ void	Command::_fun_TOPIC(Server &my_server)
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
+	
 	if (itc == my_server.getChannels().end())
 	{
 		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
-	std::list<User>::iterator        Usrlst = itc->getUsrListbg();
+	
 	while (Usrlst != itc->getUsrListend() && *Usrlst != this->_cmdUser)
         Usrlst++;
     if (Usrlst == itc->getUsrListend())
@@ -350,15 +351,51 @@ void	Command::_fun_TOPIC(Server &my_server)
         my_server.send(this->_cmdUser.getfd(), ret);
         return ;
     }
-	if (_parsedCmd.size() == 2)
+	
+	if (itc->isOp(*Usrlst) == false)
 	{
-		insert_all(ret, " RPL_TOPIC\r\n");
+		insert_all(ret, " ERR_CHOPRIVSNEEDED\r\n");
 		my_server.send(this->_cmdUser.getfd(), ret);
 		return ;
 	}
-
 	
-	
+	std::vector<unsigned char>	Topic = itc->getTopic();
+	if (_parsedCmd.size() == 2)
+	{
+		if (Topic.size() > 0)
+			insert_all(ret, " RPL_TOPIC\r\n");
+		else
+			insert_all(ret, " RPL_NOTOPIC\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	else if (_parsedCmd.size() == 3 && this->_parsedCmd[2].size() == 1 && this->_parsedCmd[2][0] == ':')
+	{
+		Topic.clear();
+		itc->setTopic(Topic);
+		insert_all(ret, " RPL_TOPIC\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
+			my_server.send(itu->getfd(), ret);
+	}
+	else
+	{
+		Topic.clear();
+		std::vector<std::vector<unsigned char> >::iterator iterator = this->_parsedCmd.begin();
+		if (*(iterator->begin()) == ':')
+			Topic.insert(Topic.end(), iterator->begin() + 1, iterator->end());
+		iterator++;
+		Topic.push_back(' ');
+		while (iterator != this->_parsedCmd.end())
+		{
+			iterator++;
+			Topic.insert(Topic.end(), iterator->begin(), iterator->end());
+			Topic.push_back(' ');
+		}
+		itc->setTopic(Topic);
+		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
+			my_server.send(itu->getfd(), ret);
+	}
 }
 
 void	Command::_fun_KICK(Server &my_server)

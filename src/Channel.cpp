@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 15:59:48 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/14 17:56:14 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,26 @@ std::list<User>::iterator    Channel::getUsrListbg(void)
 std::list<User>::iterator    Channel::getUsrListend(void)
 {
 	return (this->_userLst.end());
+}
+
+std::vector<unsigned char>	 Channel::getTopic(void) const
+{
+	return (this->_topic);	
+}
+
+void        Channel::setTopic(std::vector<unsigned char> topic)
+{
+	this->_topic = topic;
+}
+
+bool    Channel::isOp(User usr) const
+{
+    for (std::vector<User>::const_iterator it = this->_opList.begin(); it != this->_opList.end(); it++)
+    {
+		if (*it == usr)
+            return (true);
+	}
+    return (false);
 }
 
 void Channel::addUser(User newUser, Server &my_server)

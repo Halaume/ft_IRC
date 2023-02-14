@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 15:53:20 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/14 18:04:12 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,12 @@
 
 Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
 {
-	_passwd = NULL;
+	
 }
 
 Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
 {
-	_passwd = copy._passwd;
+	
 }
 
 Server::~Server(void)
@@ -51,9 +51,14 @@ Server &	Server::operator=(const Server & src)
 	return (*this);
 }
 
-std::vector<Channel>         Server::getChannels(void) const
+std::vector<Channel> Server::getChannels(void) const
 {
 	return (this->_channels);
+}
+
+std::vector<unsigned char>	Server::getPassword(void) const
+{
+	return (this->_passwd);
 }
 
 
@@ -83,7 +88,8 @@ int	Server::init(char **argv)
 		return (std::cerr << "Invalid socket" << std::endl, 1); 
 	bzero(&_server, sizeof(_server));
 	
-	_passwd = argv[2];
+	for (int i = 0; argv[2][i]; i++)
+		_passwd.push_back(static_cast<unsigned char>(argv[2][i]));
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
