@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 14:37:35 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 18:46:28 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@
 #include "../inc/utils.hpp"
 
 std::string server_name = "mig.42.fr";
+
+enum numerics {
+	ERR_NEEDMOREPARAMS = 461
+};
 
 Command::Command(void):  _globalCmd(), _parsedCmd(), _fdUser(), _cmd_buf(), _cmd_size(0), _error(0)
 {
@@ -45,24 +49,20 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
-void Command::push_to_buf(int error, std::vector<unsigned char> vector, std::string msg)
+void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
 {
-	(void)vector; (void)error;
-	std::string str;
+	(void)error; (void)cmd;
+	_cmd_buf.clear();
+	add_to_vector(&_cmd_buf, ":" + server_name + " ");
 
-	_error = error;
-	// _cmd_size = vector.size();
-	_cmd_buf += ":";
-	_cmd_buf += server_name;
-	_cmd_buf += " ";
-	_cmd_buf += itos(error);
-	_cmd_buf += " ";
-	// _cmd_buf += client;
-	_cmd_buf += " ";
-	for (std::vector<unsigned char>::size_type i = 0; i < vector.size(); i++)
-		_cmd_buf.push_back((char)vector[i]);
-	_cmd_buf += " :";
-	_cmd_buf += msg;
+	std::vector<unsigned char>::size_type m;
+	std::cout << "2:\n";
+	for (m = 0; m < _cmd_buf.size(); m++)
+		std::cout << _cmd_buf[m];
+	std::cout << "\n";
+	
+	
+	
 }
 
 /*''''''''''''''''''''''''''''''''''''
@@ -79,38 +79,34 @@ void	Command::_fun_CAP(Server &my_server)
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_PASS(Server &my_server)
 {
+	(void)my_server;
 	// 1 verify if host is already registered
 	// 2 verify enough arguments
 	// 3 ver
-	// std::vector<unsigned char> ret;
-	// std::string ret_str;
-	// unsigned char ret[];
 
 	std::cout << "PASS COMMAND REALIZED\n";
-	(void)my_server;
-	// std::cout << "vtos:" << v_to_str(this->_parsedCmd[0]) << std::endl;
-	if (this->_parsedCmd.size() < 2)
+	std::vector<unsigned char> v;
+	
+	if (this->_parsedCmd.size() < 2 && my_server.findUser(_fdUser)->getRegistered() == false)
 	{
-		_error = 461;
-		// push_to_buf(461, _parsedCmd[0], "Not enough parameters\r\n");
-		// std::cout << "Buf:" << _cmd_buf << std::endl;
-		// my_server.send(_fdUser, ret_str);
-		return ;		
-	}
-	else if (this->_cmdUser.getRegistered())
-	{
-		_error = 462;
-		// ret = server_response("iguscett", "462", v_to_str(_parsedCmd[0]), "You may not reregister\r\n");
-		// ret_str = v_to_str(ret);
-		// std::cout << "Ret:" << ret_str << std::endl;
-		// my_server.send(_fdUser, ret_str);
-		return ;
-	}
-	else if (this->_cmdUser.setPasswd(this->_parsedCmd[1]))
-	{
-		_error = 464;
+		std::cout << "PASS not enough params\n";
+		push_to_buf(ERR_NEEDMOREPARAMS, _parsedCmd[0]);
 		return;
 	}
+	// else if (my_server.findUser(_fdUser)->getRegistered())
+	// {
+	// 	std::cout << "PASS already registered\n";
+	// 	_error = 462;
+	// 	return ;
+	// }
+	// my_server.findUser(_fdUser)->setPasswd(_parsedCmd[1]);
+	// std::cout << "PASS found user passwd:|" << my_server.findUser(_fdUser)->getPasswd() << "|\n";
+	// if (my_server.findUser(_fdUser)->getPasswd() != my_server.getPasswd())
+	// {
+	// 	std::cout << "PASS wrong password\n";
+	// 	_error = 464;
+	// 	return;
+	// }
 }
 
 void	Command::_fun_NICK(Server &my_server)
@@ -419,16 +415,11 @@ void	Command::_answer(Server &my_server)
 	}
 }
 
-
 // Getters
 unsigned char Command::getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type i, std::vector<std::vector<unsigned char> >::size_type j)
 {
 	return (_parsedCmd[i][j]);
 }
-// std::vector<std::vector<unsigned char> > Command::getGobalCmd()
-// {
-// 	return (_globalCmd);
-// }
 
 std::vector<std::vector<unsigned char> > Command::getParsedCmd()
 {

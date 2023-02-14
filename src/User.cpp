@@ -6,18 +6,23 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 22:26:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 19:15:10 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
 #include <string>
 #include "../inc/User.hpp"
 
-User::User(void): _fd(), _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
+User::User(void): _fd(), _pass_status(0), _registered(false), _passwd(), _user_name(), _realName(), _client(), _channels()
 {
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _userName(copy._userName), _realName(copy._realName), _client(copy._client), _channels(copy._channels)
+User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _user_name(), _realName(), _client(), _channels()
+{
+}
+
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _user_name(copy._user_name), _realName(copy._realName), _client(copy._client), _channels(copy._channels)
 {
 }
 
@@ -57,9 +62,14 @@ bool	User::getRegistered(void) const
 	return (this->_registered);
 }
 
-std::vector<unsigned char>	User::getUserName(void) const
+// std::vector<unsigned char> User::getPasswd(void) const
+// {
+// 	return (this->_passwd);
+// }
+
+std::vector<unsigned char> User::getUserName(void) const
 {
-	return (this->_userName);
+	return (this->_user_name);
 }
 
 void	User::setPassStatus(int pass_status)
@@ -77,9 +87,23 @@ void	User::setPasswd(std::vector<unsigned char> passwd)
 	this->_passwd = passwd;
 }
 
-void	User::setUserName(std::vector<unsigned char> username)
+// void	User::setPasswd(std::vector<unsigned char> passwd)
+// {
+// 	_passwd.clear();
+// 	for (std::vector<unsigned char>::size_type it = 0; it < passwd.size(); it++)
+// 		_passwd.push_back((char)passwd[it]);
+// }
+
+void User::setUserName(std::vector<unsigned char> user_name)
 {
-	this->_userName = username;
+	this->_user_name = user_name;
+	// std::vector<unsigned char>::size_type m;
+	// std::cout << "un1:";
+	// for (m = 0; m < user_name.size(); m++)
+	// 	std::cout << user_name[m];
+	// std::cout << "\nun2:";
+	// for (m = 0; m < _user_name.size(); m++)
+	// 	std::cout << _user_name[m];
 }
 
 void	User::setRealName(std::vector<unsigned char> realname)
@@ -95,4 +119,16 @@ int	User::getNbChan(void)
 std::vector<Channel>& User::getChannels(void)
 {
 	return (this->_channels);
+}
+
+std::ostream &		operator<<( std::ostream & o, User const & i)
+{
+	std::vector<unsigned char>::size_type m;
+	
+	o << "Username: ";
+	for (m = 0; m < i.getUserName().size(); m++)
+		o << i.getUserName()[m];
+	o << " fd: " << i.getfd() << std::endl;
+
+	return o;
 }

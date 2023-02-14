@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 14:31:17 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 18:41:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,24 @@
 #include <vector>
 #include <string>
 #include <string.h>
+
+void add_to_vector(std::vector<unsigned char> v, char *str)
+{
+	for (size_t i = 0; i < strlen(str); i++)
+		v.push_back(static_cast<unsigned char>(str[i]));
+}
+
+void add_to_vector(std::vector<unsigned char>* v, std::string str)
+{
+	for (size_t i = 0; i < str.size(); i++)
+		(*v).push_back(static_cast<unsigned char>(str[i]));
+		
+	// std::vector<unsigned char>::size_type m;
+	// std::cout << "1:\n";
+	// for (m = 0; m < v.size(); m++)
+	// 	std::cout << v[m];
+	// std::cout << "\n";
+}
 
 int ft_strlen(const unsigned char* str)
 {

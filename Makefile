@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/08 16:42:05 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/14 17:59:54 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ INC_DIR =		./inc/
 OBJ_DIR = 		obj
 SRC_DIR	= 		./src/
 
-INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server Channel User Command utils))
+INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server User Channel Command utils))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 
@@ -38,8 +38,8 @@ CXXFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c+
 
 SRC_FT = main \
 		 Server \
-		 Channel \
 		 User \
+		 Channel \
 		 Command \
 		 utils
 

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 22:05:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 19:16:33 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,11 @@
 
 Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
 {
-	_passwd = NULL;
 }
 
 Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
 {
-	_passwd = copy._passwd;
+	// _passwd = copy._passwd;
 }
 
 Server::~Server(void)
@@ -71,7 +70,7 @@ int	Server::init(char **argv)
 		return (std::cerr << "Invalid socket" << std::endl, 1); 
 	bzero(&_server, sizeof(_server));
 	
-	_passwd = argv[2];
+	add_to_vector(_passwd, argv[2]);
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
@@ -228,6 +227,15 @@ int	Server::run(void)
 				this->accept_socket(k);
 			else
 			{
+				if (isUserInList(_events[k].data.fd) == false) // ADD User to list
+				{
+					User new_user(_events[k].data.fd);
+					_Users.push_back(new_user);
+				}
+				//////////////////////////
+				printUsersList();
+				/////////////////////////
+				
 				this->getGobalCmd(&cmd, v, k);				// Get global command
 				this->printGlobalCommand(cmd);				// Print global command
 				// Parse command and execute
@@ -235,7 +243,7 @@ int	Server::run(void)
 				{
 					this->getParsedCmd(&cmd, v, i);
 					
-					// Execute commands
+					// Print executed commands///////
 					std::cout << "______X-e-cute command______\n";
 					std::vector<std::vector<unsigned char> >::size_type m, n;
 					for (m = 0; m < cmd.getParsedCmd().size(); m++)
@@ -245,11 +253,11 @@ int	Server::run(void)
 						std::cout << " ";
 					}
 					std::cout << std::endl;
+					//////////////////////////
+					
 					cmd._answer(*this);
 					
 					cmd._parsedCmd.clear();
-					// if (i == 0)
-					// 	cmd._answer(*this);
 					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
 					
 					// Parse scommand
@@ -264,36 +272,61 @@ int	Server::run(void)
 	return (1);
 }
 
-void	Server::send(int fd, std::string buf)
+bool Server::isUserInList(int fd)
+{
+	for (std::list<User>::iterator it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		if (fd == it->getfd())
+			return (true);
+	}
+	return (false);
+}
+
+void Server::send_to_client(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
-	//send(fd, buf, buf.size(), MSG_DONTWAIT);
-	ret = ::send(fd, buf.c_str(), buf.size(), 0); // add option?
+	
+	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	(void)ret;
 }
 
-std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
+// std::list<User>::iterator	Server::findUser(std::string nick)
+// {
+// 	std::list<User>::iterator it;
+// 	for (it = _Users.begin(); it != _Users.end(); ++it)
+// 	{
+// 		if (it->getUserName() == nick)
+// 			return (it);
+// 	}
+// 	return (it);
+// }
+
+std::list<User>::iterator	Server::findUser(int fd)
 {
 	std::list<User>::iterator it;
-	for (it = this->_Users.begin(); it != this->_Users.end(); it++)
+	for (it = _Users.begin(); it != _Users.end(); ++it)
 	{
-		if (it->getUserName() == nick)
+		if (it->getfd() == fd)
 			return (it);
 	}
 	return (it);
 }
 
-
-// void Server::printUsersList(void)
-// {
-// 	std::list<User>::iterator it;
-// 	for (it = _users_list.begin(); it != _users_list.end(); ++it)
-// 	{
-//     	std::cout << "User name:" << it->getUserName() << " fd:" << it->getfd() << std::endl;
-// 	}
-
-// }
-
+void Server::printUsersList(void)
+{
+	std::cout << "____PRINT USERS____\n";
+	for (std::list<User>::iterator it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		// to test user name
+		// std::vector<unsigned char> v;
+		// std::string str = "lol";
+		// add_to_vector(&v, str);
+		// it->setUserName(v);
+		
+		std::cout << *it << std::endl;
+	}
+	std::cout << "__END PRINT USERS__\n";
+}
 
 // GETTERS
 
@@ -312,6 +345,66 @@ std::list<User> Server::getUser(void) const
 	return (this->_Users);
 }
 
+// std::string Server::getPasswd(void) const
+// {
+// 	return (_passwd);
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // User* Server::getUser(int fd)
 // {
 // 	std::list<User>::iterator it;
@@ -322,12 +415,6 @@ std::list<User> Server::getUser(void) const
 // 	// Exception si User pas trouve?
 // 	return (&(*it));
 // }
-
-
-
-
-
-
 
 // Print scommand
 // std::cout << "Print scommand____\n";

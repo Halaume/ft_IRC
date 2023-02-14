@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 14:20:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 18:27:03 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Command
 		~Command(void);
 		Command &	operator=(const Command & src);
 
-		void										push_to_buf(int error, std::vector<unsigned char> vector, std::string msg);
+		void										push_to_buf(int error, std::vector<unsigned char> vector);
 		
 		// Getters
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
@@ -42,7 +42,7 @@ class Command
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
 
 		// Setters
-		void	setFdUser(int);
+		void										setFdUser(int);
 
 		
 		std::vector<std::vector<unsigned char> >	_globalCmd;
@@ -54,7 +54,7 @@ class Command
 		// User										_cmdUser;
 		
 		int										_fdUser;
-		std::string								_cmd_buf;
+		std::vector<unsigned char>				_cmd_buf;
 		std::vector<unsigned char>::size_type	_cmd_size;
 		int										_error;
 		

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 22:04:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 18:05:44 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,13 @@ class Server
 		int			accept_socket(int);
 
 
-		void printUsersList(void);
+		void						printUsersList(void);
 
 		// GETTERS
-		int			getSct(void);
-		int			getEpollfd(void);
-		// User*		getUser(int fd);
+		int							getSct(void);
+		int							getEpollfd(void);
+		std::string					getPasswd(void) const;
+		// User*						getUser(int fd);
 
 		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
 		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
@@ -58,15 +59,18 @@ class Server
 		void 						printGlobalCommand(Command cmd);
 		void 						printParsedCommand(Command cmd);
 
+		bool						isUserInList(int);
+
 		std::list<User>				getUser(void) const;
 		Channel &					findChan(std::vector<unsigned char>);
-		void						send(int, std::string);
-		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);
+		void						send_to_client(int, std::vector<unsigned char>);
+		std::list<User>::iterator	findUser(std::string nick);
+		std::list<User>::iterator	findUser(int fd);
 
 	private:
 		sockaddr_in						_server;
 		int								_sct;
-		char *							_passwd;
+		std::vector<unsigned char>		_passwd;
 		int								_epollfd;
 		epoll_event						_events[10];
 		epoll_event						_ev;
