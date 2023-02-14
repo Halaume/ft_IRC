@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 15:17:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:05:18 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,8 @@ int	Server::init(char **argv)
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
-	_server.sin_port = htons(atoi(argv[1])); // check if negative? or any other char
-	if (_server.sin_port == 0)
+	_server.sin_port = htons((short unsigned int)atoi(argv[1])); // check if negative? or any other char
+	if (_server.sin_port == 0) // be able to connect directly on port 6667 if not specified 
 		return (close(_sct), std::cerr << "Error on port" << std::endl, 1);
 
 	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))//server_info->ai_addrlen))
@@ -125,16 +125,29 @@ void Server::printGlobalCommand(Command cmd)
 	std::cout << "--Print global command--\n";
 	for (i = 0; i < cmd._globalCmd.size(); i++) 
 	{
-		std::cout << ">";
+		std::cout << "> size:" << cmd._globalCmd[i].size() << "  ";
 		for (j = 0; j < cmd._globalCmd[i].size(); j++)
 			std::cout << cmd._globalCmd[i][j];
 	}
 	std::cout << "\n";
 }
 
+void Server::printParsedCommand(Command cmd)
+{
+	std::vector<std::vector<unsigned char> >::size_type i, j;
+	
+	std::cout << "--Print parsed command--\n";
+	for (i = 0; i < cmd._parsedCmd.size(); i++) 
+	{
+		std::cout << ">";
+		for (j = 0; j < cmd._parsedCmd[i].size(); j++)
+			std::cout << cmd._parsedCmd[i][j];
+	}
+	std::cout << "\n";
+}
+
 void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 {
-	// std::vector<std::vector<unsigned char> >::size_type i;
 	int	firstRun = 1;
 	int isLastCr = 0;
 	
@@ -149,8 +162,6 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 	unsigned char buf[BUFFER_SIZE] = "";
 	while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0) // add flags? MSG_DONTWAIT
 	{
-		// unsigned char buf[BUFFER_SIZE] = "";
-		// ::send(_events[k].data.fd, "001\r\n", 5, 0);
 		for (int i = 0; i < BUFFER_SIZE; i++)
 		{
 			if (!firstRun && i == 0 && isLastCr && buf[i] == '\n')
@@ -159,12 +170,7 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 				cmd->_globalCmd.push_back(v);
 				v.clear();
 			}
-			else if (!firstRun && i == 0 && isLastCr && buf[i] != 'n')
-			{
-				isLastCr = 0;
-				v.push_back(buf[i]);
-			}
-			else if (i > 0 && v.back() == '\r' && buf[i] == '\n')
+			else if (i > 0 && isLastCr && buf[i] == '\n')
 			{
 				v.push_back(buf[i]);
 				cmd->_globalCmd.push_back(v);
@@ -172,18 +178,17 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 			}
 			else
 				v.push_back(buf[i]);
-			if (i == BUFFER_SIZE && buf[i] == '\r')
+			if (buf[i] == '\r')
 				isLastCr = 1;
+			else
+				isLastCr = 0;
 			
 			
 		}
-		// bzero(buf, BUFFER_SIZE);
-		// memset(&buf[0], "", BUFFER_SIZE);
+		bzero(buf, BUFFER_SIZE);
 		firstRun = 0;
 	}	
 }
-
-
 
 void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
 {
@@ -241,7 +246,8 @@ int	Server::run(void)
 					}
 					std::cout << std::endl;
 					cmd._answer(*this);
-
+					
+					cmd._parsedCmd.clear();
 					// if (i == 0)
 					// 	cmd._answer(*this);
 					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
@@ -249,6 +255,7 @@ int	Server::run(void)
 					// Parse scommand
 					
 				}
+				cmd._globalCmd.clear();
 
 			}
 		}
@@ -257,16 +264,11 @@ int	Server::run(void)
 	return (1);
 }
 
-
-
-
-
-void	Server::send(int fd, std::vector<unsigned char> buf)
+void	Server::send(int fd, std::string buf)
 {
 	long int ret;
 	//send(fd, buf, buf.size(), MSG_DONTWAIT);
-	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
-		ret = write(fd, &buf[i], 1);
+	ret = ::send(fd, buf.c_str(), buf.size(), 0); // add option?
 	(void)ret;
 }
 

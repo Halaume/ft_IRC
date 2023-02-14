@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 17:44:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:26:08 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,10 @@ class User
 		
 		std::vector<Channel>& 		getChannels(void);
 		int							getfd(void) const;
+		int							getPassStatus(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
+		void						setPassStatus(int);
 		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>);
 		void						setUserName(std::vector<unsigned char>);
@@ -59,6 +61,7 @@ class User
 		
 	private:
 		int							_fd;
+		int							_pass_status;
 		bool						_registered;
 		std::vector<unsigned char>	_passwd;
 		std::string					_currCmd;

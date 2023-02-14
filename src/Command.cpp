@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 15:02:25 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:23:49 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ Command &	Command::operator=(const Command & src)
 void	Command::_fun_CAP(Server &my_server)
 {
 	// Do something amazing
-	std::cout << "CAP COMMAND REALIZED\n";
+	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
 	(void)my_server;
 }
 
@@ -63,13 +63,14 @@ void	Command::_fun_PASS(Server &my_server)
 	std::vector<unsigned char> ret;
 
 	std::cout << "PASS COMMAND REALIZED\n";
-
+	(void)my_server;
+	std::cout << "vtos:" << v_to_str(this->_parsedCmd[0]) << std::endl;
 	if (this->_parsedCmd.size() < 2)
 	{
-		std::cout << "Not enough params\n";
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.send(_fdUser, ret);
+		ret = server_response("iguscett", "461", v_to_str(_parsedCmd[0]), "Not enough parameters\r\n");
+		std::string ret_str = v_to_str(ret);
+		std::cout << "Ret:" << ret_str << std::endl;
+		my_server.send(_fdUser, ret_str);
 		return ;
 	}
 	// if (this->_cmdUser.getRegistered())

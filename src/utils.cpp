@@ -6,13 +6,15 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/10 15:14:17 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:22:19 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <vector>
 #include <string>
+
+const std::string server_name = "lateam.42.fr";
 
 void	insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
 {
@@ -42,18 +44,7 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 
 int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 {
-	std::cout << "vec size:" << my_vec.size() << std::endl;
-	if (my_vec.size() > 1000)
-	{
-		int m = 0;
-		for (std::vector<unsigned char>::size_type j = 0; j < my_vec.size(); j++)
-		{
-			std::cout << my_vec[j];
-			m++;
-		}
-		std::cout << std::endl << "m:" << m << std::cout;
-	}
-	
+	// std::cout << "vec size:" << my_vec.size() << std::endl;
 	if (my_vec.size() != str.length())
 	{
 		// std::cout << "error 1\n";
@@ -70,4 +61,52 @@ int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 			
 	}
 	return (0);
+}
+
+std::string v_to_str(std::vector<unsigned char> vector)
+{
+	std::string str;
+
+	for (std::vector<unsigned char>::size_type i = 0; i < vector.size(); i++)
+		str.push_back(vector[i]);
+	return (str);
+}
+
+// Responses
+std::vector<unsigned char> server_response(std::string client, std::string code, std::string command, std::string to_insert)
+{
+	int j;
+	std::vector<unsigned char> ret;
+
+	ret.push_back(':');
+	// if (client.length() > 0)
+	// {
+	// 	for (j = 0; j < (int)client.length(); j++)
+	// 		ret.push_back(client[j]);
+	// 	ret.push_back('!');
+	// 	for (j = 0; j < (int)client.length(); j++)
+	// 		ret.push_back(client[j]);
+	// 	ret.push_back('@');
+	// 	for (j = 0; j < (int)server_name.length(); j++)
+	// 		ret.push_back(server_name[j]);
+	// }
+	// else
+	// {
+		for (j = 0; j < (int)server_name.length(); j++)
+			ret.push_back(server_name[j]);
+	// }
+	ret.push_back(' ');
+	for (j = 0; j < (int)code.length(); j++)
+		ret.push_back(code[j]);
+	ret.push_back(' ');
+	for (j = 0; j < (int)client.length(); j++)
+		ret.push_back(client[j]);
+	ret.push_back(' ');
+	for (j = 0; j < (int)command.length(); j++)
+		ret.push_back(command[j]);
+	ret.push_back(' ');
+	ret.push_back(':');
+	for (std::vector<unsigned char>::size_type i = 0; to_insert[i]; i++)
+		ret.push_back(static_cast<unsigned char>(to_insert[i]));
+	return (ret);
 }

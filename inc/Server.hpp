@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 19:42:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:04:47 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include "User.hpp"
 #include "Command.hpp"
 
-#define BUFFER_SIZE 3000
+#define BUFFER_SIZE 1
 
 class Channel;
 
@@ -56,10 +56,11 @@ class Server
 		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
 		
 		void 						printGlobalCommand(Command cmd);
-		
+		void 						printParsedCommand(Command cmd);
+
 		std::list<User>				getUser(void) const;
 		Channel &					findChan(std::vector<unsigned char>);
-		void						send(int, std::vector<unsigned char>);
+		void						send(int, std::string);
 		std::list<User>::iterator	findUser(std::vector<unsigned char> nick);
 
 	private:

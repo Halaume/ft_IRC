@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/08 17:23:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/13 22:07:19 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ void Channel::addUser(User newUser, Server &my_server)
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
 	std::vector<unsigned char>	sender;
+	std::string sender_str;
 	std::list<User>::iterator	it = this->_userLst.begin();
 
 	while (it != this->_userLst.end() && *it != newUser)
@@ -81,19 +82,22 @@ void Channel::addUser(User newUser, Server &my_server)
 	if (!connected && newUser.getNbChan() == 10)
 	{
 		insert_all(sender, "ERR_TOMANYCHANNELS\r\n");
-		my_server.send(newUser.getfd(), sender);
+		sender_str = v_to_str(sender);
+		my_server.send(newUser.getfd(), sender_str);
 		return ;
 	}
 	if (!connected)
 		this->_userLst.insert(this->_userLst.end(), newUser);
 	sender.clear();
 	insert_all(sender, "RPL_TOPIC\r\n");
-	my_server.send(newUser.getfd(), sender);
+	sender_str = v_to_str(sender);
+	my_server.send(newUser.getfd(), sender_str);
 	it = this->_userLst.begin();
 	sender.clear();
 	insert_all(sender, "RPL_NAMREPLY\r\n");
+	sender_str = v_to_str(sender);
 	while (it != this->_userLst.end())
-		my_server.send(newUser.getfd(), sender);
+		my_server.send(newUser.getfd(), sender_str);
 }
 
 void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char> passwd)
@@ -102,6 +106,7 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 	bool	connected = false;
 	std::list<User>::iterator	it = this->_userLst.begin();
 	std::vector<unsigned char>	sender;
+	std::string sender_str;
 
 	while (it != this->_userLst.end() && *it != newUser)
 		it++;
@@ -109,8 +114,9 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 		connected = true;
 	if (!connected && newUser.getNbChan() == 10)
 	{
+		sender_str = v_to_str(sender);
 		insert_all(sender, "ERR_TOOMANYCHANNELS\r\n");
-		my_server.send(newUser.getfd(), sender);
+		my_server.send(newUser.getfd(), sender_str);
 		return ;
 	}
 	if (!connected)
@@ -121,18 +127,21 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 		{
 			sender.clear();
 			insert_all(sender, "ERR_BADCHANNELKEY\r\n");
-			my_server.send(newUser.getfd(), sender);
+			sender_str = v_to_str(sender);
+			my_server.send(newUser.getfd(), sender_str);
 			return ;
 		}
 	}
 	sender.clear();
 	insert_all(sender, "RPL_TOPIC\r\n");
-	my_server.send(newUser.getfd(), sender);
+	sender_str = v_to_str(sender);
+	my_server.send(newUser.getfd(), sender_str);
 	it = this->_userLst.begin();
 	sender.clear();
 	insert_all(sender, "RPL_NAMREPLY\r\n");
+	sender_str = v_to_str(sender);
 	while (it != this->_userLst.end())
-		my_server.send(it->getfd(), sender);
+		my_server.send(it->getfd(), sender_str);
 }
 
 
