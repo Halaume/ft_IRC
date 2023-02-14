@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:46:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 22:33:11 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ enum numerics {
 	ERR_NEEDMOREPARAMS = 461
 };
 
-Command::Command(void):  _globalCmd(), _parsedCmd(), _fdUser(), _cmd_buf(), _cmd_size(0), _error(0)
+Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _cmd_size(0), _error(0), _cmd_user(NULL)
 {
 }
 
-Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _fdUser(copy._fdUser) \
-, _cmd_buf(copy._cmd_buf), _cmd_size(copy._cmd_size), _error(copy._error)
+Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _cmd_fd_user(copy._cmd_fd_user) \
+, _cmd_buf(copy._cmd_buf), _cmd_size(copy._cmd_size), _error(copy._error), _cmd_user(copy._cmd_user)
 {
 
 }
@@ -49,11 +49,31 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
+void Command::setCmdUser(Server &my_server)
+{
+	std::list<User>::iterator it;
+
+	for (it = my_server.getUsers().begin(); it != my_server.getUsers().end(); ++it)
+	{
+		if (it->getfd() == _cmd_fd_user)
+		{
+			_cmd_user = &(*it);
+			print_vector(_cmd_user->getUserName());
+			std::cout << "Fd:" << it->getfd() << std::endl;
+			return;
+		}
+	}
+	_cmd_user = NULL;
+}
+
 void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
 {
 	(void)error; (void)cmd;
 	_cmd_buf.clear();
 	add_to_vector(&_cmd_buf, ":" + server_name + " ");
+	add_to_vector(&_cmd_buf, _cmd_user->getUserName());
+
+	print_vector(_cmd_user->getUserName());
 
 	std::vector<unsigned char>::size_type m;
 	std::cout << "2:\n";
@@ -87,21 +107,21 @@ void	Command::_fun_PASS(Server &my_server)
 	std::cout << "PASS COMMAND REALIZED\n";
 	std::vector<unsigned char> v;
 	
-	if (this->_parsedCmd.size() < 2 && my_server.findUser(_fdUser)->getRegistered() == false)
+	if (this->_parsedCmd.size() < 2 && my_server.findUser(_cmd_fd_user)->getRegistered() == false)
 	{
 		std::cout << "PASS not enough params\n";
 		push_to_buf(ERR_NEEDMOREPARAMS, _parsedCmd[0]);
 		return;
 	}
-	// else if (my_server.findUser(_fdUser)->getRegistered())
+	// else if (my_server.findUser(_cmd_fd_user)->getRegistered())
 	// {
 	// 	std::cout << "PASS already registered\n";
 	// 	_error = 462;
 	// 	return ;
 	// }
-	// my_server.findUser(_fdUser)->setPasswd(_parsedCmd[1]);
-	// std::cout << "PASS found user passwd:|" << my_server.findUser(_fdUser)->getPasswd() << "|\n";
-	// if (my_server.findUser(_fdUser)->getPasswd() != my_server.getPasswd())
+	// my_server.findUser(_cmd_fd_user)->setPasswd(_parsedCmd[1]);
+	// std::cout << "PASS found user passwd:|" << my_server.findUser(_cmd_fd_user)->getPasswd() << "|\n";
+	// if (my_server.findUser(_cmd_fd_user)->getPasswd() != my_server.getPasswd())
 	// {
 	// 	std::cout << "PASS wrong password\n";
 	// 	_error = 464;
@@ -324,7 +344,12 @@ void	Command::_answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
-	
+	// my_server.printUsersList();
+	this->setCmdUser(my_server);
+	User *up;
+	up = &my_server._Users.front();
+	std::cout << "User list address:" << up << " and _cmd_user add:" << _cmd_user << std::endl;
+	// print_vector(_cmd_user->getUserName());	
 	// std::vector<std::vector<unsigned char> >::size_type m;
 	// std::cout << "Command answer function parsed command[0]:";
 	// for (m = 0; m < _parsedCmd[0].size(); m++)
@@ -427,7 +452,7 @@ std::vector<std::vector<unsigned char> > Command::getParsedCmd()
 }
 
 // Setters
-void Command::setFdUser(int fd)
+void Command::setCmdFdUser(int fd)
 {
-	_fdUser = fd;	
+	_cmd_fd_user = fd;	
 }

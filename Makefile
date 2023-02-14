@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/14 17:59:54 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/14 21:50:16 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ CXX = c++ $(CXXFLAGS)
 
 RM = rm -fr
 
-CXXFLAGS = -Wall -Wextra -Werror -Wconversion -Wshadow -Wpedantic -O3 -g -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -O3 -g -std=c++98 #-Wconversion -Wshadow -Wpedantic
 
 .cpp.o:
 	$(CXX) -c $< -o $(<:.cpp=.o)

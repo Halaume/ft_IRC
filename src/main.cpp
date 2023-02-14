@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/09 16:29:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 21:52:03 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,19 @@
 #include "../inc/Command.hpp"
 #include "../inc/utils.hpp"
 
-Server	g_serv;
+// Server	g_serv;
 
 int is_kill = 0;
 
 void	signal_handling(int sig)
 {
-	if (close(g_serv.getSct()) == -1) {
-		std::cerr << "Failed to close socket\n";
-	}
-	if (close(g_serv.getEpollfd()) == -1) {
-		std::cerr << "Failed to close epoll file descriptor\n";
-		// return 1
-	}
+	// if (close(g_serv.getSct()) == -1) {
+	// 	std::cerr << "Failed to close socket\n";
+	// }
+	// if (close(g_serv.getEpollfd()) == -1) {
+	// 	std::cerr << "Failed to close epoll file descriptor\n";
+	// 	// return 1
+	// }
 	is_kill = sig;
 }
 
@@ -50,6 +50,7 @@ int	check_kill(Server server)
 
 int main(int argc, char **argv)
 {
+	Server g_serv;
 	if (argc != 3)
 		return (std::cerr << "Wrong number of arg" << std::endl, 1);
 

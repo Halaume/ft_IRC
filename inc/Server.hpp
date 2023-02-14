@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:05:44 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 22:29:56 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,13 @@ class Server
 
 		bool						isUserInList(int);
 
-		std::list<User>				getUser(void) const;
+		std::list<User>				getUsers(void) const;
 		Channel &					findChan(std::vector<unsigned char>);
 		void						send_to_client(int, std::vector<unsigned char>);
 		std::list<User>::iterator	findUser(std::string nick);
 		std::list<User>::iterator	findUser(int fd);
+
+		std::list<User>					_Users;
 
 	private:
 		sockaddr_in						_server;
@@ -75,7 +77,7 @@ class Server
 		epoll_event						_events[10];
 		epoll_event						_ev;
 		std::vector<Channel>			_channels;
-		std::list<User>					_Users;
+		
 };
 
 #endif

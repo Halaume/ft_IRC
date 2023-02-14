@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:41:22 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 22:15:18 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,22 @@ void add_to_vector(std::vector<unsigned char>* v, std::string str)
 	// std::cout << "\n";
 }
 
+void add_to_vector(std::vector<unsigned char>* v1, std::vector<unsigned char> v2)
+{
+	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
+		(*v1).push_back(v2[i]);
+}
+
+void print_vector(std::vector<unsigned char> v)
+{
+	std::vector<unsigned char>::size_type m;
+	
+	std::cout << "Vector print:\n";
+	for (m = 0; m < v.size(); m++)
+		std::cout << v[m];
+	std::cout << "\n";
+}
+
 int ft_strlen(const unsigned char* str)
 {
 	int i = 0;
@@ -49,7 +65,7 @@ std::string itos(int n)
 	
 	while (n > 0)
 	{
-		c = '0' + n % 10;
+		c = '0' + (n % 10);
 		str.push_back(c);
 		n /= 10;
 	}

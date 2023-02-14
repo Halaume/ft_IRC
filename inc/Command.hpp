@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:27:03 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 22:05:58 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 class Server;
 
-// class User;
+class User;
 
 
 
@@ -42,7 +42,8 @@ class Command
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
 
 		// Setters
-		void										setFdUser(int);
+		void										setCmdFdUser(int);
+		void										setCmdUser(Server &);
 
 		
 		std::vector<std::vector<unsigned char> >	_globalCmd;
@@ -53,10 +54,11 @@ class Command
 	private:
 		// User										_cmdUser;
 		
-		int										_fdUser;
+		int										_cmd_fd_user;
 		std::vector<unsigned char>				_cmd_buf;
 		std::vector<unsigned char>::size_type	_cmd_size;
 		int										_error;
+		User									*_cmd_user;
 		
 		void									_fun_CAP(Server &my_server);
 		void									_fun_NICK(Server &my_server);

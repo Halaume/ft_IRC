@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 19:16:33 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 22:30:32 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,12 @@
 #include <vector>
 #include "../inc/utils.hpp"
 
-Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
+Server::Server(void): _Users(),_server(), _sct(), _passwd(),_epollfd(), _ev(), _channels()
 {
 }
 
-Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
+Server::Server(const Server & copy):_Users(copy._Users), _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), \
+_epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels)
 {
 	// _passwd = copy._passwd;
 }
@@ -150,7 +151,7 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 	int	firstRun = 1;
 	int isLastCr = 0;
 	
-	cmd->setFdUser(_events[k].data.fd);
+	cmd->setCmdFdUser(_events[k].data.fd);
 	cmd->_globalCmd.clear();
 	v.clear();
 	if (_events[k].events & EPOLLHUP)
@@ -254,7 +255,6 @@ int	Server::run(void)
 					}
 					std::cout << std::endl;
 					//////////////////////////
-					
 					cmd._answer(*this);
 					
 					cmd._parsedCmd.clear();
@@ -340,7 +340,7 @@ int Server::getEpollfd(void)
 	return (_epollfd);
 }
 
-std::list<User> Server::getUser(void) const
+std::list<User> Server::getUsers(void) const
 {
 	return (this->_Users);
 }
