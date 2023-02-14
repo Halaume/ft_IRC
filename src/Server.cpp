@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 16:24:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 16:52:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,6 @@ int	Server::init(char **argv)
 int	Server::run(void)
 {
 	// TO DO: always protect close functions
-	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
 	long retrec;
@@ -152,8 +151,8 @@ int	Server::run(void)
 				// Hang up
 				if (_events[k].events & EPOLLHUP)
 				{
-					close(_events[k].data.fd);
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
+					close(_events[k].data.fd);
 				}
 				// Read fdand get command
 				unsigned char buf[BUFFER_SIZE] = "";
@@ -162,25 +161,27 @@ int	Server::run(void)
 				{
 					//Free le User de tout la ou il est present into close fd
 				}
-				else if (retrec == 1000)//MAX RECVPOSSIBLE a voir
+				else if (retrec == BUFFER_SIZE)//MAX RECVPOSSIBLE a voir
 				{
-					//Store Le buffer dans USER
+					//Store Le buffer dans USER->currcmd(C'est un string mais maybe a changer jsp)
 				}
 				else
 				{
 					//Parse buffer into go commande
+					//Command	Command a faire;
 				}
-					/*
-					 * {
-					for (i = 0; i < BUFFER_SIZE; i++)
+				/*
+				while (recvpabo > 0)
+				{
+				for (i = 0; i < BUFFER_SIZE; i++)
+				{
+					v.push_back(buf[i]);
+					if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
 					{
-						v.push_back(buf[i]);
-						if (i > 0 && buf[i - 1] == '\r' && buf[i] == '\n')
-						{
-							command.push_back(v);
-							v.clear();
-						}
+						command.push_back(v);
+						v.clear();
 					}
+				}
 				}
 				// Print command
 				std::cout << "Print command____\n";
@@ -239,10 +240,18 @@ void	Server::sendto(int fd, std::vector<unsigned char> buf)
 //		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 //					events->EpollOUT;
 
+	int	wait_ret = epoll_wait(this->_epollfd, this->_events, 1, -1);
+	if (wait_ret == -1)
+	{
+		std::cerr << "Error on epoll wait" << std::endl;
+		return ;
+	}
 	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 	{
-		//Free le User de tout la ou il est present into close fd
+//		Free le User de tout la ou il est present
+//		epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
+//		close(_events[k].data.fd);
 	}
 	else
 	{
