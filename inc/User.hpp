@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 13:51:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 16:32:41 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,9 @@ class User
 		bool						operator==(std::vector<unsigned char>) const;
 		bool						operator!=(User) const;
 		
-		std::vector<Channel>& 		getChannels(void);
+		std::vector<Channel *> 		getChannels(void) const;
+		std::vector<Channel *>::iterator	getChannelsbg(void);
+		std::vector<Channel *>::iterator	getChannelsend(void);
 		int							getfd(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
@@ -68,7 +70,7 @@ class User
 		std::vector<unsigned char>	_userName;
 		std::vector<unsigned char>	_realName;
 		std::string					_client;
-		std::vector<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };
 

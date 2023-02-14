@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 17:24:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 16:32:08 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,19 +61,19 @@ void	Command::_fun_USER(Server &my_server)
 	{
 		ret = this->_parsedCmd[0];
 		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
-	if (this->_cmdUser.getRegistered())
+	if (this->_cmdUser->getRegistered())
 	{
 		insert_all(ret, ":You may not reregister\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
-	this->_cmdUser.setUserName(this->_parsedCmd[1]);
+	this->_cmdUser->setUserName(this->_parsedCmd[1]);
 	//	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
-	this->_cmdUser.setRealName(this->_parsedCmd[4]);
-	this->_cmdUser.setRegistered(true);
+	this->_cmdUser->setRealName(this->_parsedCmd[4]);
+	this->_cmdUser->setRegistered(true);
 }
 
 //TODO Si rate, vider toute la cmd stocker
@@ -85,16 +85,16 @@ void	Command::_fun_PASS(Server &my_server)
 	{
 		ret = this->_parsedCmd[0];
 		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
-	if (this->_cmdUser.getRegistered())
+	if (this->_cmdUser->getRegistered())
 	{
 		insert_all(ret, ":You may not reregister\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
-	this->_cmdUser.setPasswd(this->_parsedCmd[1]);
+	this->_cmdUser->setPasswd(this->_parsedCmd[1]);
 //	if (this->_cmdUser.getPasswd() != my_server.getPasswd())
 //	{
 		//TODO free toute la suite des cmd
@@ -113,7 +113,7 @@ void	Command::_fun_JOIN(Server &my_server)
 	{
 		ret = this->_parsedCmd[0];
 		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
 	std::vector<std::vector<unsigned char> >	chan = splitOnComa(this->_parsedCmd[1]);
@@ -159,25 +159,25 @@ void	Command::_fun_QUIT(Server &my_server)
 		}
 	}
 	
-	for (std::vector<Channel>::iterator itc = _cmdUser.getChannels().begin(); itc != _cmdUser.getChannels().end(); itc++)
+	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
 	{
-		for (std::list<User>::iterator itu = itc->getUsers().begin(); itu != itc->getUsers().end(); itu++)
-			my_server.send(itu->getfd(), ret);
-		_cmdUser.getChannels().erase(itc);
+		for (std::list<User *>::const_iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
+			my_server.sendto((*itu)->getfd(), ret);
+		this->_cmdUser->getChannels().erase(itc);
 	}
 	
-	my_server.getUser().remove(this->_cmdUser);
-	close(_cmdUser.getfd());
+	my_server.getUser().remove(*(this->_cmdUser));
+	close(_cmdUser->getfd());
 }
 
 
 void	Command::_fun_RESTART(Server &my_server)
 {
-	if (!this->_cmdUser.getOperator())
+	if (!this->_cmdUser->getOperator())
 	{
-		std::vector<unsigned char> msg = this->_cmdUser.getUserName();
+		std::vector<unsigned char> msg = this->_cmdUser->getUserName();
 		insert_all(msg, " :Permission Denied- You're not an IRC operator");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 	free_fun(my_server);
@@ -208,18 +208,18 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		dest.clear();
 		dest = this->_parsedCmd[0];
 		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
-		my_server.send(this->_cmdUser.getfd(), dest);
+		my_server.sendto(this->_cmdUser.getfd(), dest);
 		return ;
 	}*/
 	if (chan != *my_server.getChannel().end() && is_op)
 	{
-		for (std::list<User>::iterator	itc = chan.getOpListbg(); itc != chan.getOpListend(); itc++)
-			my_server.send(itc->getfd(), msg);
+		for (std::list<User *>::iterator	itc = chan.getOpListbg(); itc != chan.getOpListend(); itc++)
+			my_server.sendto((*itc)->getfd(), msg);
 	}
 	else
 	{
-		for (std::list<User>::iterator	itc = chan.getUsrListbg(); itc != chan.getUsrListend(); itc++)
-			my_server.send(itc->getfd(), msg);
+		for (std::list<User *>::iterator	itc = chan.getUsrListbg(); itc != chan.getUsrListend(); itc++)
+			my_server.sendto((*itc)->getfd(), msg);
 	}
 }
 
@@ -237,7 +237,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	if (this->_parsedCmd.size() < 3)
 	{
 		insert_all(ret, ":No text to send\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
 //PAS SUR DE CELLE CI
@@ -245,7 +245,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	{
 		ret = this->_parsedCmd[0];// RET SHOULD BE <TARGET>
 		insert_all(ret, " :Duplicate recipients. No message delivered\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
+		my_server.sendto(this->_cmdUser->getfd(), ret);
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
@@ -270,10 +270,10 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		{
 			ret = this->_parsedCmd[0];
 			insert_all(ret, " ERR_NOSUCHNICK\r\n");
-			my_server.send(this->_cmdUser.getfd(), ret);
+			my_server.sendto(this->_cmdUser->getfd(), ret);
 		}
 		else
-			my_server.send(itu->getfd(), msg);
+			my_server.sendto(itu->getfd(), msg);
 	}
 }
 
@@ -305,55 +305,55 @@ void	Command::_fun_KICK(Server &my_server)
 	if (this->_parsedCmd.size() < 3)
 	{
 		insert_all(msg, " ERR_NEEDMOREPARAM\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 
 	if (tmp == my_server.getChannel().end())
 	{
-		msg = this->_cmdUser.getUserName();
+		msg = this->_cmdUser->getUserName();
 		insert_all(msg, " ERR_NOSUCHCHANNEL\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 
 	if (!tmp->isOp(this->_cmdUser))
 	{
-		msg = this->_cmdUser.getUserName();
+		msg = this->_cmdUser->getUserName();
 		msg.insert(msg.end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
 		insert_all(msg, " :You're not channel operator\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 
-	std::list<User>::iterator		Usrlst = tmp->getUsrListbg();
+	std::list<User *>::iterator		Usrlst = tmp->getUsrListbg();
 	while (Usrlst != tmp->getUsrListend() && *Usrlst != this->_cmdUser)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser.getUserName();
+		msg = this->_cmdUser->getUserName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_NOTONCHANNEL\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 	Usrlst = tmp->getUsrListbg();
-	while (Usrlst != tmp->getUsrListend() && !(*Usrlst == this->_parsedCmd[2])) // TODO A CHANGER
+	while (Usrlst != tmp->getUsrListend() && !(**Usrlst == this->_parsedCmd[2])) // TODO A CHANGER
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser.getUserName();
+		msg = this->_cmdUser->getUserName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_USERNOTINCHANNEL\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 	if (tmp->isOp(*Usrlst))
 	{
-		msg = this->_cmdUser.getUserName();
+		msg = this->_cmdUser->getUserName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_CANNOTKICKADMIN\r\n");
-		my_server.send(this->_cmdUser.getfd(), msg);
+		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
 	}
 

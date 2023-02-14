@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 13:17:16 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 16:24:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,13 +114,15 @@ int	Server::run(void)
 	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
-	int retrec;
+	long retrec;
 	int k;
-	std::vector<std::vector<unsigned char> >::size_type i, j;
+//	std::vector<std::vector<unsigned char> >::size_type i, j;
 	socklen_t server_length = sizeof(_server);
 	std::vector<std::vector<unsigned char> > command;
 	std::vector<std::vector<unsigned char> > scommand;
 	std::vector<unsigned char> v;
+	_ev.events = EPOLLIN | EPOLLET;
+	_evout.events = EPOLLOUT | EPOLLET;
 
 	while (true)
 	{	
@@ -138,11 +140,10 @@ int	Server::run(void)
 					return (std::cerr << "Error on accept" << std::endl, 1);
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
 				std::cout << "1.1 : accepted fd:" << accepted << std::endl;
-				_ev.events = EPOLLIN | EPOLLET;
-//				_evout.events = EPOLLOUT | EPOLLET; TODO Une deuxieme epoll_events pour le epollOUT
 				_ev.data.fd = accepted;
 				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+				//HERE CREER UN USER ET LUI DONER ACCETED COMME FD
 			}
 			else
 			{
@@ -161,7 +162,7 @@ int	Server::run(void)
 				{
 					//Free le User de tout la ou il est present into close fd
 				}
-				else if (retrec == MAXRECVPOSSIBLE)
+				else if (retrec == 1000)//MAX RECVPOSSIBLE a voir
 				{
 					//Store Le buffer dans USER
 				}
@@ -230,7 +231,7 @@ int	Server::run(void)
 	return (1);
 }
 
-void	Server::send(int fd, std::vector<unsigned char> buf)
+void	Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
 //TODO prep pour le out : enlever le in into ajouter le out
@@ -238,20 +239,25 @@ void	Server::send(int fd, std::vector<unsigned char> buf)
 //		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
 //					events->EpollOUT;
 
-	//send(fd, buf, buf.size(), CHECKDISCORDCHAKALITO);
-	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
-		ret = write(fd, &buf[i], 1);
+	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 	{
 		//Free le User de tout la ou il est present into close fd
 	}
 	else
 	{
-
-//	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, accepted, &_ev) == - 1)
-//		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+		if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &(this->_evout)) == - 1)
+		{
+			std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl;
+			return ;
+		}
 	}
-	//si sct PT aka ret == -1, close sct sinon epolin le retour
+	if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &(this->_ev)) == - 1)
+	{
+		//Free le User
+		std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl;
+		return ;
+	}
 }
 
 std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)

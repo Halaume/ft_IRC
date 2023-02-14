@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 17:24:25 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 15:58:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Command
 		void	parseCommand(std::string);
 		
 	private:
-		User										_cmdUser;
+		User *										_cmdUser;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 		void										_answer(Server &);
 		
