@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 17:16:13 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/14 13:17:16 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,7 @@ int	Server::run(void)
 	Command	currCmd;
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
+	int retrec;
 	int k;
 	std::vector<std::vector<unsigned char> >::size_type i, j;
 	socklen_t server_length = sizeof(_server);
@@ -155,8 +156,21 @@ int	Server::run(void)
 				}
 				// Read fdand get command
 				unsigned char buf[BUFFER_SIZE] = "";
-				while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0)// add flags? MSG_DONTWAIT
+				retrec = recv(_events[k].data.fd, buf, BUFFER_SIZE, MSG_DONTWAIT);// add flags? MSG_DONTWAIT
+				if (retrec < 0)
 				{
+					//Free le User de tout la ou il est present into close fd
+				}
+				else if (retrec == MAXRECVPOSSIBLE)
+				{
+					//Store Le buffer dans USER
+				}
+				else
+				{
+					//Parse buffer into go commande
+				}
+					/*
+					 * {
 					for (i = 0; i < BUFFER_SIZE; i++)
 					{
 						v.push_back(buf[i]);
@@ -200,7 +214,7 @@ int	Server::run(void)
 							std::cout << scommand[i][j];
 						std::cout << "\n";
 					}	
-				}
+				}*/
 				// Parsing
 				
 				// std::cout << std::endl << "command size: " << command.size() << " and command:\n" << command << std::endl;
@@ -227,10 +241,17 @@ void	Server::send(int fd, std::vector<unsigned char> buf)
 	//send(fd, buf, buf.size(), CHECKDISCORDCHAKALITO);
 	for (std::vector<unsigned char>::size_type i = 0; i < buf.size(); i++)
 		ret = write(fd, &buf[i], 1);
-	//si sct PT aka ret == -1, close sct sinon epolin le retour
+	if (ret < 0)
+	{
+		//Free le User de tout la ou il est present into close fd
+	}
+	else
+	{
+
 //	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, accepted, &_ev) == - 1)
 //		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
-	(void)ret;
+	}
+	//si sct PT aka ret == -1, close sct sinon epolin le retour
 }
 
 std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
