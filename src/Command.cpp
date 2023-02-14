@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/13 22:23:49 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/14 14:37:35 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,21 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
-
+#include <stdlib.h>
 
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "../inc/User.hpp"
 #include "../inc/utils.hpp"
 
-Command::Command(void):  _globalCmd(), _parsedCmd(), _fdUser()
+std::string server_name = "mig.42.fr";
+
+Command::Command(void):  _globalCmd(), _parsedCmd(), _fdUser(), _cmd_buf(), _cmd_size(0), _error(0)
 {
 }
 
-Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _fdUser(copy._fdUser)
+Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _fdUser(copy._fdUser) \
+, _cmd_buf(copy._cmd_buf), _cmd_size(copy._cmd_size), _error(copy._error)
 {
 
 }
@@ -42,12 +45,31 @@ Command &	Command::operator=(const Command & src)
 	return (*this);
 }
 
+void Command::push_to_buf(int error, std::vector<unsigned char> vector, std::string msg)
+{
+	(void)vector; (void)error;
+	std::string str;
+
+	_error = error;
+	// _cmd_size = vector.size();
+	_cmd_buf += ":";
+	_cmd_buf += server_name;
+	_cmd_buf += " ";
+	_cmd_buf += itos(error);
+	_cmd_buf += " ";
+	// _cmd_buf += client;
+	_cmd_buf += " ";
+	for (std::vector<unsigned char>::size_type i = 0; i < vector.size(); i++)
+		_cmd_buf.push_back((char)vector[i]);
+	_cmd_buf += " :";
+	_cmd_buf += msg;
+}
+
 /*''''''''''''''''''''''''''''''''''''
-				CAP
+				CAP > to delete?
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_CAP(Server &my_server)
 {
-	// Do something amazing
 	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
 	(void)my_server;
 }
@@ -60,26 +82,35 @@ void	Command::_fun_PASS(Server &my_server)
 	// 1 verify if host is already registered
 	// 2 verify enough arguments
 	// 3 ver
-	std::vector<unsigned char> ret;
+	// std::vector<unsigned char> ret;
+	// std::string ret_str;
+	// unsigned char ret[];
 
 	std::cout << "PASS COMMAND REALIZED\n";
 	(void)my_server;
-	std::cout << "vtos:" << v_to_str(this->_parsedCmd[0]) << std::endl;
+	// std::cout << "vtos:" << v_to_str(this->_parsedCmd[0]) << std::endl;
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret = server_response("iguscett", "461", v_to_str(_parsedCmd[0]), "Not enough parameters\r\n");
-		std::string ret_str = v_to_str(ret);
-		std::cout << "Ret:" << ret_str << std::endl;
-		my_server.send(_fdUser, ret_str);
+		_error = 461;
+		// push_to_buf(461, _parsedCmd[0], "Not enough parameters\r\n");
+		// std::cout << "Buf:" << _cmd_buf << std::endl;
+		// my_server.send(_fdUser, ret_str);
+		return ;		
+	}
+	else if (this->_cmdUser.getRegistered())
+	{
+		_error = 462;
+		// ret = server_response("iguscett", "462", v_to_str(_parsedCmd[0]), "You may not reregister\r\n");
+		// ret_str = v_to_str(ret);
+		// std::cout << "Ret:" << ret_str << std::endl;
+		// my_server.send(_fdUser, ret_str);
 		return ;
 	}
-	// if (this->_cmdUser.getRegistered())
-	// {
-	// 	insert_all(ret, ":You may not reregister\r\n");
-	// 	my_server.send(this->_cmdUser.getfd(), ret);
-	// 	return ;
-	// }
-	// this->_cmdUser.setPasswd(this->_parsedCmd[1]);
+	else if (this->_cmdUser.setPasswd(this->_parsedCmd[1]))
+	{
+		_error = 464;
+		return;
+	}
 }
 
 void	Command::_fun_NICK(Server &my_server)
