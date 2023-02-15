@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:27:27 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:52:57 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ class Server
 		int						_epollfd;
 		epoll_event				_events[10];
 		epoll_event				_ev;
-		epoll_event				_evout;
 		std::vector<Channel>	_channels;
 		std::list<User>			_Users;
 

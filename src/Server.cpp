@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:52:16 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:52:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,18 +34,19 @@
 
 void	check_kill(Server& server);
 
-Server::Server(void): _argv(), _server(), _sct(), _passwd(), _epollfd(), _ev(), _evout(), _channels(), _Users()
+Server::Server(void): _argv(), _server(), _sct(), _passwd(), _epollfd(), _ev(), _channels(), _Users()
 {
 }
 
-Server::Server(const Server & copy): _argv(copy._argv), _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev), _evout(copy._evout), _channels(copy._channels), _Users(copy._Users)
+Server::Server(const Server & copy): _argv(copy._argv), _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev), _channels(copy._channels), _Users(copy._Users)
 {
 	// _passwd = copy._passwd;
 }
 
 Server::~Server(void)
 {
-	free_fun(*this);
+	close(this->_sct);
+	close(this->_epollfd);
 }
 
 Server &	Server::operator=(const Server & src)
@@ -79,7 +80,7 @@ int	Server::init(char **argv)
 	if (_sct == -1)
 		return (std::cerr << "Invalid socket" << std::endl, 1); 
 	bzero(&_server, sizeof(_server));
-	
+
 	add_to_vector(_passwd, argv[2]);
 
 	_server.sin_addr.s_addr = INADDR_ANY;
@@ -102,7 +103,7 @@ int	Server::init(char **argv)
 
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-	
+
 	std::cout << "0 : epoll fd: " << _epollfd << std::endl;
 	this->_argv = argv;
 
@@ -114,7 +115,7 @@ int Server::accept_socket(int k)
 	int yes = 1;//	For SO_KEEPALIVE
 	int accepted = 0;
 	socklen_t server_length = sizeof(_server);
-	
+
 	std::cout << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
 	accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
 	if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)//Keepalive permet de garder la connexion apres utilisation
@@ -131,7 +132,7 @@ int Server::accept_socket(int k)
 void Server::printGlobalCommand(Command cmd)
 {
 	std::vector<std::vector<unsigned char> >::size_type i, j;
-	
+
 	std::cout << "--Print global command--\n";
 	for (i = 0; i < cmd._globalCmd.size(); i++) 
 	{
@@ -145,7 +146,7 @@ void Server::printGlobalCommand(Command cmd)
 void Server::printParsedCommand(Command cmd)
 {
 	std::vector<std::vector<unsigned char> >::size_type i, j;
-	
+
 	std::cout << "--Print parsed command--\n";
 	for (i = 0; i < cmd._parsedCmd.size(); i++) 
 	{
@@ -156,11 +157,21 @@ void Server::printParsedCommand(Command cmd)
 	std::cout << "\n";
 }
 
+bool Server::isUserInList(int fd)
+{
+	for (std::list<User>::iterator it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		if (fd == it->getfd())
+			return (true);
+	}
+	return (false);
+}
+
 void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 {
 	int	firstRun = 1;
 	int isLastCr = 0;
-	
+
 	cmd->setCmdFdUser(_events[k].data.fd);
 	cmd->_globalCmd.clear();
 	v.clear();
@@ -192,8 +203,8 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 				isLastCr = 1;
 			else
 				isLastCr = 0;
-			
-			
+
+
 		}
 		bzero(buf, BUFFER_SIZE);
 		firstRun = 0;
@@ -203,7 +214,7 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
 {
 	std::vector<std::vector<unsigned char> >::size_type j;
-	
+
 	v.clear();
 	cmd->_parsedCmd.clear();
 	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
@@ -218,9 +229,10 @@ void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vecto
 	}
 }
 
+#include <errno.h>
+
 int	Server::run(void)
 {
-	unsigned char buf[BUFFER_SIZE] = "";
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
 	long retrec;
@@ -228,10 +240,10 @@ int	Server::run(void)
 	socklen_t server_length = sizeof(_server);
 	std::vector<unsigned char> v;
 	_ev.events = EPOLLIN | EPOLLET;
-	_evout.events = EPOLLOUT | EPOLLET;
 
 	while (true)
 	{	
+		unsigned char buf[BUFFER_SIZE] = "";
 		int	wait_ret = epoll_wait(_epollfd, _events, EPOLLIN, 1);
 		check_kill(*this);
 		if (wait_ret == -1)
@@ -246,24 +258,34 @@ int	Server::run(void)
 					return (std::cerr << "Error on accept" << std::endl, 1);
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
 				std::cout << "1.1 : accepted fd:" << accepted << std::endl;
+				_ev.events = EPOLLIN | EPOLLET;
 				_ev.data.fd = accepted;
 				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
 					return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
-				User	newUsr = User(accepted);
-				if (this->_Users.size() == 0)
-					newUsr.setOperator(true);
-				this->_Users.push_back(newUsr);
 			}
 			else
 			{
+				if (isUserInList(_events[k].data.fd) == false) // ADD User to list
+				{
+					User new_user(_events[k].data.fd);
+					if (this->_Users.size() == 0)
+						new_user.setOperator(true);
+					_Users.push_back(new_user);
+				}
 				std::list<User>::iterator Usr = this->getUsr(this->_events[k].data.fd);
 				v.clear();
 				if (_events[k].events & EPOLLHUP)
 				{
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 					close(_events[k].data.fd);
+					std::cout << "ICI" << std::endl;
 				}
-				retrec = recv(_events[k].data.fd, buf, BUFFER_SIZE, MSG_DONTWAIT);//MAX RECVPOSSIBLE a voir
+
+				retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, 0);//MAX RECVPOSSIBLE a voir
+				std::cout << retrec << std::endl;
+				std::cout << Usr->getfd() << std::endl;
+				std::cout << _events[k].data.fd << std::endl;
+				std::cout << errno << std::endl;
 				if (retrec < 0)
 					this->_Users.erase(Usr);
 				else if (retrec == BUFFER_SIZE)//MAX RECVPOSSIBLE a voir
@@ -274,6 +296,7 @@ int	Server::run(void)
 				}
 				else
 				{
+					std::cerr << "User found" << std::endl;
 					Command	cmd;
 					std::vector<std::vector<unsigned char> >	ParsedCommand;
 
@@ -309,9 +332,11 @@ int	Server::run(void)
 void	Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
-	if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &this->_evout) == - 1)
+	_ev.events = EPOLLOUT | EPOLLET;
+	if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &this->_ev) == - 1)
 		return ;
-	int	wait_ret = epoll_wait(this->_epollfd, this->_events, 1, -1);
+	int	wait_ret = epoll_wait(this->_epollfd, this->_events, 1, 1);
+	check_kill(*this);
 	if (wait_ret == -1)
 	{
 		std::cerr << "Error on epoll wait" << std::endl;
@@ -323,7 +348,7 @@ void	Server::sendto(int fd, std::vector<unsigned char> buf)
 		std::list<User>::iterator Usr = this->getUsr(fd);
 		for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
 			it->delUser(fd);
-		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_evout);
+		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
 		close(fd);
 	}
 	if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &(this->_ev)) == - 1)
@@ -366,7 +391,7 @@ void Server::printUsersList(void)
 		// std::string str = "lol";
 		// add_to_vector(&v, str);
 		// it->setUserName(v);
-		
+
 		std::cout << *it << std::endl;
 	}
 	std::cout << "__END PRINT USERS__\n";

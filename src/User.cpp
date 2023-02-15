@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:22:55 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:02:43 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,6 @@ User::~User(void)
 {
 	if (this->_fd != 0)
 		close(this->_fd);
-	this->_passwd.erase(this->_passwd.begin(), this->_passwd.end());
-	this->_userName.erase(this->_userName.begin(), this->_userName.end());
-	this->_realName.erase(this->_realName.begin(), this->_realName.end());
-	this->_channels.erase(this->_channels.begin(), this->_channels.end());
-
 }
 
 User &	User::operator=(const User & src)
