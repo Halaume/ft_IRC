@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 22:15:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:55:35 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,18 +25,33 @@ void add_to_vector(std::vector<unsigned char>* v, std::string str)
 {
 	for (size_t i = 0; i < str.size(); i++)
 		(*v).push_back(static_cast<unsigned char>(str[i]));
-		
-	// std::vector<unsigned char>::size_type m;
-	// std::cout << "1:\n";
-	// for (m = 0; m < v.size(); m++)
-	// 	std::cout << v[m];
-	// std::cout << "\n";
 }
+
+std::vector<unsigned char> to_vector(std::string str)
+{
+	std::vector<unsigned char> v;
+	
+	for (size_t i = 0; i < str.size(); i++)
+		v.push_back(static_cast<unsigned char>(str[i]));
+	return (v);
+}
+
 
 void add_to_vector(std::vector<unsigned char>* v1, std::vector<unsigned char> v2)
 {
 	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
 		(*v1).push_back(v2[i]);
+}
+
+std::vector<unsigned char> concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+
+	for (std::vector<unsigned char>::size_type i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	for (std::vector<unsigned char>::size_type j = 0; j < v2.size(); j++)
+		ret.push_back(v2[j]);
+	return (ret);
 }
 
 void print_vector(std::vector<unsigned char> v)

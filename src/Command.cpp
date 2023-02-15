@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 22:33:11 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:50:47 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,10 @@
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "../inc/User.hpp"
+#include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
 std::string server_name = "mig.42.fr";
-
-enum numerics {
-	ERR_NEEDMOREPARAMS = 461
-};
 
 Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _cmd_size(0), _error(0), _cmd_user(NULL)
 {
@@ -51,19 +48,7 @@ Command &	Command::operator=(const Command & src)
 
 void Command::setCmdUser(Server &my_server)
 {
-	std::list<User>::iterator it;
-
-	for (it = my_server.getUsers().begin(); it != my_server.getUsers().end(); ++it)
-	{
-		if (it->getfd() == _cmd_fd_user)
-		{
-			_cmd_user = &(*it);
-			print_vector(_cmd_user->getUserName());
-			std::cout << "Fd:" << it->getfd() << std::endl;
-			return;
-		}
-	}
-	_cmd_user = NULL;
+	_cmd_user = my_server.findUser(_cmd_fd_user);
 }
 
 void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
@@ -72,17 +57,17 @@ void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
 	_cmd_buf.clear();
 	add_to_vector(&_cmd_buf, ":" + server_name + " ");
 	add_to_vector(&_cmd_buf, _cmd_user->getUserName());
-
-	print_vector(_cmd_user->getUserName());
+	add_to_vector(&_cmd_buf, " ");
+	add_to_vector(&_cmd_buf, numeric_response(ERR_NEEDMOREPARAMS, cmd));
+	// add_to_vector(&_cmd_buf, cmd);
+	// add_to_vector(&_cmd_buf, ERR_NEEDMOREPARAMSmsg);
 
 	std::vector<unsigned char>::size_type m;
 	std::cout << "2:\n";
 	for (m = 0; m < _cmd_buf.size(); m++)
 		std::cout << _cmd_buf[m];
 	std::cout << "\n";
-	
-	
-	
+
 }
 
 /*''''''''''''''''''''''''''''''''''''
@@ -344,17 +329,10 @@ void	Command::_answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
-	// my_server.printUsersList();
-	this->setCmdUser(my_server);
-	User *up;
-	up = &my_server._Users.front();
-	std::cout << "User list address:" << up << " and _cmd_user add:" << _cmd_user << std::endl;
-	// print_vector(_cmd_user->getUserName());	
-	// std::vector<std::vector<unsigned char> >::size_type m;
-	// std::cout << "Command answer function parsed command[0]:";
-	// for (m = 0; m < _parsedCmd[0].size(); m++)
-	// 	std::cout << _parsedCmd[0][m] ;
-	// std::cout << "|EOF" << std::endl;
+	setCmdUser(my_server);
+	// _cmd_user = my_compare.findUser(_cmd_fd_user);
+
+	std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
 
 	
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)

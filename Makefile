@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/14 21:50:16 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/15 15:38:14 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ INC_DIR =		./inc/
 OBJ_DIR = 		obj
 SRC_DIR	= 		./src/
 
-INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server User Channel Command utils))
+INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server User Channel Command utils Numerics))
 
 SRC =			$(SRC_FT:%=$(SRC_DIR)/%.cpp)
 
@@ -41,6 +41,7 @@ SRC_FT = main \
 		 User \
 		 Channel \
 		 Command \
+		 Numerics \
 		 utils
 
 all: $(NAME)

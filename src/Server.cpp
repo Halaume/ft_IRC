@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 22:30:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:05:01 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,7 +298,7 @@ void Server::send_to_client(int fd, std::vector<unsigned char> buf)
 // 		if (it->getUserName() == nick)
 // 			return (it);
 // 	}
-// 	return (it);
+// 	return (it);// _Users.end() ?
 // }
 
 std::list<User>::iterator	Server::findUser(int fd)
@@ -308,8 +308,8 @@ std::list<User>::iterator	Server::findUser(int fd)
 	{
 		if (it->getfd() == fd)
 			return (it);
-	}
-	return (it);
+	}	
+	return (it); // _Users.end()?
 }
 
 void Server::printUsersList(void)

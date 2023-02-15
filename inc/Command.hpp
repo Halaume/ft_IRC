@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 22:05:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:44:47 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #include "Server.hpp"
 #include "Channel.hpp"
 // #include "User.hpp"
+// #define server_name "mig.42.fr"
+// std::string server_name = "mig.42.fr";
 
 class Server;
 
@@ -44,8 +46,7 @@ class Command
 		// Setters
 		void										setCmdFdUser(int);
 		void										setCmdUser(Server &);
-
-		
+	
 		std::vector<std::vector<unsigned char> >	_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
@@ -58,7 +59,7 @@ class Command
 		std::vector<unsigned char>				_cmd_buf;
 		std::vector<unsigned char>::size_type	_cmd_size;
 		int										_error;
-		User									*_cmd_user;
+		std::list<User>::iterator				_cmd_user;
 		
 		void									_fun_CAP(Server &my_server);
 		void									_fun_NICK(Server &my_server);

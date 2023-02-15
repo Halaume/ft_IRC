@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 22:15:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:54:21 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,11 @@ int	                                        my_compare(std::vector<unsigned char
 
 std::string                                 v_to_str(std::vector<unsigned char> vector);
 
+std::vector<unsigned char>                  to_vector(std::string str);
 void                                        add_to_vector(std::vector<unsigned char> v, char *str);
 void                                        add_to_vector(std::vector<unsigned char>* v, std::string str);
 void                                        add_to_vector(std::vector<unsigned char>*, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 
 void                                        print_vector(std::vector<unsigned char> v);
 
