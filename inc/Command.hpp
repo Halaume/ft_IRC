@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 14:08:06 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:14:47 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Command
 		std::vector<std::vector<unsigned char> >	getCommand(void) const;
 		void		setCommand(std::vector<std::vector<unsigned char> >);
 		void		setUser(User*);
+		void		answer(Server &);
 
 		//Aucune idee de ce que c'est
 		void	parseCommand(std::string);
@@ -40,7 +41,6 @@ class Command
 	private:
 		User *										_cmdUser;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
-		void										_answer(Server &);
 		
 		void	_fun_CAP(Server &my_server);
 		void	_fun_NICK(Server &my_server);
@@ -57,7 +57,7 @@ class Command
 		void	_fun_INVITE(Server &my_server);
 		void	_fun_KILL(Server &my_server);
 		void	_fun_RESTART(Server &my_server);
-		void	_fun_PING(Server &my_server);
+		void	_fun_PONG(Server &my_server);
 
 		void	do_chan(std::vector<unsigned char>, Server &my_server, std::vector<unsigned char>);
 

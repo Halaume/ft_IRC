@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 15:20:18 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:47:28 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Channel
 		void						addUser(User *, Server&);
 		void						addUser(User *, Server&, std::vector<unsigned char>);
 		bool						isOp(User *) const;
+		void						delUser(int);
 
 		// Getters
 		std::list<User *>			getUsers(void) const;

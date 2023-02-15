@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 13:59:18 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:25:15 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,25 +24,10 @@ class User
 	public:
 		User(void);
 		User(const User &copy);
+		User(int);
 		~User(void);
 		User &	operator=(const User & src);
 
-		
-		
-		// GETTERS
-		// int					getfd(void) const;
-		// std::string			getCurrCmd(void) const;
-		// std::string			getUserName(void) const;
-		// std::string			getRealName(void) const;
-		// std::string			getClient(void) const;
-
-		// SETTERS
-		// void				setfd(int fd);
-//		void				setCurrCmd(std::vector<> currCmd);
-		// void				setUserName(std::string name);
-		// void				setRealName(std::string name);
-		// void				setClient(std::string client);
-		
 		bool						operator==(User) const;
 		bool						operator==(std::vector<unsigned char>) const;
 		bool						operator!=(User) const;

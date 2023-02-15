@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 13:40:26 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:15:06 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,13 +384,13 @@ void	Command::_fun_KILL(Server &my_server)
 }
 
 
-void	Command::_fun_PING(Server &my_server)
+void	Command::_fun_PONG(Server &my_server)
 {
 //	std::vector<User>::iterator	it = my_server.getUsers().begin();
 	(void)my_server;
 }
 
-void	Command::_answer(Server &my_server)
+void	Command::answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
@@ -470,7 +470,7 @@ void	Command::_answer(Server &my_server)
 		}
 		case 14:
 		{
-			this->_fun_PING(my_server);
+			this->_fun_PONG(my_server);
 			break;
 		}
 		default:
