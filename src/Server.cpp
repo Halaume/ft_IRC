@@ -6,15 +6,17 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 14:55:48 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:52:16 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "../inc/Command.hpp"
+#include "../inc/utils.hpp"
 
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -30,14 +32,15 @@
 #include <vector>
 #include "../inc/utils.hpp"
 
-Server::Server(void): _server(), _sct(), _passwd(),_epollfd(), _ev(), _channels(), _Users()
+void	check_kill(Server& server);
+
+Server::Server(void): _argv(), _server(), _sct(), _passwd(), _epollfd(), _ev(), _evout(), _channels(), _Users()
 {
-	_passwd = NULL;
 }
 
-Server::Server(const Server & copy): _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev),_channels(copy._channels), _Users(copy._Users)
+Server::Server(const Server & copy): _argv(copy._argv), _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev), _evout(copy._evout), _channels(copy._channels), _Users(copy._Users)
 {
-	_passwd = copy._passwd;
+	// _passwd = copy._passwd;
 }
 
 Server::~Server(void)
@@ -77,7 +80,7 @@ int	Server::init(char **argv)
 		return (std::cerr << "Invalid socket" << std::endl, 1); 
 	bzero(&_server, sizeof(_server));
 	
-	_passwd = argv[2];
+	add_to_vector(_passwd, argv[2]);
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
@@ -106,6 +109,115 @@ int	Server::init(char **argv)
 	return (0);
 }
 
+int Server::accept_socket(int k)
+{
+	int yes = 1;//	For SO_KEEPALIVE
+	int accepted = 0;
+	socklen_t server_length = sizeof(_server);
+	
+	std::cout << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
+	accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
+	if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)//Keepalive permet de garder la connexion apres utilisation
+		return (std::cerr << "Error on accept" << std::endl, 1);
+	fcntl(accepted, F_SETFL, O_NONBLOCK);
+	std::cout << "1.1 : accepted fd:" << accepted << std::endl;
+	_ev.events = EPOLLIN | EPOLLET;
+	_ev.data.fd = accepted;
+	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
+		return (std::cerr << "Error on epoll_ctl_add accepted sock" << std::endl, 1);
+	return (0);
+}
+
+void Server::printGlobalCommand(Command cmd)
+{
+	std::vector<std::vector<unsigned char> >::size_type i, j;
+	
+	std::cout << "--Print global command--\n";
+	for (i = 0; i < cmd._globalCmd.size(); i++) 
+	{
+		std::cout << "> size:" << cmd._globalCmd[i].size() << "  ";
+		for (j = 0; j < cmd._globalCmd[i].size(); j++)
+			std::cout << cmd._globalCmd[i][j];
+	}
+	std::cout << "\n";
+}
+
+void Server::printParsedCommand(Command cmd)
+{
+	std::vector<std::vector<unsigned char> >::size_type i, j;
+	
+	std::cout << "--Print parsed command--\n";
+	for (i = 0; i < cmd._parsedCmd.size(); i++) 
+	{
+		std::cout << ">";
+		for (j = 0; j < cmd._parsedCmd[i].size(); j++)
+			std::cout << cmd._parsedCmd[i][j];
+	}
+	std::cout << "\n";
+}
+
+void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
+{
+	int	firstRun = 1;
+	int isLastCr = 0;
+	
+	cmd->setCmdFdUser(_events[k].data.fd);
+	cmd->_globalCmd.clear();
+	v.clear();
+	if (_events[k].events & EPOLLHUP)
+	{
+		close(_events[k].data.fd);
+		epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
+	}
+	unsigned char buf[BUFFER_SIZE] = "";
+	while (recv(_events[k].data.fd, buf, BUFFER_SIZE, 0) > 0) // add flags? MSG_DONTWAIT
+	{
+		for (int i = 0; i < BUFFER_SIZE; i++)
+		{
+			if (!firstRun && i == 0 && isLastCr && buf[i] == '\n')
+			{
+				v.push_back(buf[i]);
+				cmd->_globalCmd.push_back(v);
+				v.clear();
+			}
+			else if (i > 0 && isLastCr && buf[i] == '\n')
+			{
+				v.push_back(buf[i]);
+				cmd->_globalCmd.push_back(v);
+				v.clear();
+			}
+			else
+				v.push_back(buf[i]);
+			if (buf[i] == '\r')
+				isLastCr = 1;
+			else
+				isLastCr = 0;
+			
+			
+		}
+		bzero(buf, BUFFER_SIZE);
+		firstRun = 0;
+	}	
+}
+
+void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
+{
+	std::vector<std::vector<unsigned char> >::size_type j;
+	
+	v.clear();
+	cmd->_parsedCmd.clear();
+	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
+	{			
+		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
+		{
+			cmd->_parsedCmd.push_back(v);
+			v.clear();
+		}
+		else if (cmd->_globalCmd[i][j] != ' ')
+			v.push_back(cmd->_globalCmd[i][j]);
+	}
+}
+
 int	Server::run(void)
 {
 	unsigned char buf[BUFFER_SIZE] = "";
@@ -120,8 +232,8 @@ int	Server::run(void)
 
 	while (true)
 	{	
-		//CHECK CTRL + C
-		int	wait_ret = epoll_wait(_epollfd, _events, 1, -1);
+		int	wait_ret = epoll_wait(_epollfd, _events, EPOLLIN, 1);
+		check_kill(*this);
 		if (wait_ret == -1)
 			return (std::cerr << "Error on epoll wait" << std::endl, 1);
 		for (k = 0; k < wait_ret; ++k)
@@ -234,6 +346,32 @@ std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 	return (it);
 }
 
+std::list<User>::iterator	Server::findUser(int fd)
+{
+	std::list<User>::iterator it;
+	for (it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		if (it->getfd() == fd)
+			return (it);
+	}	
+	return (it); // _Users.end()?
+}
+void Server::printUsersList(void)
+{
+	std::cout << "____PRINT USERS____\n";
+	for (std::list<User>::iterator it = _Users.begin(); it != _Users.end(); ++it)
+	{
+		// to test user name
+		// std::vector<unsigned char> v;
+		// std::string str = "lol";
+		// add_to_vector(&v, str);
+		// it->setUserName(v);
+		
+		std::cout << *it << std::endl;
+	}
+	std::cout << "__END PRINT USERS__\n";
+}
+
 // GETTERS
 
 std::list<User>::iterator	Server::getUsr(int fd)
@@ -266,7 +404,7 @@ int Server::getEpollfd(void) const
 	return (_epollfd);
 }
 
-std::list<User> Server::getUser(void) const
+std::list<User> Server::getUsers(void) const
 {
 	return (this->_Users);
 }

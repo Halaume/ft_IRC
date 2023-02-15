@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 14:15:06 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:26:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,22 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
-
+#include <stdlib.h>
 
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "../inc/User.hpp"
+#include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-Command::Command(void): _cmdUser(), _parsedCmd()
+std::string server_name = "mig.42.fr";
+
+Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _cmd_size(0), _error(0), _cmd_user(NULL)
 {
 }
 
-Command::Command(const Command &copy): _cmdUser(copy._cmdUser), _parsedCmd(copy._parsedCmd)
+Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _cmd_fd_user(copy._cmd_fd_user) \
+, _cmd_buf(copy._cmd_buf), _cmd_size(copy._cmd_size), _error(copy._error), _cmd_user(copy._cmd_user)
 {
 
 }
@@ -51,9 +55,72 @@ void	Command::setUser(User* usr)
 	this->_cmdUser = usr;
 }
 
+void Command::setCmdUser(Server &my_server)
+{
+	_cmd_user = my_server.findUser(_cmd_fd_user);
+}
+
+void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
+{
+	(void)error; (void)cmd;
+	_cmd_buf.clear();
+	add_to_vector(&_cmd_buf, ":" + server_name + " ");
+	add_to_vector(&_cmd_buf, _cmd_user->getUserName());
+	add_to_vector(&_cmd_buf, " ");
+	add_to_vector(&_cmd_buf, numeric_response(ERR_NEEDMOREPARAMS, cmd));
+	// add_to_vector(&_cmd_buf, cmd);
+	// add_to_vector(&_cmd_buf, ERR_NEEDMOREPARAMSmsg);
+
+	std::vector<unsigned char>::size_type m;
+	std::cout << "2:\n";
+	for (m = 0; m < _cmd_buf.size(); m++)
+		std::cout << _cmd_buf[m];
+	std::cout << "\n";
+
+}
+
+/*''''''''''''''''''''''''''''''''''''
+				CAP > to delete?
+''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_CAP(Server &my_server)
 {
+	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
 	(void)my_server;
+}
+
+/*''''''''''''''''''''''''''''''''''''
+				PASS
+''''''''''''''''''''''''''''''''''''''*/
+void	Command::_fun_PASS(Server &my_server)
+{
+	(void)my_server;
+	// 1 verify if host is already registered
+	// 2 verify enough arguments
+	// 3 ver
+
+	std::cout << "PASS COMMAND REALIZED\n";
+	std::vector<unsigned char> v;
+	
+	if (this->_parsedCmd.size() < 2 && my_server.findUser(_cmd_fd_user)->getRegistered() == false)
+	{
+		std::cout << "PASS not enough params\n";
+		push_to_buf(ERR_NEEDMOREPARAMS, _parsedCmd[0]);
+		return;
+	}
+	// else if (my_server.findUser(_cmd_fd_user)->getRegistered())
+	// {
+	// 	std::cout << "PASS already registered\n";
+	// 	_error = 462;
+	// 	return ;
+	// }
+	// my_server.findUser(_cmd_fd_user)->setPasswd(_parsedCmd[1]);
+	// std::cout << "PASS found user passwd:|" << my_server.findUser(_cmd_fd_user)->getPasswd() << "|\n";
+	// if (my_server.findUser(_cmd_fd_user)->getPasswd() != my_server.getPasswd())
+	// {
+	// 	std::cout << "PASS wrong password\n";
+	// 	_error = 464;
+	// 	return;
+	// }
 }
 
 void	Command::_fun_NICK(Server &my_server)
@@ -83,32 +150,6 @@ void	Command::_fun_USER(Server &my_server)
 	//	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
 	this->_cmdUser->setRealName(this->_parsedCmd[4]);
 	this->_cmdUser->setRegistered(true);
-}
-
-//TODO Si rate, vider toute la cmd stocker
-void	Command::_fun_PASS(Server &my_server)
-{
-	std::vector<unsigned char> ret;
-
-	if (this->_parsedCmd.size() < 2)
-	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
-		return ;
-	}
-	if (this->_cmdUser->getRegistered())
-	{
-		insert_all(ret, ":You may not reregister\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
-		return ;
-	}
-	this->_cmdUser->setPasswd(this->_parsedCmd[1]);
-//	if (this->_cmdUser.getPasswd() != my_server.getPasswd())
-//	{
-		//TODO free toute la suite des cmd
-		//send err_password incorrect
-//	}
 }
 
 
@@ -154,19 +195,18 @@ void	Command::_fun_JOIN(Server &my_server)
 void	Command::_fun_QUIT(Server &my_server)
 {
 	std::vector<unsigned char> ret;
-	unsigned long i = 1;
 	
-	if (this->_parsedCmd.size() > 1)
-	{
-		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-		i++;
-		while (i < _parsedCmd.size())
-		{
-			ret.push_back(' ');
-			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-			i++;
-		}
-	}
+// 	if (this->_parsedCmd.size() > 1)
+// 	{
+// 		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+// 		i++;
+// 		while (i < _parsedCmd.size())
+// 		{
+// 			ret.push_back(' ');
+// 			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+// 			i++;
+// 		}
+// 	}
 	
 	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
 	{
@@ -175,7 +215,7 @@ void	Command::_fun_QUIT(Server &my_server)
 		this->_cmdUser->getChannels().erase(itc);
 	}
 	
-	my_server.getUser().remove(*(this->_cmdUser));
+	my_server.getUsers().remove(*(this->_cmdUser));
 	close(_cmdUser->getfd());
 }
 
@@ -275,7 +315,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	else
 	{
 		std::list<User>::iterator	itu = my_server.findUser(receiver);
-		if (itu == my_server.getUser().end())
+		if (itu == my_server.getUsers().end())
 		{
 			ret = this->_parsedCmd[0];
 			insert_all(ret, " ERR_NOSUCHNICK\r\n");
@@ -394,6 +434,12 @@ void	Command::answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
+	setCmdUser(my_server);
+	// _cmd_user = my_compare.findUser(_cmd_fd_user);
+
+	std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
+
+	
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
@@ -476,4 +522,21 @@ void	Command::answer(Server &my_server)
 		default:
 			break;
 	}
+}
+
+// Getters
+unsigned char Command::getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type i, std::vector<std::vector<unsigned char> >::size_type j)
+{
+	return (_parsedCmd[i][j]);
+}
+
+std::vector<std::vector<unsigned char> > Command::getParsedCmd()
+{
+	return (_parsedCmd);
+}
+
+// Setters
+void Command::setCmdFdUser(int fd)
+{
+	_cmd_fd_user = fd;	
 }

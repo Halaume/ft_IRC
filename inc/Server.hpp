@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 13:31:20 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 15:27:27 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,15 @@
 
 #include "Channel.hpp"
 #include "User.hpp"
+#include "Command.hpp"
 
 #define BUFFER_SIZE 1048576
 
 class Channel;
 
 class User;
+
+// class Command;
 
 class Server
 {
@@ -39,35 +42,47 @@ class Server
 		
 		int			init(char **);
 		int			run(void);
+		int			accept_socket(int);
 
 
-		void printUsersList(void);
+		void						printUsersList(void);
 
 		// GETTERS
 		std::vector<Channel>	getChannel(void) const;
 		int						getSct(void) const;
 		int						getEpollfd(void) const;
-		// User*		getUser(int fd);
 
-		std::list<User>					getUser(void) const;
 		char **							getArgv(void) const;
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
-		Channel &						findChan(std::vector<unsigned char>);
 		void							sendto(int, std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		std::list<User>::iterator		getUsr(int);
+
+		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
+		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
+		
+		void 						printGlobalCommand(Command cmd);
+		void 						printParsedCommand(Command cmd);
+
+		bool						isUserInList(int);
+
+		std::list<User>				getUsers(void) const;
+		Channel &					findChan(std::vector<unsigned char>);
+		std::list<User>::iterator	findUser(int fd);
 
 	private:
 		char **					_argv;
 		sockaddr_in				_server;
 		int						_sct;
-		char *					_passwd;
+		std::vector<unsigned char>	_passwd;
 		int						_epollfd;
 		epoll_event				_events[10];
 		epoll_event				_ev;
 		epoll_event				_evout;
 		std::vector<Channel>	_channels;
 		std::list<User>			_Users;
+
+		
 };
 
 #endif
