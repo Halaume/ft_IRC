@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 16:52:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:10:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,16 @@ Server &	Server::operator=(const Server & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
+}
+
+std::list<User>::iterator	Server::getUsr(int fd)
+{
+	for (std::list<User>::iterator it = this->_Users.begin(); it != this->_Users.end(); it++)
+	{
+		if (it->getfd() == fd)
+			return (it);
+	}
+	return (this->_Users.end());
 }
 
 std::vector<Channel>::iterator	Server::findExistingChan(std::vector<unsigned char> channel)
@@ -117,8 +127,6 @@ int	Server::run(void)
 	int k;
 //	std::vector<std::vector<unsigned char> >::size_type i, j;
 	socklen_t server_length = sizeof(_server);
-	std::vector<std::vector<unsigned char> > command;
-	std::vector<std::vector<unsigned char> > scommand;
 	std::vector<unsigned char> v;
 	_ev.events = EPOLLIN | EPOLLET;
 	_evout.events = EPOLLOUT | EPOLLET;
@@ -146,7 +154,7 @@ int	Server::run(void)
 			}
 			else
 			{
-				command.clear();
+				std::list<User>::iterator Usr = this->getUsr(this->_events[k].data.fd);
 				v.clear();
 				// Hang up
 				if (_events[k].events & EPOLLHUP)
@@ -154,21 +162,41 @@ int	Server::run(void)
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 					close(_events[k].data.fd);
 				}
-				// Read fdand get command
 				unsigned char buf[BUFFER_SIZE] = "";
-				retrec = recv(_events[k].data.fd, buf, BUFFER_SIZE, MSG_DONTWAIT);// add flags? MSG_DONTWAIT
+				retrec = recv(_events[k].data.fd, buf, BUFFER_SIZE, MSG_DONTWAIT);//MAX RECVPOSSIBLE a voir
 				if (retrec < 0)
-				{
-					//Free le User de tout la ou il est present into close fd
-				}
+					this->_Users.erase(Usr);
 				else if (retrec == BUFFER_SIZE)//MAX RECVPOSSIBLE a voir
 				{
-					//Store Le buffer dans USER->currcmd(C'est un string mais maybe a changer jsp)
+					for (int i = 0; i < BUFFER_SIZE; i++)
+						v.push_back(buf[i]);
+					Usr->insertCurrCmd(v);
 				}
 				else
 				{
-					//Parse buffer into go commande
-					//Command	Command a faire;
+					Command	cmd;
+					std::vector<std::vector<unsigned char> >	ParsedCommand;
+
+					for (int i = 0; i < retrec; i++)
+						v.push_back(buf[i]);
+					Usr->insertCurrCmd(v);
+					std::vector<unsigned char>::iterator last = Usr->getCurrCmdbg();
+					for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
+					{
+						if (it != Usr->getCurrCmdbg() && *it - 1 == '\r' && *it == '\n')
+						{
+							std::vector<unsigned char>	CmdNoParse(last, it);
+							for (std::vector<unsigned char>::iterator j = last; j != it; j++)
+							{			
+								if (*j == ' ' || j == it - 2)
+									cmd.getCommand().insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
+							}
+							Usr->getCurrCmd().erase(last, it);
+							last = it + 1;
+						}
+					}
+					cmd.setUser(&(*Usr));
+					cmd.setCommand(ParsedCommand);
 				}
 				/*
 				while (recvpabo > 0)

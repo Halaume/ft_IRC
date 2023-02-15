@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 16:32:08 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 13:40:26 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,15 @@ Command &	Command::operator=(const Command & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
+}
+
+void	Command::setCommand(std::vector<std::vector<unsigned char> > cmd)
+{
+	this->_parsedCmd = cmd;
+}
+void	Command::setUser(User* usr)
+{
+	this->_cmdUser = usr;
 }
 
 void	Command::_fun_CAP(Server &my_server)

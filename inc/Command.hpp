@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 15:58:44 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 14:08:06 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,13 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
+		std::vector<std::vector<unsigned char> >	getCommand(void) const;
+		void		setCommand(std::vector<std::vector<unsigned char> >);
+		void		setUser(User*);
 
+		//Aucune idee de ce que c'est
 		void	parseCommand(std::string);
-		
+
 	private:
 		User *										_cmdUser;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;

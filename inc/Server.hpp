@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 14:21:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 13:31:20 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include "Channel.hpp"
 #include "User.hpp"
 
-#define BUFFER_SIZE 3000
+#define BUFFER_SIZE 1048576
 
 class Channel;
 
@@ -55,6 +55,7 @@ class Server
 		Channel &						findChan(std::vector<unsigned char>);
 		void							sendto(int, std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
+		std::list<User>::iterator		getUsr(int);
 
 	private:
 		char **					_argv;

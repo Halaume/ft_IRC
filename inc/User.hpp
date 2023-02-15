@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 16:36:05 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 13:59:18 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class User
 
 		// SETTERS
 		// void				setfd(int fd);
-		// void				setCurrCmd(std::string currCmd);
+//		void				setCurrCmd(std::vector<> currCmd);
 		// void				setUserName(std::string name);
 		// void				setRealName(std::string name);
 		// void				setClient(std::string client);
@@ -48,8 +48,11 @@ class User
 		bool						operator!=(User) const;
 		
 		std::vector<Channel *> 		getChannels(void) const;
+		std::vector<unsigned char>	getCurrCmd(void) const;
 		std::vector<Channel *>::iterator	getChannelsbg(void);
 		std::vector<Channel *>::iterator	getChannelsend(void);
+		std::vector<unsigned char>::iterator	getCurrCmdbg(void);
+		std::vector<unsigned char>::iterator	getCurrCmdend(void);
 		int							getfd(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
@@ -60,13 +63,14 @@ class User
 		int							getNbChan(void);
 		bool						getOperator(void) const;
 		void						setOperator(bool);
+		void						insertCurrCmd(std::vector<unsigned char>);
 		
 	private:
 		int							_fd;
 		bool						_operator;
 		bool						_registered;
 		std::vector<unsigned char>	_passwd;
-		std::string					_currCmd;
+		std::vector<unsigned char>	_currCmd;
 		std::vector<unsigned char>	_userName;
 		std::vector<unsigned char>	_realName;
 		std::string					_client;

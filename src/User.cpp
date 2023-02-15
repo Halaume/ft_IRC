@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 16:32:26 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/15 13:59:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,11 @@ bool	User::getRegistered(void) const
 	return (this->_registered);
 }
 
+std::vector<unsigned char>	User::getCurrCmd(void) const
+{
+	return (this->_currCmd);
+}
+
 std::vector<Channel *>::iterator	User::getChannelsbg(void)
 {
 	return (this->_channels.begin());
@@ -74,6 +79,16 @@ std::vector<Channel *>::iterator	User::getChannelsbg(void)
 std::vector<Channel *>::iterator	User::getChannelsend(void)
 {
 	return (this->_channels.end());
+}
+
+std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
+{
+	return (this->_currCmd.begin());
+}
+
+std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
+{
+	return (this->_currCmd.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const
@@ -119,4 +134,9 @@ bool	User::getOperator(void) const
 void	User::setOperator(bool val)
 {
 	this->_operator = val;
+}
+
+void	User::insertCurrCmd(std::vector<unsigned char> vec)
+{
+	this->_currCmd.insert(this->_currCmd.end(), vec.begin(), vec.end());
 }
