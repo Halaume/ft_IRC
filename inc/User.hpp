@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:56:01 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:05:41 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class User
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
 		std::vector<unsigned char>	getPasswd(void) const;
+		std::vector<unsigned char>	getClient(void) const;
 		void						setPassStatus(int);
 		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>);

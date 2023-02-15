@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 21:48:10 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 18:08:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,13 @@
 User::User(void): _fd(), _pass_status(0), _registered(false), _passwd(), _user_name(), _realName(), _client(), _channels()
 {
 	_user_name.push_back('*');
+	_client.push_back('*');
 }
 
 User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _user_name(), _realName(), _client(), _channels()
 {
 	_user_name.push_back('*');
+	_client.push_back('*');
 }
 
 User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _user_name(copy._user_name), _realName(copy._realName), _client(copy._client), _channels(copy._channels)
@@ -54,6 +56,11 @@ int		User::getfd(void) const
 	return (this->_fd);
 }
 
+std::vector<unsigned char> User::getPasswd(void) const
+{
+	return (_passwd);
+}
+
 int		User::getPassStatus(void) const
 {
 	return (this->_pass_status);
@@ -63,11 +70,6 @@ bool	User::getRegistered(void) const
 {
 	return (this->_registered);
 }
-
-// std::vector<unsigned char> User::getPasswd(void) const
-// {
-// 	return (this->_passwd);
-// }
 
 std::vector<unsigned char> User::getUserName(void) const
 {
@@ -83,18 +85,6 @@ void	User::setRegistered(bool registered)
 {
 	this->_registered = registered;
 }
-
-void	User::setPasswd(std::vector<unsigned char> passwd)
-{
-	this->_passwd = passwd;
-}
-
-// void	User::setPasswd(std::vector<unsigned char> passwd)
-// {
-// 	_passwd.clear();
-// 	for (std::vector<unsigned char>::size_type it = 0; it < passwd.size(); it++)
-// 		_passwd.push_back((char)passwd[it]);
-// }
 
 void User::setUserName(std::vector<unsigned char> user_name)
 {
@@ -123,6 +113,17 @@ std::vector<Channel>& User::getChannels(void)
 	return (this->_channels);
 }
 
+std::vector<unsigned char> User::getClient(void) const
+{
+	return (_client);
+}
+
+void User::setPasswd(std::vector<unsigned char> passwd)
+{
+	_passwd.clear();
+	_passwd = passwd;
+}
+
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
@@ -130,7 +131,10 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << "Username: ";
 	for (m = 0; m < i.getUserName().size(); m++)
 		o << i.getUserName()[m];
-	o << " fd: " << i.getfd() << std::endl;
+	o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
+	for (m = 0; m < i.getPasswd().size(); m++)
+		o << i.getPasswd()[m];
+	o << std::endl;
 
 	return o;
 }

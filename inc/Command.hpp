@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:44:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:27:02 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,13 @@ class Command
 		~Command(void);
 		Command &	operator=(const Command & src);
 
-		void										push_to_buf(int error, std::vector<unsigned char> vector);
+		void										push_to_buf(int error);
 		
 		// Getters
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
+		std::list<User>::iterator					getCmdUser();
 
 		// Setters
 		void										setCmdFdUser(int);
@@ -57,7 +58,6 @@ class Command
 		
 		int										_cmd_fd_user;
 		std::vector<unsigned char>				_cmd_buf;
-		std::vector<unsigned char>::size_type	_cmd_size;
 		int										_error;
 		std::list<User>::iterator				_cmd_user;
 		

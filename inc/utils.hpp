@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:54:21 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:35:10 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,11 @@ void                                        add_to_vector(std::vector<unsigned c
 void                                        add_to_vector(std::vector<unsigned char>* v, std::string str);
 void                                        add_to_vector(std::vector<unsigned char>*, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
+
+std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg);
+std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg);
+
+// std::vector<unsigned char>                  concat_resp(std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg);
 
 void                                        print_vector(std::vector<unsigned char> v);
 

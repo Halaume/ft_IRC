@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:05:01 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 18:29:55 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,23 +190,7 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 	}	
 }
 
-void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
-{
-	std::vector<std::vector<unsigned char> >::size_type j;
-	
-	v.clear();
-	cmd->_parsedCmd.clear();
-	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
-	{			
-		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
-		{
-			cmd->_parsedCmd.push_back(v);
-			v.clear();
-		}
-		else if (cmd->_globalCmd[i][j] != ' ')
-			v.push_back(cmd->_globalCmd[i][j]);
-	}
-}
+
 
 int	Server::run(void)
 {
@@ -231,6 +215,7 @@ int	Server::run(void)
 				if (isUserInList(_events[k].data.fd) == false) // ADD User to list
 				{
 					User new_user(_events[k].data.fd);
+					// new_user.setRegistered(true); // <<<<< delete
 					_Users.push_back(new_user);
 				}
 				//////////////////////////
@@ -290,17 +275,6 @@ void Server::send_to_client(int fd, std::vector<unsigned char> buf)
 	(void)ret;
 }
 
-// std::list<User>::iterator	Server::findUser(std::string nick)
-// {
-// 	std::list<User>::iterator it;
-// 	for (it = _Users.begin(); it != _Users.end(); ++it)
-// 	{
-// 		if (it->getUserName() == nick)
-// 			return (it);
-// 	}
-// 	return (it);// _Users.end() ?
-// }
-
 std::list<User>::iterator	Server::findUser(int fd)
 {
 	std::list<User>::iterator it;
@@ -330,6 +304,31 @@ void Server::printUsersList(void)
 
 // GETTERS
 
+void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
+{
+	std::vector<std::vector<unsigned char> >::size_type j;
+	
+	v.clear();
+	cmd->_parsedCmd.clear();
+	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
+	{			
+		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
+		{
+			cmd->_parsedCmd.push_back(v);
+			v.clear();
+		}
+		else if (cmd->_globalCmd[i][j] != ' ')
+			v.push_back(cmd->_globalCmd[i][j]);
+	}
+}
+
+// void Server::getParsedCmd(void)
+// {
+// 	std::vector<std::vector<unsigned char> >::size_type j;
+	
+// 	return (_parsedCmd)
+// }
+
 int Server::getSct(void)
 {
 	return (_sct);
@@ -345,84 +344,7 @@ std::list<User> Server::getUsers(void) const
 	return (this->_Users);
 }
 
-// std::string Server::getPasswd(void) const
-// {
-// 	return (_passwd);
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// User* Server::getUser(int fd)
-// {
-// 	std::list<User>::iterator it;
-// 	for (it = _users_list.begin(); it != _users_list.end(); ++it) {
-// 		if (it->getfd() == fd)
-// 			return (&(*it));
-// 	}
-// 	// Exception si User pas trouve?
-// 	return (&(*it));
-// }
-
-// Print scommand
-// std::cout << "Print scommand____\n";
-// for (m = 0; m < scommand.size(); m++) 
-// {
-// 	std::cout << ">";
-// 	for (n = 0; n < scommand[m].size(); n++)
-// 		std::cout << scommand[m][n];
-// 	std::cout << "\n";
-// }
-// std::cout << "End scommand\n";
+std::vector<unsigned char> Server::getPasswd(void) const
+{
+	return (_passwd);
+}

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 14:55:09 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 17:51:00 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Channel;
 
 class User;
 
-// class Command;
+class Command;
 
 class Server
 {
@@ -50,11 +50,12 @@ class Server
 		// GETTERS
 		int							getSct(void);
 		int							getEpollfd(void);
-		std::string					getPasswd(void) const;
+		std::vector<unsigned char>	getPasswd(void) const;
 		// User*						getUser(int fd);
 
 		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
 		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
+		void 						getParsedCmd();
 		
 		void 						printGlobalCommand(Command cmd);
 		void 						printParsedCommand(Command cmd);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:55:35 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/15 18:25:17 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,24 @@
 #include <vector>
 #include <string>
 #include <string.h>
+
+std::string itos(int n)
+{
+	std::string str;
+	char		c;
+	std::basic_string<char>::size_type l;
+	
+	while (n > 0)
+	{
+		c = '0' + (n % 10);
+		str.push_back(c);
+		n /= 10;
+	}
+	l = str.length();
+	for (std::basic_string<char>::size_type i = 0; i < l / 2; i++)
+        std::swap(str[i], str[l - i - 1]);
+	return (str);
+}
 
 void add_to_vector(std::vector<unsigned char> v, char *str)
 {
@@ -29,11 +47,7 @@ void add_to_vector(std::vector<unsigned char>* v, std::string str)
 
 std::vector<unsigned char> to_vector(std::string str)
 {
-	std::vector<unsigned char> v;
-	
-	for (size_t i = 0; i < str.size(); i++)
-		v.push_back(static_cast<unsigned char>(str[i]));
-	return (v);
+	return (std::vector<unsigned char>(str.begin(), str.end()));
 }
 
 
@@ -54,6 +68,43 @@ std::vector<unsigned char> concat_vectors(std::vector<unsigned char> v1, std::ve
 	return (ret);
 }
 
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	std::string scode = itos(code);
+	
+	ret.push_back(' ');
+	for (std::string::size_type j = 0; j < scode.size(); j++)
+		ret.push_back(scode[j]);
+	ret.push_back(' ');
+	for (i = 0; i < client.size(); i++)
+		ret.push_back(client[i]);
+	ret.push_back(' ');
+	for (i = 0; i < cmd.size(); i++)
+		ret.push_back(cmd[i]);
+	for (i = 0; i < msg.size(); i++)
+		ret.push_back(msg[i]);
+	return (ret);
+}
+
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	std::string scode = itos(code);
+	
+	ret.push_back(' ');
+	for (std::string::size_type j = 0; j < scode.size(); j++)
+		ret.push_back(scode[j]);
+	ret.push_back(' ');
+	for (i = 0; i < client.size(); i++)
+		ret.push_back(client[i]);
+	for (i = 0; i < msg.size(); i++)
+		ret.push_back(msg[i]);
+	return (ret);
+}
+
 void print_vector(std::vector<unsigned char> v)
 {
 	std::vector<unsigned char>::size_type m;
@@ -70,24 +121,6 @@ int ft_strlen(const unsigned char* str)
 	while (str[i])
 		i++;
 	return (i);
-}
-
-std::string itos(int n)
-{
-	std::string str;
-	char		c;
-	std::basic_string<char>::size_type l;
-	
-	while (n > 0)
-	{
-		c = '0' + (n % 10);
-		str.push_back(c);
-		n /= 10;
-	}
-	l = str.length();
-	for (std::basic_string<char>::size_type i = 0; i < l / 2; i++)
-        std::swap(str[i], str[l - i - 1]);
-	return (str);
 }
 
 void insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
