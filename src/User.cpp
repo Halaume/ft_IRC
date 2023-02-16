@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 17:02:43 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 12:01:16 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,20 @@ User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _
 
 User::~User(void)
 {
-	if (this->_fd != 0)
-		close(this->_fd);
 }
 
 User &	User::operator=(const User & src)
 {
 	if (&src == this)
 		return (*this);
+	this->_fd = src._fd;
+	this->_pass_status = src._pass_status;
+	this->_registered = src._registered;
+	this->_passwd = src._passwd;
+	this->_userName = src._userName;
+	this->_realName = src._realName;
+	this->_client = src._client;
+	this->_channels = src._channels;
 	return (*this);
 }
 

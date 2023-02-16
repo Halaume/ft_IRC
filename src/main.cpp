@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:52:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 11:48:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,19 +26,12 @@ int is_kill = 0;
 
 void	signal_handling(int sig)
 {
-	// if (close(g_serv.getSct()) == -1) {
-	// 	std::cerr << "Failed to close socket\n";
-	// }
-	// if (close(g_serv.getEpollfd()) == -1) {
-	// 	std::cerr << "Failed to close epoll file descriptor\n";
-	// 	// return 1
-	// }
 	is_kill = sig;
 }
 
 void	check_kill(Server& server)
 {
-	if (is_kill != 0)// CTRL + C
+	if (is_kill == 130)// CTRL + C
 	{
 		free_fun(server);
 		exit(0);
@@ -53,12 +46,8 @@ int main(int argc, char **argv)
 
 	std::signal(SIGINT, signal_handling);
 
-	// std::cout << " enum 1:" << RPL_WELCOME << std::endl;
 	if(g_serv.init(argv) != 0)
 		return (1);
-	// if (close(g_serv.getEpollfd()) == -1) {
-	// 	std::cerr << "Failed to close epoll file descriptor\n";
-	// }
-	return (g_serv.run());
-	// return 0;
+	g_serv.run();
+	return (1);
 }
