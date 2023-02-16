@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 17:38:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 18:35:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,14 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd)//std::vec
 {
 	switch (num_code)
 	{
+		case ERR_NONICKNAMEGIVEN:
+		{
+			return (ERR_NONICKNAMEGIVENmsg(ERR_NONICKNAMEGIVEN));
+		}
+		case ERR_NICKNAMEINUSE:
+		{
+			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, cmd.getCmdUser()->getClient(), cmd.getCmdUser()->getNick()));
+		}
 		case ERR_NEEDMOREPARAMS:
 		{
 			return (ERR_NEEDMOREPARAMSmsg(ERR_NEEDMOREPARAMS, cmd.getCmdUser()->getClient(), cmd.getParsedCmd()[0]));
@@ -30,6 +38,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd)//std::vec
 		case ERR_ALREADYREGISTERED:
 		{
 			return (ERR_ALREADYREGISTEREDmsg(ERR_ALREADYREGISTERED, cmd.getCmdUser()->getClient()));
+		}
+		case ERR_PASSWDMISMATCH:
+		{
+			return (ERR_PASSWDMISMATCHmsg(ERR_PASSWDMISMATCH, cmd.getCmdUser()->getClient()));
 		}
 	}
 

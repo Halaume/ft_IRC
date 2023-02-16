@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 17:51:00 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:06:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,11 @@ class Server
 
 		bool						isUserInList(int);
 
-		std::list<User>				getUsers(void) const;
-		Channel &					findChan(std::vector<unsigned char>);
+		const std::list<User>&		getUsers(void) const;
+		Channel&					findChan(std::vector<unsigned char>);
 		void						send_to_client(int, std::vector<unsigned char>);
 		std::list<User>::iterator	findUser(std::string nick);
+		std::list<User>::iterator	findUserNick(std::vector<unsigned char> nick);
 		std::list<User>::iterator	findUser(int fd);
 
 		std::list<User>					_Users;

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 18:25:17 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:41:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,28 +33,27 @@ std::string itos(int n)
 	return (str);
 }
 
-void add_to_vector(std::vector<unsigned char> v, char *str)
+void add_to_vector(std::vector<unsigned char>& v, char *str)
 {
 	for (size_t i = 0; i < strlen(str); i++)
 		v.push_back(static_cast<unsigned char>(str[i]));
 }
 
-void add_to_vector(std::vector<unsigned char>* v, std::string str)
+void add_to_vector(std::vector<unsigned char>& v, std::string str)
 {
 	for (size_t i = 0; i < str.size(); i++)
-		(*v).push_back(static_cast<unsigned char>(str[i]));
+		v.push_back(static_cast<unsigned char>(str[i]));
+}
+
+void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
+{
+	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
+		v1.push_back(v2[i]);
 }
 
 std::vector<unsigned char> to_vector(std::string str)
 {
 	return (std::vector<unsigned char>(str.begin(), str.end()));
-}
-
-
-void add_to_vector(std::vector<unsigned char>* v1, std::vector<unsigned char> v2)
-{
-	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
-		(*v1).push_back(v2[i]);
 }
 
 std::vector<unsigned char> concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
@@ -68,7 +67,7 @@ std::vector<unsigned char> concat_vectors(std::vector<unsigned char> v1, std::ve
 	return (ret);
 }
 
-std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg)
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> msg)
 {
 	std::vector<unsigned char> ret;
 	std::vector<unsigned char>::size_type i;
@@ -77,18 +76,12 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> clie
 	ret.push_back(' ');
 	for (std::string::size_type j = 0; j < scode.size(); j++)
 		ret.push_back(scode[j]);
-	ret.push_back(' ');
-	for (i = 0; i < client.size(); i++)
-		ret.push_back(client[i]);
-	ret.push_back(' ');
-	for (i = 0; i < cmd.size(); i++)
-		ret.push_back(cmd[i]);
 	for (i = 0; i < msg.size(); i++)
 		ret.push_back(msg[i]);
 	return (ret);
 }
 
-std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg)
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, std::vector<unsigned char> msg)
 {
 	std::vector<unsigned char> ret;
 	std::vector<unsigned char>::size_type i;
@@ -98,8 +91,28 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> clie
 	for (std::string::size_type j = 0; j < scode.size(); j++)
 		ret.push_back(scode[j]);
 	ret.push_back(' ');
-	for (i = 0; i < client.size(); i++)
-		ret.push_back(client[i]);
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	for (i = 0; i < msg.size(); i++)
+		ret.push_back(msg[i]);
+	return (ret);
+}
+
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	std::string scode = itos(code);
+	
+	ret.push_back(' ');
+	for (std::string::size_type j = 0; j < scode.size(); j++)
+		ret.push_back(scode[j]);
+	ret.push_back(' ');
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
 	for (i = 0; i < msg.size(); i++)
 		ret.push_back(msg[i]);
 	return (ret);
@@ -170,51 +183,30 @@ int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 	return (0);
 }
 
-// std::string v_to_str(std::vector<unsigned char> vector)
-// {
-// 	std::string str;
+int	my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	// std::cout << "size1:" << v1.size() << " size2:" << v2.size() << std::endl;
+	if (v1.size() != v2.size())
+		return (1);
+	for (std::vector<unsigned char>::size_type i = 0; i < v1.size(); i++)
+	{
+		// std::cout << "getcli:" << v1[i] << " and cli:" << v2[i] << std::endl;
+		if (v1[i] != v2[i])
+			return (1);
+	}
+	return (0);
+}
 
-// 	for (std::vector<unsigned char>::size_type i = 0; i < vector.size(); i++)
-// 		str.push_back((char)vector[i]);
-// 	return (str);
-// }
-
-// Responses
-// std::vector<unsigned char> server_response(std::string client, std::string code, std::string command, std::string to_insert)
-// {
-// 	(void)client; (void)code; (void)command; (void)to_insert;
-// 	int j;
-// 	std::vector<unsigned char> ret;
-
-// 	ret.push_back(':');
-// 	// if (client.length() > 0)
-// 	// {
-// 	// 	for (j = 0; j < (int)client.length(); j++)
-// 	// 		ret.push_back(client[j]);
-// 	// 	ret.push_back('!');
-// 	// 	for (j = 0; j < (int)client.length(); j++)
-// 	// 		ret.push_back(client[j]);
-// 	// 	ret.push_back('@');
-// 	// 	for (j = 0; j < (int)server_name.length(); j++)
-// 	// 		ret.push_back(server_name[j]);
-// 	// }
-// 	// else
-// 	// {
-// 	// 	for (j = 0; j < ft_strlen(server_name); j++)
-// 	// 		ret.push_back(server_name[j]);
-// 	// // }
-// 	ret.push_back(' ');
-// 	// for (j = 0; j < (int)code.length(); j++)
-// 	// 	ret.push_back(code[j]);
-// 	// ret.push_back(' ');
-// 	// for (j = 0; j < (int)client.length(); j++)
-// 	// 	ret.push_back(client[j]);
-// 	// ret.push_back(' ');
-// 	// for (j = 0; j < (int)command.length(); j++)
-// 	// 	ret.push_back(command[j]);
-// 	// ret.push_back(' ');
-// 	// ret.push_back(':');
-// 	// for (std::vector<unsigned char>::size_type i = 0; to_insert[i]; i++)
-// 	// 	ret.push_back(static_cast<unsigned char>(to_insert[i]));
-// 	return (ret);
-// }
+bool isValidCharacter(unsigned char c)
+{
+	if ((c >= '0' && c <= '9') ||
+		(c >= 'A' && c <= 'Z') ||
+		(c >= 'a' && c <= 'z') ||
+		(c == '-') || (c == '_') ||
+		(c == '[') || (c == ']') ||
+		(c == '{') || (c == '}') ||
+		(c == '\\') || (c == '`') ||
+		(c == '|'))
+		return (true);
+	return (false);
+}

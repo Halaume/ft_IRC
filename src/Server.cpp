@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 18:29:55 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:06:07 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ int	Server::init(char **argv)
 	bzero(&_server, sizeof(_server));
 	
 	add_to_vector(_passwd, argv[2]);
+
+	// print_vector(_passwd);
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
@@ -286,19 +288,29 @@ std::list<User>::iterator	Server::findUser(int fd)
 	return (it); // _Users.end()?
 }
 
+std::list<User>::iterator Server::findUserNick(std::vector<unsigned char> nick)
+{
+	int i = 0;
+	std::list<User>::iterator itu;
+
+	for (itu = _Users.begin(); itu != _Users.end(); ++itu)
+	{
+		// std::cout << i << std::endl;
+		if (!my_compare(itu->getNick(), nick))
+			return (itu);
+		i++;
+	}
+	// std::cout << i << std::endl;
+	// if (itu == _Users.end())
+	// 	std::cout << "OK == end()\n";
+	return (itu);
+}
+
 void Server::printUsersList(void)
 {
 	std::cout << "____PRINT USERS____\n";
 	for (std::list<User>::iterator it = _Users.begin(); it != _Users.end(); ++it)
-	{
-		// to test user name
-		// std::vector<unsigned char> v;
-		// std::string str = "lol";
-		// add_to_vector(&v, str);
-		// it->setUserName(v);
-		
 		std::cout << *it << std::endl;
-	}
 	std::cout << "__END PRINT USERS__\n";
 }
 
@@ -339,7 +351,7 @@ int Server::getEpollfd(void)
 	return (_epollfd);
 }
 
-std::list<User> Server::getUsers(void) const
+const std::list<User>& Server::getUsers(void) const
 {
 	return (this->_Users);
 }

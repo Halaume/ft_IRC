@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 17:05:41 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:32:11 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 #include <vector>
 
 #include "Channel.hpp"
+
+#define PASSWORD_NOT_SET	0
+#define PASSWORD_SET		1
 
 class Channel;
 
@@ -47,6 +50,8 @@ class User
 		
 		bool						operator==(User) const;
 		bool						operator!=(User) const;
+
+		bool						isNickValid(std::vector<unsigned char> nick);
 		
 		std::vector<Channel>& 		getChannels(void);
 		int							getfd(void) const;
@@ -55,14 +60,18 @@ class User
 		std::vector<unsigned char>	getUserName(void) const;
 		std::vector<unsigned char>	getPasswd(void) const;
 		std::vector<unsigned char>	getClient(void) const;
-		void						setPassStatus(int);
-		void						setRegistered(bool);
-		void						setPasswd(std::vector<unsigned char>);
-		void						setPasswd(std::string);
-		void						setUserName(std::vector<unsigned char> user_name);
-		void						setUserNamev(std::vector<unsigned char>);
-		void						setRealName(std::vector<unsigned char>);
+		std::vector<unsigned char>	getNick(void) const;
 		int							getNbChan(void);
+		
+		void						setPassStatus(int);
+		void						setRegistered(bool&);
+		void						setPasswd(std::vector<unsigned char>&);
+		void						setClient(std::vector<unsigned char>&);
+		void						setNick(std::vector<unsigned char>&);
+		void						setPasswd(std::string&);
+		void						setUserName(std::vector<unsigned char>&);
+		void						setUserNamev(std::vector<unsigned char>&);
+		void						setRealName(std::vector<unsigned char>&);
 		
 	private:
 		int							_fd;
@@ -73,6 +82,7 @@ class User
 		std::vector<unsigned char>	_user_name;
 		std::vector<unsigned char>	_realName;
 		std::vector<unsigned char>	_client;
+		std::vector<unsigned char>	_nick;
 		std::vector<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };

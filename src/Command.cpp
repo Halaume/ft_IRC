@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 18:26:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:31:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,23 @@ void Command::setCmdUser(Server &my_server)
 
 void Command::push_to_buf(int error)
 {
+	std::vector<unsigned char> generic_nickname;
+
+	generic_nickname.push_back('*');
 	_cmd_buf.clear();
-	add_to_vector(&_cmd_buf, ":" + server_name);
-	add_to_vector(&_cmd_buf, numeric_response(error, *this));
+	// if (my_compare(generic_nickname, _cmd_user->getClient()))
+	// {
+		add_to_vector(_cmd_buf, ":" + server_name);
+	// }
+	// else // to verify
+	// {
+		// add_to_vector(_cmd_buf, ":");
+		// add_to_vector(_cmd_buf, _cmd_user->getClient());
+		// add_to_vector(_cmd_buf, "!");
+		// add_to_vector(_cmd_buf, _cmd_user->getUserName());
+		// add_to_vector(_cmd_buf, "@" + server_name);
+	// }
+	add_to_vector(_cmd_buf, numeric_response(error, *this));
 
 	std::vector<unsigned char>::size_type m;
 	std::cout << "2:\n";
@@ -74,33 +88,64 @@ void	Command::_fun_CAP(Server &my_server)
 }
 
 /*''''''''''''''''''''''''''''''''''''
-				PASS > sendto
+				PASS TODO + sendto + passlength or char restriction? +++ exit and close connection when password mismatch
+				Verifier que pas nick ou USER
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_PASS(Server &my_server)
 {
 	(void)my_server;
 	std::vector<unsigned char> v;
 	
-	if (this->_parsedCmd.size() < 2 && _cmd_user->getRegistered() == false)
+	print_vector(_parsedCmd[1]);
+	print_vector(my_server.getPasswd());
+	if (_parsedCmd.size() < 2 && _cmd_user->getRegistered() == false) // && !_cmd_user->getPassStatus())
 	{
 		push_to_buf(ERR_NEEDMOREPARAMS);
 		// sendto
 		return;
 	}
-	else if (_cmd_user->getRegistered())
+	else if (_cmd_user->getRegistered()) // || _cmd_user->getPassStatus())
 	{
 		push_to_buf(ERR_ALREADYREGISTERED);
 		// sendto
-		return ;
+		return;
+	}
+	else if (my_compare(_parsedCmd[1], my_server.getPasswd()))
+	{
+		push_to_buf(ERR_PASSWDMISMATCH);
+		return;
 	}
 	(*_cmd_user).setPasswd(_parsedCmd[1]);
+	(*_cmd_user).setPassStatus(PASSWORD_SET);
 }
 
+/*''''''''''''''''''''''''''''''''''''
+				NICK TODO + verifier que pass est set
+''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_NICK(Server &my_server)
 {
 	(void)my_server;
-}
+	std::cout << "Nick command\n";
+	
+	if (_parsedCmd.size() < 2)
+	{
+		push_to_buf(ERR_NONICKNAMEGIVEN);
+		return;
+	}
+	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
+	if (itu != my_server.getUsers().end())
+	{
+		push_to_buf(ERR_NICKNAMEINUSE);
+		return;
+	}
+	else if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
+	{
+		std::cout << "invalid nick\n";
+		return;
+	}
+	(*_cmd_user).setNick(_parsedCmd[1]);
 
+}
 
 // void	Command::_fun_USER(Server &my_server)
 // {
@@ -309,12 +354,12 @@ void	Command::_fun_PING(Server &my_server)
 
 void	Command::_answer(Server &my_server)
 {
-	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
+	std::string	options[] = {"CAP", "NICK", "PASS", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
 	setCmdUser(my_server);
 	// _cmd_user = my_compare.findUser(_cmd_fd_user);
 
-	std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
+	// std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
 
 	
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
@@ -322,34 +367,23 @@ void	Command::_answer(Server &my_server)
 	switch (i)
 	{
 		case 0:
-		{
-			this->_fun_CAP(my_server);
+			_fun_CAP(my_server);
 			break;
-		}
 		case 1:
-		{
+			_fun_NICK(my_server);
 			break;
-		}
 		case 2:
-		{
-			this->_fun_PASS(my_server);
+			_fun_PASS(my_server);
 			break;
-		}
 		// case 3:
-		// {
 		// 	this->_fun_JOIN(my_server);
 		// 	break;
-		// }
 		// case 4:
-		// {
 		// 	this->_fun_PRIVMSG(my_server);
 		// 	break;
-		// }
 		// case 5:
-		// {
 		// 	this->_fun_OPER(my_server);
 		// 	break;
-		// }
 		// case 6:
 		// {
 		// 	this->_fun_QUIT(my_server);
