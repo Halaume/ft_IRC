@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:23:00 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 14:47:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class User
 		void						setUserName(std::vector<unsigned char> user_name);
 		void						setUserNamev(std::vector<unsigned char>);
 		void						setRealName(std::vector<unsigned char>);
+		void						setRet(std::vector<unsigned char>);
+		std::vector<unsigned char>	getRet(void) const;
 		int							getNbChan(void);
 		bool						getOperator(void) const;
 		void						setOperator(bool);
@@ -66,6 +68,7 @@ class User
 		std::vector<unsigned char>	_userName;
 		std::vector<unsigned char>	_realName;
 		std::vector<unsigned char>	_client;
+		std::vector<unsigned char>	_ret;
 		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 12:01:16 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 14:48:33 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,18 @@
 #include <unistd.h>
 #include "../inc/User.hpp"
 
-User::User(void): _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
+User::User(void): _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _ret(), _channels()
 {
 	this->_fd = 0;
 	_userName.push_back('*');
 }
 
-User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _channels()
+User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _ret(), _channels()
 {
 	_userName.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _userName(copy._userName), _realName(copy._realName), _client(copy._client), _channels(copy._channels)
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _userName(copy._userName), _realName(copy._realName), _client(copy._client), _ret(copy._ret),_channels(copy._channels)
 {
 }
 
@@ -45,6 +45,7 @@ User &	User::operator=(const User & src)
 	this->_userName = src._userName;
 	this->_realName = src._realName;
 	this->_client = src._client;
+	this->_ret = src._ret;
 	this->_channels = src._channels;
 	return (*this);
 }
@@ -72,6 +73,11 @@ int		User::getfd(void) const
 int		User::getPassStatus(void) const
 {
 	return (this->_pass_status);
+}
+
+std::vector<unsigned char>	User::getRet(void) const
+{
+	return (this->_ret);
 }
 
 bool	User::getRegistered(void) const
@@ -122,6 +128,11 @@ void	User::setRegistered(bool registered)
 void	User::setPasswd(std::vector<unsigned char> passwd)
 {
 	this->_passwd = passwd;
+}
+
+void	User::setRet(std::vector<unsigned char> ret)
+{
+	this->_ret = ret;
 }
 
 // void	User::setPasswd(std::vector<unsigned char> passwd)

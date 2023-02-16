@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 11:45:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 15:14:41 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ class Server
 		
 		int			init(char **);
 		void		run(void);
-		int			accept_socket(int);
 
 
 		void						printUsersList(void);
@@ -76,7 +75,7 @@ class Server
 		int						_sct;
 		std::vector<unsigned char>	_passwd;
 		int						_epollfd;
-		epoll_event				_events[10];
+		epoll_event *			_events;
 		epoll_event				_ev;
 		std::vector<Channel>	_channels;
 		std::list<User>			_Users;
