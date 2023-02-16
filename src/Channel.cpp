@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 17:56:14 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/16 17:00:12 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,11 @@ std::list<User>::iterator    Channel::getUsrListend(void)
 std::vector<unsigned char>	 Channel::getTopic(void) const
 {
 	return (this->_topic);	
+}
+
+std::map<char, bool>		 Channel::getModes(void) const
+{
+	return (this->_modes);
 }
 
 void        Channel::setTopic(std::vector<unsigned char> topic)
@@ -167,7 +172,21 @@ void Channel::addUser(User newUser, Server &my_server, std::vector<unsigned char
 
 
 // Getters
-std::list<User>& Channel::getUsers(void)
+std::list<User> &Channel::getUsers(void)
 {
 	return (_userLst);
 }
+
+
+std::list<User>::iterator	Channel::findUser(std::vector<unsigned char> nick)
+{
+	std::list<User>::iterator it;
+	
+	for (it = this->_userLst.begin(); it != this->_userLst.end(); it++)
+	{
+		if (it->getUserName() == nick)
+			return (it);
+	}
+	return (it);
+}
+

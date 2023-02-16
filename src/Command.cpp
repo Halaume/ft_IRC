@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 17:53:51 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/16 16:59:27 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,6 +291,52 @@ void	Command::_fun_MODE(Server &my_server)
 }
 
 
+void	Command::_fun_INVITE(Server &my_server)
+{
+	std::vector<unsigned char>	ret;
+
+	if (this->_parsedCmd.size() > 3)
+	{
+		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+	}
+	
+	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[2]);
+	if (itc == my_server.getChannels().end())
+	{
+		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	
+	std::list<User>::iterator	itu = itc->findUser(this->_cmdUser.getUserName());
+	if (itu == itc->getUsrListend())
+	{
+		insert_all(ret, " ERR_NOTONCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	
+	itu = itc->findUser(_parsedCmd[1]);
+	if (itu != itc->getUsrListend())
+	{
+		insert_all(ret, " ERR_USERONCHANNEL\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	
+	if (itc->getModes().find('i')->second && !itc->isOp(_cmdUser))
+	{
+		insert_all(ret, " ERR_CHANOPRIVSNEEDED\r\n");
+		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
+	}
+	
+	insert_all(ret, " RPL_INVITING\r\n");
+	my_server.send(this->_cmdUser.getfd(), ret);
+	return ;
+}
+
 void	Command::_fun_QUIT(Server &my_server)
 {
 	std::vector<unsigned char> ret;
@@ -403,10 +449,14 @@ void	Command::_fun_KICK(Server &my_server)
 	(void)my_server;
 }
 
-void	Command::_fun_INVITE(Server &my_server)
-{
-	(void)my_server;
-}
+// void	Command::_fun_INVITE(Server &my_server)
+// {
+	
+	
+
+
+// 	(void)my_server;
+// }
 
 void	Command::_fun_KILL(Server &my_server)
 {
