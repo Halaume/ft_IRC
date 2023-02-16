@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 17:35:36 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/16 18:03:08 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	check_kill(Server& server);
 
 Server::Server(void): _argv(), _server(), _sct(), _passwd(), _epollfd(),  _ev(), _channels(), _Users()
 {
-	this->_events = new epoll_event();
+	this->_events = new struct epoll_event[1000];
 }
 
 Server::Server(const Server & copy): _argv(copy._argv), _server(copy._server), _sct(copy._sct), _passwd(copy._passwd), _epollfd(copy._epollfd), _ev(copy._ev), _channels(copy._channels), _Users(copy._Users)
@@ -48,7 +48,7 @@ Server::~Server(void)
 {
 	close(this->_sct);
 	close(this->_epollfd);
-	delete (this->_events);
+	delete [] (this->_events);
 }
 
 Server &	Server::operator=(const Server & src)
@@ -282,7 +282,8 @@ void	Server::run(void)
 							{
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 								close(Usr->getfd());
-								this->_Users.erase(Usr);
+								if (Usr != this->_Users.end())
+									this->_Users.erase(Usr);
 							}
 							else if (retrec == BUFFER_SIZE)//MAX RECVPOSSIBLE a voir
 							{
@@ -323,7 +324,8 @@ void	Server::run(void)
 						default:
 							epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 							close(_events[k].data.fd);
-							this->_Users.erase(Usr);
+							if (Usr != this->_Users.end())
+								this->_Users.erase(Usr);
 							break;
 					}
 				}
@@ -331,7 +333,8 @@ void	Server::run(void)
 				{
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_events[k]);
 					close(_events[k].data.fd);
-					this->_Users.erase(this->getUsr(this->_events[k].data.fd));
+					if (this->getUsr(this->_events[k].data.fd) != this->_Users.end())
+						this->_Users.erase(this->getUsr(this->_events[k].data.fd));
 				}
 			}
 		}
