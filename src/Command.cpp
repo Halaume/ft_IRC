@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 16:59:27 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/16 19:21:05 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -470,11 +470,17 @@ void	Command::_fun_PING(Server &my_server)
 	(void)my_server;
 }
 
+void	Command::_fun_NOTICE(Server &my_server)
+{
+
+	(void)my_server;
+}
+
 void	Command::_answer(Server &my_server)
 {
-	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
+	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
 	int i = 0;
-	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
+	while (i < 16 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
@@ -551,6 +557,11 @@ void	Command::_answer(Server &my_server)
 		case 14:
 		{
 			this->_fun_PING(my_server);
+			break;
+		}
+		case 15:
+		{
+			this->_fun_NOTICE(my_server);
 			break;
 		}
 		default:
