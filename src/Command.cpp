@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:21:05 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/17 16:50:52 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,17 +267,28 @@ void	Command::_fun_OPER(Server &my_server)
 {
 	std::vector<unsigned char> ret;
 	
-	if (_parsedCmd.size() < 3)
+	if (_parsedCmd.size() == 3)
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
-		my_server.send(this->_cmdUser.getfd(), ret);
-		return ;
+		std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
+		if (itu == my_server.getUser().end())
+		{
+			insert_all(ret, " ERR_PASSWMISMTCH\r\n");
+			my_server.send(this->_cmdUser.getfd(),ret);
+			return ;
+		}
+		else 
+		{
+			if (my_compare_vec(_parsedCmd[2], my_server.getPassword()) == 1)
+			{
+				insert_all(ret, " ERR_PASSWMISMTCH\r\n");
+				my_server.send(this->_cmdUser.getfd(),ret);
+				return ;
+			}
+		}
 	}
-	// else (_parsedCmd.size() == 3 && )
-	
-		
-	
+	insert_all(ret, " ERR_PASSWMISMATCH\r\n");
+	my_server.send(this->_cmdUser.getfd(), ret);
+	return ;
 }
 
 void	Command::_fun_ERROR(Server &my_server)
@@ -299,6 +310,7 @@ void	Command::_fun_INVITE(Server &my_server)
 	{
 		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
 		my_server.send(this->_cmdUser.getfd(), ret);
+		return ;
 	}
 	
 	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[2]);
