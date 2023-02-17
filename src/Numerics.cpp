@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 18:35:36 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 11:14:31 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd)//std::vec
 		case ERR_NONICKNAMEGIVEN:
 		{
 			return (ERR_NONICKNAMEGIVENmsg(ERR_NONICKNAMEGIVEN));
+		}
+		case ERR_ERRONEUSNICKNAME:
+		{
+			return (ERR_ERRONEUSNICKNAMEmsg(ERR_ERRONEUSNICKNAME, cmd.getCmdUser()->getClient(), cmd.getCmdUser()->getNick()));
 		}
 		case ERR_NICKNAMEINUSE:
 		{

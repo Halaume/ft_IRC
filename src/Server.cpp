@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:06:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 13:21:32 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,7 @@ int	Server::run(void)
 				if (isUserInList(_events[k].data.fd) == false) // ADD User to list
 				{
 					User new_user(_events[k].data.fd);
-					// new_user.setRegistered(true); // <<<<< delete
+					new_user.setRegistered(true); // <<<<< delete
 					_Users.push_back(new_user);
 				}
 				//////////////////////////

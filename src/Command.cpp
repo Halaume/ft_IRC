@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:31:52 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 13:25:27 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,12 @@
 
 std::string server_name = "mig.42.fr";
 
-Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _error(0), _cmd_user(NULL)
+Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _error(0), _cmd_user(NULL), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 }
 
 Command::Command(const Command &copy): _globalCmd(copy._globalCmd), _parsedCmd(copy._parsedCmd), _cmd_fd_user(copy._cmd_fd_user) \
-, _cmd_buf(copy._cmd_buf), _error(copy._error), _cmd_user(copy._cmd_user)
+, _cmd_buf(copy._cmd_buf), _error(copy._error), _cmd_user(copy._cmd_user), _pass_before_nick_user(copy._pass_before_nick_user)
 {
 
 }
@@ -88,7 +88,7 @@ void	Command::_fun_CAP(Server &my_server)
 }
 
 /*''''''''''''''''''''''''''''''''''''
-				PASS TODO + sendto + passlength or char restriction? +++ exit and close connection when password mismatch
+				PASS TODO + sendto +++ exit and close connection when password mismatch
 				Verifier que pas nick ou USER
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_PASS(Server &my_server)
@@ -96,8 +96,6 @@ void	Command::_fun_PASS(Server &my_server)
 	(void)my_server;
 	std::vector<unsigned char> v;
 	
-	print_vector(_parsedCmd[1]);
-	print_vector(my_server.getPasswd());
 	if (_parsedCmd.size() < 2 && _cmd_user->getRegistered() == false) // && !_cmd_user->getPassStatus())
 	{
 		push_to_buf(ERR_NEEDMOREPARAMS);
@@ -110,22 +108,33 @@ void	Command::_fun_PASS(Server &my_server)
 		// sendto
 		return;
 	}
-	else if (my_compare(_parsedCmd[1], my_server.getPasswd()))
-	{
-		push_to_buf(ERR_PASSWDMISMATCH);
-		return;
-	}
+	// else if (my_compare(_parsedCmd[1], my_server.getPasswd()))
+	// {
+	// 	push_to_buf(ERR_PASSWDMISMATCH);
+	// 	return;
+	// }
 	(*_cmd_user).setPasswd(_parsedCmd[1]);
 	(*_cmd_user).setPassStatus(PASSWORD_SET);
+	if (_pass_before_nick_user == WAITING_FOR_PASS)
+		_pass_before_nick_user = PASS_ORDER_OK;
 }
 
 /*''''''''''''''''''''''''''''''''''''
-				NICK TODO + verifier que pass est set
+				NICK TODO  modifier le message comme décrit ci-dessous?
+				The NICK message may be sent from the server to clients to acknowledge their NICK command
+				was successful and to inform other clients about the change of nickname.
+				In these cases, the <source> of the message will be the old nickname 
+				[ [ "!" user ] "@" host ] of the user who is changing their nickname.
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_NICK(Server &my_server)
 {
+	if (_pass_before_nick_user == WAITING_FOR_PASS)
+		_pass_before_nick_user = PASS_ORDER_ERROR;
+	if (_pass_before_nick_user == PASS_ORDER_ERROR)
+		return;
 	(void)my_server;
 	std::cout << "Nick command\n";
+	
 	
 	if (_parsedCmd.size() < 2)
 	{
@@ -133,42 +142,53 @@ void	Command::_fun_NICK(Server &my_server)
 		return;
 	}
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
-	if (itu != my_server.getUsers().end())
+	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
 	{
+		push_to_buf(ERR_ERRONEUSNICKNAME);
+		return;
+	}
+	else if (itu != my_server.getUsers().end())
+	{
+		if (!my_compare(_cmd_user->getNick(), _parsedCmd[1]))
+			return;
 		push_to_buf(ERR_NICKNAMEINUSE);
 		return;
 	}
-	else if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
-	{
-		std::cout << "invalid nick\n";
-		return;
-	}
+
 	(*_cmd_user).setNick(_parsedCmd[1]);
 
 }
 
-// void	Command::_fun_USER(Server &my_server)
-// {
-// 	std::vector<unsigned char> ret;
+/*''''''''''''''''''''''''''''''''''''
+				USER TODO
+''''''''''''''''''''''''''''''''''''''*/
+void	Command::_fun_USER(Server &my_server)
+{
+	std::cout << "USER command in\n";
+	(void)my_server;
+	// if (_pass_before_nick_user == WAITING_FOR_PASS)
+	// 	_pass_before_nick_user = PASS_ORDER_ERROR;
+	// if (_pass_before_nick_user == PASS_ORDER_ERROR)
+	// 	return;
+	std::vector<unsigned char> ret;
 
-// 	if (this->_parsedCmd.size() < 5)
-// 	{
-// 		ret = this->_parsedCmd[0];
-// 		insert_all(ret, " :Not enough parameters\r\n");
-// 		my_server.send(this->_cmdUser.getfd(), ret);
-// 		return ;
-// 	}
-// 	if (this->_cmdUser.getRegistered())
-// 	{
-// 		insert_all(ret, ":You may not reregister\r\n");
-// 		my_server.send(this->_cmdUser.getfd(), ret);
-// 		return ;
-// 	}
-// 	this->_cmdUser.setUserName(this->_parsedCmd[1]);
-// 	//	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
-// 	this->_cmdUser.setRealName(this->_parsedCmd[4]);
-// 	this->_cmdUser.setRegistered(true);
-// }
+	if (this->_parsedCmd.size() < 5)
+	{
+		push_to_buf(ERR_NEEDMOREPARAMS);
+		// send
+		return ;
+	}
+	if (_cmd_user->getRegistered())
+	{
+		push_to_buf(ERR_ALREADYREGISTERED);
+		// sendto
+		return;
+	}
+	// this->_cmdUser.setUserName(this->_parsedCmd[1]);
+	// //	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
+	// this->_cmdUser.setRealName(this->_parsedCmd[4]);
+	// this->_cmdUser.setRegistered(true);
+}
 
 
 
@@ -354,14 +374,14 @@ void	Command::_fun_PING(Server &my_server)
 
 void	Command::_answer(Server &my_server)
 {
+	if (_pass_before_nick_user == PASS_ORDER_ERROR)
+		return;
 	std::string	options[] = {"CAP", "NICK", "PASS", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
 	setCmdUser(my_server);
-	// _cmd_user = my_compare.findUser(_cmd_fd_user);
-
-	// std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
 
 	
+			
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
@@ -375,6 +395,8 @@ void	Command::_answer(Server &my_server)
 		case 2:
 			_fun_PASS(my_server);
 			break;
+		case 3:
+			_fun_USER(my_server);
 		// case 3:
 		// 	this->_fun_JOIN(my_server);
 		// 	break;

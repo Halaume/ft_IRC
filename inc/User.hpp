@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:32:11 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 13:21:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ class User
 		int							getNbChan(void);
 		
 		void						setPassStatus(int);
-		void						setRegistered(bool&);
+		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>&);
 		void						setClient(std::vector<unsigned char>&);
 		void						setNick(std::vector<unsigned char>&);
@@ -80,7 +80,7 @@ class User
 		std::vector<unsigned char>	_passwd;
 		std::vector<unsigned char>	_currCmd;
 		std::vector<unsigned char>	_user_name;
-		std::vector<unsigned char>	_realName;
+		std::vector<unsigned char>	_real_name;
 		std::vector<unsigned char>	_client;
 		std::vector<unsigned char>	_nick;
 		std::vector<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 14:52:44 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 11:01:17 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,10 @@
 // #include "User.hpp"
 // #define server_name "mig.42.fr"
 // std::string server_name = "mig.42.fr";
+
+# define WAITING_FOR_PASS 0
+# define PASS_ORDER_OK 1
+# define PASS_ORDER_ERROR -1
 
 class Server;
 
@@ -60,6 +64,7 @@ class Command
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
 		std::list<User>::iterator				_cmd_user;
+		int										_pass_before_nick_user;
 		
 		void									_fun_CAP(Server &my_server);
 		void									_fun_NICK(Server &my_server);
