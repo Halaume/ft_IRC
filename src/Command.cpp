@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 15:56:30 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 17:09:55 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,7 +379,7 @@ void	Command::_fun_KICK(Server &my_server)
 		return ;
 	}
 	Usrlst = tmp->getUsrListbg();
-	while (Usrlst != tmp->getUsrListend() && !(**Usrlst == this->_parsedCmd[2])) // TODO A CHANGER
+	while (Usrlst != tmp->getUsrListend() && !(**Usrlst == this->_parsedCmd[2]))
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
@@ -399,8 +399,8 @@ void	Command::_fun_KICK(Server &my_server)
 	for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
 		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), it->begin(), it->end());
 	tmp->getUsrList().erase(Usrlst);
-									//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
-	
+	//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
+
 }
 
 void	Command::_fun_INVITE(Server &my_server)
@@ -443,39 +443,63 @@ void	Command::answer(Server &my_server)
 			this->_fun_PASS(my_server);
 			break;
 		case 3:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_JOIN(my_server);
 			break;
 		case 4:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_PRIVMSG(my_server);
 			break;
 		case 5:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_OPER(my_server);
 			break;
 		case 6:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_QUIT(my_server);
 			break;
 		case 7:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_ERROR(my_server);
 			break;
 		case 8:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_MODE(my_server);
 			break;
 		case 9:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_TOPIC(my_server);
 			break;
 		case 10:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_KICK(my_server);
 			break;
 		case 11:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_INVITE(my_server);
 			break;
 		case 12:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_KILL(my_server);
 			break;
 		case 13:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_RESTART(my_server);
 			break;
 		case 14:
+			if (!this->_cmdUser->getRegistered())
+				break;
 			this->_fun_PONG(my_server);
 			break;
 		default:

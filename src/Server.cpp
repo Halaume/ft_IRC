@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 15:55:21 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 17:05:19 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,6 @@ void	Server::run(void)
 				try
 				{
 					std::list<User>::iterator Usr = this->getUsr(this->_events[k].data.fd);
-					std::cout << this->_events[k].data.fd << std::endl;
 					switch (this->_events[k].events)
 					{
 						case EPOLLOUT:
@@ -201,7 +200,6 @@ void	Server::run(void)
 							this->sendto(Usr->getfd(), Usr->getRet());
 							break;
 						case EPOLLIN:
-							std::cerr << "EPOLLIN" << std::endl;
 							if (isUserInList(_events[k].data.fd) == false)
 							{
 								User new_user(this->_events[k].data.fd);
