@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 15:00:27 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:55:21 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,6 @@ void	Server::run(void)
 					switch (this->_events[k].events)
 					{
 						case EPOLLOUT:
-							std::cerr << "EPOLLOUT" << std::endl;
 							if (Usr == this->_Users.end())
 							{
 								_ev.events = EPOLLIN | EPOLLET;
@@ -250,7 +249,6 @@ void	Server::run(void)
 								break;
 							}
 						default:
-							std::cerr << "EPOLLUP" << std::endl;
 							epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 							close(_events[k].data.fd);
 							if (Usr != this->_Users.end())
@@ -345,6 +343,11 @@ int Server::getSct(void) const
 int Server::getEpollfd(void) const
 {
 	return (_epollfd);
+}
+
+epoll_event &	Server::getEv(void)
+{
+	return (this->_ev);
 }
 
 std::list<User> Server::getUsers(void) const

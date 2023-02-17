@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 13:45:04 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:56:30 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
 	add_to_vector(&_cmd_buf, " ");
 	add_to_vector(&_cmd_buf, numeric_response(ERR_NEEDMOREPARAMS, cmd));
 	// add_to_vector(&_cmd_buf, cmd);
-	// add_to_vector(&_cmd_buf, ERR_NEEDMOREPARAMSmsg);
+	// add_to_vector(&_cmd_buf, ERR_NEEDMOREPARAMSthis->_cmdUser.getRet());
 
 	std::vector<unsigned char>::size_type m;
 	std::cout << "2:\n";
@@ -129,21 +129,17 @@ void	Command::_fun_NICK(Server &my_server)
 }
 
 //TODO Si rate, vider toute la cmd stocker
-void	Command::_fun_USER(Server &my_server)
+void	Command::_fun_USER(void)
 {
-	std::vector<unsigned char> ret;
-
 	if (this->_parsedCmd.size() < 5)
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
+		this->_cmdUser->setRet(this->_parsedCmd[0]);
+		insert_all(this->_cmdUser->getRet(), " :Not enough parameters\r\n");
 		return ;
 	}
 	if (this->_cmdUser->getRegistered())
 	{
-		insert_all(ret, ":You may not reregister\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
+		insert_all(this->_cmdUser->getRet(), ":You may not reregister\r\n");
 		return ;
 	}
 	this->_cmdUser->setUserName(this->_parsedCmd[1]);
@@ -161,13 +157,10 @@ void	Command::_fun_JOIN(Server &my_server)
 {
 	//RFC 2813/4.2.1
 	//TODO IF User == serverOp --> User = chanOp
-	std::vector<unsigned char> ret;
-
 	if (this->_parsedCmd.size() < 2)
 	{
-		ret = this->_parsedCmd[0];
-		insert_all(ret, " :Not enough parameters\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
+		this->_cmdUser->setRet(this->_parsedCmd[0]);
+		insert_all(this->_cmdUser->getRet(), " :Not enough parameters\r\n");
 		return ;
 	}
 	std::vector<std::vector<unsigned char> >	chan = splitOnComa(this->_parsedCmd[1]);
@@ -198,8 +191,6 @@ void	Command::_fun_JOIN(Server &my_server)
 
 void	Command::_fun_QUIT(Server &my_server)
 {
-	std::vector<unsigned char> ret;
-	
 // 	if (this->_parsedCmd.size() > 1)
 // 	{
 // 		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
@@ -215,7 +206,6 @@ void	Command::_fun_QUIT(Server &my_server)
 	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
 	{
 		for (std::list<User *>::const_iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
-			my_server.sendto((*itu)->getfd(), ret);
 		this->_cmdUser->getChannels().erase(itc);
 	}
 	
@@ -228,9 +218,8 @@ void	Command::_fun_RESTART(Server &my_server)
 {
 	if (!this->_cmdUser->getOperator())
 	{
-		std::vector<unsigned char> msg = this->_cmdUser->getUserName();
-		insert_all(msg, " :Permission Denied- You're not an IRC operator");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		insert_all(this->_cmdUser->getRet(), " :Permission Denied- You're not an IRC operator");
 		return ;
 	}
 	free_fun(my_server);
@@ -267,12 +256,22 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	if (chan != *my_server.getChannel().end() && is_op)
 	{
 		for (std::list<User *>::iterator	itc = chan.getOpListbg(); itc != chan.getOpListend(); itc++)
-			my_server.sendto((*itc)->getfd(), msg);
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
 	}
 	else
 	{
 		for (std::list<User *>::iterator	itc = chan.getUsrListbg(); itc != chan.getUsrListend(); itc++)
-			my_server.sendto((*itc)->getfd(), msg);
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
 	}
 }
 
@@ -286,47 +285,40 @@ void	Command::_fun_PRIVMSG(Server &my_server)
            ERR_WILDTOPLEVEL                ERR_TOOMANYTARGETS
            ERR_NOSUCHNICK
            RPL_AWAY*/
-	std::vector<unsigned char> ret;
 	if (this->_parsedCmd.size() < 3)
 	{
-		insert_all(ret, ":No text to send\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
+		insert_all(this->_cmdUser->getRet(), ":No text to send\r\n");
 		return ;
 	}
 //PAS SUR DE CELLE CI
 	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
 	{
-		ret = this->_parsedCmd[0];// RET SHOULD BE <TARGET>
-		insert_all(ret, " :Duplicate recipients. No message delivered\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), ret);
+		this->_cmdUser->setRet(this->_parsedCmd[0]);// RET SHOULD BE <TARGET>
+		insert_all(this->_cmdUser->getRet(), " :Duplicate recipients. No message delivered\r\n");
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
-	std::vector<unsigned char>	msg;
 
 	if (this->_parsedCmd[2][0] == ':')
-		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+		this->_cmdUser->setRet(std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end()));
 	else
-		msg = this->_parsedCmd[2];
+		this->_cmdUser->setRet(this->_parsedCmd[2]);
 	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
 	while (it != this->_parsedCmd.end())
 	{
-		msg.push_back(' ');
-		msg.insert(msg.end(), it->begin(), it->end());
+		this->_cmdUser->getRet().push_back(' ');
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), it->begin(), it->end());
 	}
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~')
-		do_chan(receiver, my_server, msg);
+		do_chan(receiver, my_server, this->_cmdUser->getRet());
 	else
 	{
 		std::list<User>::iterator	itu = my_server.findUser(receiver);
 		if (itu == my_server.getUsers().end())
 		{
-			ret = this->_parsedCmd[0];
-			insert_all(ret, " ERR_NOSUCHNICK\r\n");
-			my_server.sendto(this->_cmdUser->getfd(), ret);
+			this->_cmdUser->setRet(this->_parsedCmd[0]);
+			insert_all(this->_cmdUser->getRet(), " ERR_NOSUCHNICK\r\n");
 		}
-		else
-			my_server.sendto(itu->getfd(), msg);
 	}
 }
 
@@ -353,29 +345,26 @@ void	Command::_fun_TOPIC(Server &my_server)
 void	Command::_fun_KICK(Server &my_server)
 {
 	std::vector<Channel>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
-	std::vector<unsigned char>		msg;
 
 	if (this->_parsedCmd.size() < 3)
 	{
-		insert_all(msg, " ERR_NEEDMOREPARAM\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		insert_all(this->_cmdUser->getRet(), " ERR_NEEDMOREPARAM\r\n");
+		my_server.sendto(this->_cmdUser->getfd(), this->_cmdUser->getRet());
 		return ;
 	}
 
 	if (tmp == my_server.getChannel().end())
 	{
-		msg = this->_cmdUser->getUserName();
-		insert_all(msg, " ERR_NOSUCHCHANNEL\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		insert_all(this->_cmdUser->getRet(), " ERR_NOSUCHCHANNEL\r\n");
 		return ;
 	}
 
 	if (!tmp->isOp(this->_cmdUser))
 	{
-		msg = this->_cmdUser->getUserName();
-		msg.insert(msg.end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
-		insert_all(msg, " :You're not channel operator\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
+		insert_all(this->_cmdUser->getRet(), " :You're not channel operator\r\n");
 		return ;
 	}
 
@@ -384,10 +373,9 @@ void	Command::_fun_KICK(Server &my_server)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser->getUserName();
-		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(msg, " ERR_NOTONCHANNEL\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(this->_cmdUser->getRet(), " ERR_NOTONCHANNEL\r\n");
 		return ;
 	}
 	Usrlst = tmp->getUsrListbg();
@@ -395,24 +383,22 @@ void	Command::_fun_KICK(Server &my_server)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser->getUserName();
-		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(msg, " ERR_USERNOTINCHANNEL\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(this->_cmdUser->getRet(), " ERR_USERNOTINCHANNEL\r\n");
 		return ;
 	}
 	if (tmp->isOp(*Usrlst))
 	{
-		msg = this->_cmdUser->getUserName();
-		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(msg, " ERR_CANNOTKICKADMIN\r\n");
-		my_server.sendto(this->_cmdUser->getfd(), msg);
+		this->_cmdUser->setRet(this->_cmdUser->getUserName());
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+		insert_all(this->_cmdUser->getRet(), " ERR_CANNOTKICKADMIN\r\n");
 		return ;
 	}
 
 	for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
-		msg.insert(msg.end(), it->begin(), it->end());
-	tmp->getUsrList().erase(Usrlst);//Retire le User du chann
+		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), it->begin(), it->end());
+	tmp->getUsrList().erase(Usrlst);
 									//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
 	
 }
@@ -451,7 +437,7 @@ void	Command::answer(Server &my_server)
 			this->_fun_CAP(my_server);
 			break;
 		case 1:
-			this->_fun_USER(my_server);
+			this->_fun_USER();
 			break;
 		case 2:
 			this->_fun_PASS(my_server);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:26:09 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:55:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class Command
 		
 		void									_fun_CAP(Server &my_server);
 		void									_fun_NICK(Server &my_server);
-		void									_fun_USER(Server &my_server);
+		void									_fun_USER(void);
 		void									_fun_PASS(Server &my_server);
 		void									_fun_JOIN(Server &my_server);
 		void									_fun_PRIVMSG(Server &my_server);

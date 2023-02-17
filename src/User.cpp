@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 14:48:33 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:56:18 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ int		User::getPassStatus(void) const
 	return (this->_pass_status);
 }
 
-std::vector<unsigned char>	User::getRet(void) const
+std::vector<unsigned char> &	User::getRet(void)
 {
 	return (this->_ret);
 }

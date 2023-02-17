@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 14:47:59 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:56:23 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class User
 		void						setUserNamev(std::vector<unsigned char>);
 		void						setRealName(std::vector<unsigned char>);
 		void						setRet(std::vector<unsigned char>);
-		std::vector<unsigned char>	getRet(void) const;
+		std::vector<unsigned char> &	getRet(void);
 		int							getNbChan(void);
 		bool						getOperator(void) const;
 		void						setOperator(bool);
