@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:26:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 13:45:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,10 @@ void	Command::_fun_USER(Server &my_server)
 	this->_cmdUser->setRegistered(true);
 }
 
+std::vector<std::vector<unsigned char> >	Command::getCommand(void) const
+{
+	return (this->_parsedCmd);
+}
 
 void	Command::_fun_JOIN(Server &my_server)
 {
@@ -437,88 +441,57 @@ void	Command::answer(Server &my_server)
 	setCmdUser(my_server);
 	// _cmd_user = my_compare.findUser(_cmd_fd_user);
 
-	std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
-
-	
+	if (this->_parsedCmd.size() == 0)
+		return ;
 	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
 		case 0:
-		{
 			this->_fun_CAP(my_server);
 			break;
-		}
 		case 1:
-		{
 			this->_fun_USER(my_server);
 			break;
-		}
 		case 2:
-		{
 			this->_fun_PASS(my_server);
 			break;
-		}
 		case 3:
-		{
 			this->_fun_JOIN(my_server);
 			break;
-		}
 		case 4:
-		{
 			this->_fun_PRIVMSG(my_server);
 			break;
-		}
 		case 5:
-		{
 			this->_fun_OPER(my_server);
 			break;
-		}
 		case 6:
-		{
 			this->_fun_QUIT(my_server);
 			break;
-		}
 		case 7:
-		{
 			this->_fun_ERROR(my_server);
 			break;
-		}
 		case 8:
-		{
 			this->_fun_MODE(my_server);
 			break;
-		}
 		case 9:
-		{
 			this->_fun_TOPIC(my_server);
 			break;
-		}
 		case 10:
-		{
 			this->_fun_KICK(my_server);
 			break;
-		}
 		case 11:
-		{
 			this->_fun_INVITE(my_server);
 			break;
-		}
 		case 12:
-		{
 			this->_fun_KILL(my_server);
 			break;
-		}
 		case 13:
-		{
 			this->_fun_RESTART(my_server);
 			break;
-		}
 		case 14:
-		{
 			this->_fun_PONG(my_server);
 			break;
-		}
 		default:
 			break;
 	}

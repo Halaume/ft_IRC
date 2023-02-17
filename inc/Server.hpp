@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 17:52:07 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/17 15:00:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,6 @@ class Server
 		
 		int			init(char **);
 		void		run(void);
-
-
-		void						printUsersList(void);
-
 		// GETTERS
 		std::vector<Channel>	getChannel(void) const;
 		int						getSct(void) const;
@@ -57,12 +53,8 @@ class Server
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		std::list<User>::iterator		getUsr(int);
 
-		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
 		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
 		
-		void 						printGlobalCommand(Command cmd);
-		void 						printParsedCommand(Command cmd);
-
 		bool						isUserInList(int);
 
 		std::list<User>				getUsers(void) const;
