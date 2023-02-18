@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 17:05:19 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/18 15:53:52 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,8 @@ void	Server::run(void)
 	socklen_t server_length = sizeof(_server);
 	_ev.events = EPOLLIN | EPOLLET;
 	std::vector<unsigned char> v;
+	Command	cmd;
+	std::vector<unsigned char>::iterator last;
 
 	while (true)
 	{	
@@ -170,12 +172,12 @@ void	Server::run(void)
 		{
 			if (_events[k].data.fd == _sct)
 			{
-				std::cout << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
+				std::cerr << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
 				accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
 				if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)
 					return ;
 				fcntl(accepted, F_SETFL, O_NONBLOCK);
-				std::cout << "1.1 : accepted fd:" << accepted << std::endl;
+				std::cerr << "1.1 : accepted fd:" << accepted << std::endl;
 				_ev.events = EPOLLIN | EPOLLET;
 				_ev.data.fd = accepted;
 				if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
@@ -189,17 +191,53 @@ void	Server::run(void)
 					switch (this->_events[k].events)
 					{
 						case EPOLLOUT:
+							std::cerr << "epollout" << std::endl;
 							if (Usr == this->_Users.end())
 							{
+								std::cerr << "ALED" << std::endl;
 								_ev.events = EPOLLIN | EPOLLET;
 								if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
 								{
+									close(_events[k].data.fd);
+									if (Usr != this->_Users.end())
+									this->_Users.erase(Usr);
 									break;
 								}
 							}
 							this->sendto(Usr->getfd(), Usr->getRet());
+							_ev.events = EPOLLIN | EPOLLET;
+							if (Usr->getCurrCmd().size() > 0)
+							{
+								last = Usr->getCurrCmdbg();
+								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
+								{
+									std::cerr << static_cast<int>(*it) << std::endl;
+									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
+									{
+										std::vector<unsigned char>	CmdNoParse(last, it);
+										for (std::vector<unsigned char>::iterator j = last; j != it; j++)
+										{
+											if (*j == ' ' || j == it - 2)
+												cmd.getCommand().insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
+										}
+										cmd.answer(*this);
+										Usr->getCurrCmd().erase(last, it + 1);
+										last = it + 1;
+										cmd.setUser(&(*Usr));
+										_ev.events = EPOLLOUT | EPOLLET;
+									}
+								}
+							}
+							std::cerr << "lezgongue" << std::endl;
+							if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &(this->_ev)) == - 1)
+							{
+								epoll_ctl(this->_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
+								close(this->_events[k].data.fd);
+								this->_Users.erase(Usr);
+							}
 							break;
 						case EPOLLIN:
+							std::cerr << "epollin" << std::endl;
 							if (isUserInList(_events[k].data.fd) == false)
 							{
 								User new_user(this->_events[k].data.fd);
@@ -216,16 +254,16 @@ void	Server::run(void)
 							{
 								for (int i = 0; i < BUFFER_SIZE; i++)
 									v.push_back(buf[i]);
+								v.push_back('\0');
 								Usr->insertCurrCmd(v);
 							}
 							else
 							{
-								Command	cmd;
 								std::vector<std::vector<unsigned char> >	ParsedCommand;
 								for (int i = 0; i < retrec; i++)
 									v.push_back(buf[i]);
 								Usr->insertCurrCmd(v);
-								std::vector<unsigned char>::iterator last = Usr->getCurrCmdbg();
+								last = Usr->getCurrCmdbg();
 								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
 								{
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
@@ -237,11 +275,17 @@ void	Server::run(void)
 												cmd.getCommand().insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
 										}
 										cmd.answer(*this);
+										Usr->getCurrCmd().erase(last, it + 1);
 										last = it + 1;
 										_ev.events = EPOLLOUT | EPOLLET;
-										if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
-											break;
 										cmd.setUser(&(*Usr));
+										if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
+										{
+											epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
+											close(_events[k].data.fd);
+											if (Usr != this->_Users.end())
+												this->_Users.erase(Usr);
+										}
 									}
 								}
 								break;
@@ -257,9 +301,9 @@ void	Server::run(void)
 				catch (std::exception &)
 				{
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
-					close(_events[k].data.fd);
 					if (this->getUsr(this->_events[k].data.fd) != this->_Users.end())
 						this->_Users.erase(this->getUsr(this->_events[k].data.fd));
+					close(_events[k].data.fd);
 				}
 			}
 		}
@@ -269,23 +313,14 @@ void	Server::run(void)
 void	Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
+	std::cerr << buf.size() << std::endl;
 	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 	{
 		std::list<User>::iterator Usr = this->getUsr(fd);
-		for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-			it->delUser(fd);
 		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
+		this->_Users.erase(Usr);
 		close(fd);
-	}
-	_ev.events = EPOLLIN | EPOLLET;
-	if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, fd, &(this->_ev)) == - 1)
-	{
-		for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-			it->delUser(fd);
-		epoll_ctl(_epollfd, EPOLL_CTL_DEL, fd, &this->_ev);
-		close(fd);
-		return ;
 	}
 }
 
