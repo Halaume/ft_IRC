@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:41:39 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 16:44:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,17 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> msg)
 	std::string scode = itos(code);
 	
 	ret.push_back(' ');
-	for (std::string::size_type j = 0; j < scode.size(); j++)
-		ret.push_back(scode[j]);
+	if (code < 10)
+	{
+		ret.push_back('0');
+		ret.push_back('0');
+		ret.push_back(scode[0]);
+	}
+	else
+	{
+		for (std::string::size_type j = 0; j < scode.size(); j++)
+			ret.push_back(scode[j]);
+	}
 	for (i = 0; i < msg.size(); i++)
 		ret.push_back(msg[i]);
 	return (ret);
@@ -88,8 +97,17 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	std::string scode = itos(code);
 	
 	ret.push_back(' ');
-	for (std::string::size_type j = 0; j < scode.size(); j++)
-		ret.push_back(scode[j]);
+	if (code < 10)
+	{
+		ret.push_back('0');
+		ret.push_back('0');
+		ret.push_back(scode[0]);
+	}
+	else
+	{
+		for (std::string::size_type j = 0; j < scode.size(); j++)
+			ret.push_back(scode[j]);
+	}
 	ret.push_back(' ');
 	for (i = 0; i < v1.size(); i++)
 		ret.push_back(v1[i]);
@@ -105,8 +123,17 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	std::string scode = itos(code);
 	
 	ret.push_back(' ');
-	for (std::string::size_type j = 0; j < scode.size(); j++)
-		ret.push_back(scode[j]);
+	if (code < 10)
+	{
+		ret.push_back('0');
+		ret.push_back('0');
+		ret.push_back(scode[0]);
+	}
+	else
+	{
+		for (std::string::size_type j = 0; j < scode.size(); j++)
+			ret.push_back(scode[j]);
+	}
 	ret.push_back(' ');
 	for (i = 0; i < v1.size(); i++)
 		ret.push_back(v1[i]);
@@ -122,10 +149,10 @@ void print_vector(std::vector<unsigned char> v)
 {
 	std::vector<unsigned char>::size_type m;
 	
-	std::cout << "Vector print:\n";
+	std::cout << "Vector print|\n";
 	for (m = 0; m < v.size(); m++)
 		std::cout << v[m];
-	std::cout << "\n";
+	std::cout << "|\n";
 }
 
 int ft_strlen(const unsigned char* str)
@@ -209,4 +236,27 @@ bool isValidCharacter(unsigned char c)
 		(c == '|'))
 		return (true);
 	return (false);
+}
+
+std::vector<unsigned char> concat_real_name(std::vector<std::vector<unsigned char> > parsedCmd, int start)
+{
+	std::vector<unsigned char> ret;
+	int count = 0;
+	
+	for (std::vector<std::vector<unsigned char> >::size_type i = 0; i < parsedCmd.size(); i++)
+	{
+		if (count >= 4)
+		{
+			if (count > 4)
+				ret.push_back(' ');
+			for (std::vector<unsigned char>::size_type j = 0; j < parsedCmd[i].size(); j++)
+			{
+				ret.push_back(parsedCmd[i][j]);
+			}
+		}
+		if (start > 0)
+			start--;
+		count++;
+	}
+	return (ret);
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 13:22:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 23:04:48 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,11 @@ std::vector<unsigned char> User::getUserName(void) const
 	return (this->_user_name);
 }
 
+std::vector<unsigned char> User::getRealName(void) const
+{
+	return (this->_real_name);
+}
+
 int	User::getNbChan(void)
 {
 	return (static_cast<int>(this->_channels.size()));
@@ -145,6 +150,13 @@ void User::setClient(std::vector<unsigned char>& client)
 	_client = client;
 }
 
+void User::setClient(std::string& client)
+{
+	_client.clear();
+	for (std::string::size_type i = 0; i < client.size(); i++)
+		_client.push_back(client[i]);
+}
+
 void User::setNick(std::vector<unsigned char>& nick)
 {
 	_nick = nick;
@@ -167,6 +179,12 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << "Client: ";
 	for (m = 0; m < i.getClient().size(); m++)
 		o << i.getClient()[m];
+	o << " Username: ";
+	for (m = 0; m < i.getUserName().size(); m++)
+		o << i.getUserName()[m];
+	o << " Realname: ";
+	for (m = 0; m < i.getRealName().size(); m++)
+		o << i.getRealName()[m];
 	o << " Nick: ";
 	for (m = 0; m < i.getNick().size(); m++)
 		o << i.getNick()[m];

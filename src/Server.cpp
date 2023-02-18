@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 13:21:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 23:32:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,23 +96,24 @@ int	Server::init(char **argv)
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
 	
-	std::cout << "0 : epoll fd: " << _epollfd << std::endl;
+	// std::cout << "0 : epoll fd: " << _epollfd << std::endl;
 	
 	return (0);
 }
 
 int Server::accept_socket(int k)
 {
+	(void)k;
 	int yes = 1;//	For SO_KEEPALIVE
 	int accepted = 0;
 	socklen_t server_length = sizeof(_server);
 	
-	std::cout << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
+	// std::cout << "1 : socket accept and event data fd:" << _events[k].data.fd << std::endl;
 	accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
 	if (accepted == -1 || setsockopt(accepted, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)//Keepalive permet de garder la connexion apres utilisation
 		return (std::cerr << "Error on accept" << std::endl, 1);
 	fcntl(accepted, F_SETFL, O_NONBLOCK);
-	std::cout << "1.1 : accepted fd:" << accepted << std::endl;
+	// std::cout << "1.1 : accepted fd:" << accepted << std::endl;
 	_ev.events = EPOLLIN | EPOLLET;
 	_ev.data.fd = accepted;
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, accepted, &_ev) == - 1)
@@ -217,15 +218,12 @@ int	Server::run(void)
 				if (isUserInList(_events[k].data.fd) == false) // ADD User to list
 				{
 					User new_user(_events[k].data.fd);
-					new_user.setRegistered(true); // <<<<< delete
+					// new_user.setRegistered(true); // <<<<< delete
 					_Users.push_back(new_user);
 				}
-				//////////////////////////
-				printUsersList();
-				/////////////////////////
 				
-				this->getGobalCmd(&cmd, v, k);				// Get global command
-				this->printGlobalCommand(cmd);				// Print global command
+				getGobalCmd(&cmd, v, k);				// !!!! attention aux tabulations!!! pose problème mtn
+				// printGlobalCommand(cmd);				// Print global command
 				// Parse command and execute
 				for (i = 0; i < cmd._globalCmd.size(); i++)
 				{
@@ -245,6 +243,22 @@ int	Server::run(void)
 					cmd._answer(*this);
 					
 					cmd._parsedCmd.clear();
+
+					//////////////////////////
+					printUsersList();
+					/////////////////////////
+					Channel c1;
+					User u1, u2, u3;
+					std::string str = "Firstchan!";
+					c1.setChanName(str);
+					str = "supersecretpass12345!";
+					c1.setChanPassword(str);
+					_channels.push_back(c1);
+					str = "JOE"; u1.setClient(str); c1.addUser(&u1, *this);
+					str = "Jack"; u1.setClient(str);
+					str = "PAPET"; u1.setClient(str);
+					std::cout << _channels;
+					//////////////////////////
 					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
 					
 					// Parse scommand
@@ -334,13 +348,6 @@ void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vecto
 	}
 }
 
-// void Server::getParsedCmd(void)
-// {
-// 	std::vector<std::vector<unsigned char> >::size_type j;
-	
-// 	return (_parsedCmd)
-// }
-
 int Server::getSct(void)
 {
 	return (_sct);
@@ -359,4 +366,44 @@ const std::list<User>& Server::getUsers(void) const
 std::vector<unsigned char> Server::getPasswd(void) const
 {
 	return (_passwd);
+}
+
+std::ostream & operator<<( std::ostream & o, std::vector<Channel> & i)
+{
+	std::vector<Channel>::size_type m;
+	std::vector<unsigned char>::size_type n;
+	std::list<User *>::iterator itu;
+
+	o << "____Channels begin____\n";
+	for (m = 0; m < i.size(); m++)
+	{
+		o << "Channel: ";
+		for (n = 0; n < i[m].getChanName().size(); n++)
+			o << i[m].getChanName()[n];
+		o << "   Password: ";
+		for (n = 0; n < i[m].getChanPassword().size(); n++)
+			o << i[m].getChanPassword()[n];
+		o << "\n--------USERS--------\n";
+		// for (n = 0; n < (*i[m].getUsrListbg())->getClient().size(); n++)
+		// 	o << (*i[m].getUsrListbg())->getClient()[n];
+
+		o << (*i[m].getUsrListbg())->getfd();
+		// for (itu = i[m].getUsrList().begin(); itu != i[m].getUsrList().end(); ++itu)
+		// {
+		// 	// o << *itu;
+		// }
+		// o << " Realname: ";
+		// for (m = 0; m < i.getRealName().size(); m++)
+		// 	o << i.getRealName()[m];
+		// o << " Nick: ";
+		// for (m = 0; m < i.getNick().size(); m++)
+		// 	o << i.getNick()[m];
+		// o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
+		// for (m = 0; m < i.getPasswd().size(); m++)
+		// 	o << i.getPasswd()[m];
+		o << std::endl;
+	}
+	o << "____Channels end____\n";
+	
+	return o;
 }

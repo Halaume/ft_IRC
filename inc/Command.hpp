@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 11:01:17 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 16:46:48 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,11 @@
 # define WAITING_FOR_PASS 0
 # define PASS_ORDER_OK 1
 # define PASS_ORDER_ERROR -1
+# define PASS_NICK_OK 2
+# define PASS_USER_OK 3
+# define PASS_CONNECTION_ERROR 4
+
+
 
 class Server;
 
@@ -56,7 +61,7 @@ class Command
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
 		void										_answer(Server &);
-		
+		void										register_user(Server &);	
 	private:
 		// User										_cmdUser;
 		

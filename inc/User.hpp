@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 13:21:50 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 23:03:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ class User
 		int							getPassStatus(void) const;
 		bool						getRegistered(void) const;
 		std::vector<unsigned char>	getUserName(void) const;
+		std::vector<unsigned char>	getRealName(void) const;
 		std::vector<unsigned char>	getPasswd(void) const;
 		std::vector<unsigned char>	getClient(void) const;
 		std::vector<unsigned char>	getNick(void) const;
@@ -66,11 +67,13 @@ class User
 		void						setPassStatus(int);
 		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>&);
+		
 		void						setClient(std::vector<unsigned char>&);
+		void						setClient(std::string&);
+		
 		void						setNick(std::vector<unsigned char>&);
 		void						setPasswd(std::string&);
 		void						setUserName(std::vector<unsigned char>&);
-		void						setUserNamev(std::vector<unsigned char>&);
 		void						setRealName(std::vector<unsigned char>&);
 		
 	private:

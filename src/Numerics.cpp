@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 11:14:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 21:39:08 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,40 @@
 #include <vector>
 #include <string>
 #include <string.h>
+#include <ctime>
+#include <time.h>
 
 
+#include "../inc/Command.hpp"
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-std::vector<unsigned char> numeric_response(int num_code, Command cmd)//std::vector<unsigned char> param)
+std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name)//std::vector<unsigned char> param)
 {
+
+	// std::cout << "date:" << buf << std::endl;
+	
 	switch (num_code)
 	{
+		case RPL_WELCOME:
+		{
+			return (RPL_WELCOMEmsg(RPL_WELCOME, cmd.getCmdUser()->getClient()));
+		}
+		case RPL_YOURHOST:
+		{
+			return (RPL_YOURHOSTmsg(RPL_YOURHOST, cmd.getCmdUser()->getClient(), server_name));
+		}
+		case RPL_CREATED:
+		{
+			char       time_buf[80];
+			strftime(time_buf, sizeof(time_buf), "%Y-%m-%d @ %X", &tstruct);
+			std::string date_and_time(time_buf);
+			return (RPL_CREATEDmsg(RPL_CREATED, cmd.getCmdUser()->getClient(), date_and_time));
+		}
+		case RPL_MYINFO:
+		{
+			return (RPL_MYINFOmsg(RPL_MYINFO, cmd.getCmdUser()->getClient(), server_name));
+		}
 		case ERR_NONICKNAMEGIVEN:
 		{
 			return (ERR_NONICKNAMEGIVENmsg(ERR_NONICKNAMEGIVEN));

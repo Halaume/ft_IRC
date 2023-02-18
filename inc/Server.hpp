@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:06:22 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/18 23:17:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <ctime>
 
 #include <netinet/in.h>
 
@@ -25,6 +26,10 @@
 #include "Command.hpp"
 
 #define BUFFER_SIZE 1
+
+const std::time_t g_time= std::time(0);   // get time now
+
+const struct tm  tstruct = *localtime(&g_time);
 
 class Channel;
 
@@ -46,6 +51,7 @@ class Server
 
 
 		void						printUsersList(void);
+		void						printChannelsList(void);
 
 		// GETTERS
 		int							getSct(void);
@@ -81,5 +87,8 @@ class Server
 		std::vector<Channel>			_channels;
 		
 };
+
+std::ostream &		operator<<( std::ostream & o, std::vector<Channel> & i);
+
 
 #endif

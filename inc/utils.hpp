@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 19:35:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/17 17:20:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ std::vector<unsigned char>                  concat_resp(int code, std::vector<un
 
 bool                                        isValidCharacter(unsigned char);
 
+std::vector<unsigned char>                  concat_real_name(std::vector<std::vector<unsigned char> > parsedCmd, int start);
 
 void                                        print_vector(std::vector<unsigned char> v);
 
