@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 16:46:48 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 21:31:04 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 // #include "User.hpp"
 // #define server_name "mig.42.fr"
 // std::string server_name = "mig.42.fr";
+
+# define MAX_NB_CHAN 10
 
 # define WAITING_FOR_PASS 0
 # define PASS_ORDER_OK 1
@@ -45,7 +47,7 @@ class Command
 		~Command(void);
 		Command &	operator=(const Command & src);
 
-		void										push_to_buf(int error);
+		// void										push_to_buf(int error);
 		
 		// Getters
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);

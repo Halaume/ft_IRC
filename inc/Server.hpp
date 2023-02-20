@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 23:17:39 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/19 22:34:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,25 +50,32 @@ class Server
 		int			accept_socket(int);
 
 
-		void						printUsersList(void);
-		void						printChannelsList(void);
+		void							printUsersList(void);
+		void							printChannelsList(void);
+	
+		// GETTERS	
+		int								getSct(void);
+		int								getEpollfd(void);
+		std::vector<unsigned char>		getPasswd(void) const;
+		// User*							getUser(int fd);
+		void							getGobalCmd(Command*, std::vector<unsigned char>, int);
+		void 							getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
+		void 							getParsedCmd();
+		std::list<Channel>::iterator	getChannelsbg(void);
+		std::list<Channel>::iterator	getChannelsend(void);
 
-		// GETTERS
-		int							getSct(void);
-		int							getEpollfd(void);
-		std::vector<unsigned char>	getPasswd(void) const;
-		// User*						getUser(int fd);
-
-		void						getGobalCmd(Command*, std::vector<unsigned char>, int);
-		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
-		void 						getParsedCmd();
+		
 		
 		void 						printGlobalCommand(Command cmd);
 		void 						printParsedCommand(Command cmd);
 
 		bool						isUserInList(int);
-
 		const std::list<User>&		getUsers(void) const;
+		
+		// Channels
+		bool						channelExists(std::vector<unsigned char>&);
+		void						addNewChannel(Channel&);
+
 		Channel&					findChan(std::vector<unsigned char>);
 		void						send_to_client(int, std::vector<unsigned char>);
 		std::list<User>::iterator	findUser(std::string nick);
@@ -84,11 +91,11 @@ class Server
 		int								_epollfd;
 		epoll_event						_events[10];
 		epoll_event						_ev;
-		std::vector<Channel>			_channels;
+		std::list<Channel>				_channels;
 		
 };
 
-std::ostream &		operator<<( std::ostream & o, std::vector<Channel> & i);
+std::ostream &		operator<<( std::ostream & o, Server & i);
 
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 16:44:06 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 14:50:23 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,20 @@ void print_vector(std::vector<unsigned char> v)
 	std::cout << "|\n";
 }
 
+void print_vector2(std::vector<std::vector<unsigned char> > v)
+{
+	std::vector<std::vector<unsigned char> >::size_type m;
+	std::vector<unsigned char>::size_type n;
+	
+	std::cout << "Vector2 print|\n";
+	for (m = 0; m < v.size(); m++)
+	{
+		for (n = 0; n < v[m].size(); n++)
+			std::cout << v[m][n];
+		std::cout << "|\n";
+	}
+}
+
 int ft_strlen(const unsigned char* str)
 {
 	int i = 0;
@@ -259,4 +273,31 @@ std::vector<unsigned char> concat_real_name(std::vector<std::vector<unsigned cha
 		count++;
 	}
 	return (ret);
+}
+
+int reparseChannelsKeys(std::vector<unsigned char> cmd, std::vector<std::vector<unsigned char> > *chan_key)
+{
+	std::vector<unsigned char> v;
+
+	for (std::vector<unsigned char>::size_type it = 0; it < cmd.size(); ++it)
+	{
+		if (cmd[it] == ',' && v.size() > 0)
+		{
+			chan_key->push_back(v);
+			v.clear();
+		}
+		else if (it == (cmd.size() - 1))
+		{
+			if (cmd[it] != ',')
+				v.push_back(cmd[it]);
+			if (v.size() > 0)
+			{
+				chan_key->push_back(v);
+				v.clear();
+			}
+		}
+		else if (cmd[it] != ',')
+			v.push_back(cmd[it]);
+	}
+	return (0);
 }

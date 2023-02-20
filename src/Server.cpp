@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 23:32:52 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 22:38:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,19 @@ Server &	Server::operator=(const Server & src)
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
 {
-	std::vector<Channel>::iterator	it = this->_channels.begin();
-	while (it != this->_channels.end() && it->getChanName() != channel)
-		it++;
-	if (it == this->_channels.end())
-		it = this->_channels.insert(this->_channels.end(), Channel(channel));
-	return (*it);
+	std::list<Channel>::iterator it; // = _channels.begin();
+	
+	for (it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (!my_compare(it->getChanName(), channel))
+			return (*it);
+	}
+	return (*(++it));
+	// while (it != this->_channels.end() && it->getChanName() != channel)
+	// 	it++;
+	// if (it == this->_channels.end())
+	// 	it = this->_channels.insert(this->_channels.end(), Channel(channel));
+	// return (*it);
 }
 
 int	Server::init(char **argv)
@@ -193,8 +200,6 @@ void Server::getGobalCmd(Command* cmd, std::vector<unsigned char> v, int k)
 	}	
 }
 
-
-
 int	Server::run(void)
 {
 	// TO DO: always protect close functions
@@ -247,17 +252,29 @@ int	Server::run(void)
 					//////////////////////////
 					printUsersList();
 					/////////////////////////
-					Channel c1;
-					User u1, u2, u3;
-					std::string str = "Firstchan!";
-					c1.setChanName(str);
-					str = "supersecretpass12345!";
-					c1.setChanPassword(str);
-					_channels.push_back(c1);
-					str = "JOE"; u1.setClient(str); c1.addUser(&u1, *this);
-					str = "Jack"; u1.setClient(str);
-					str = "PAPET"; u1.setClient(str);
-					std::cout << _channels;
+					// Channel c1;
+					// User u1, u2, u3;
+
+					// channel
+					// std::string str = "lolo";
+					// c1.setChanName(str);
+					// str = "supersecretpass12345!";
+					// c1.setChanPassword(str);
+					
+					// users
+					// str = "JOE"; u1.setClient(str); u1.setfd(10);
+					// c1.addUser(&u1, *this);
+					// c1.addUser(&u2, *this);
+					// c1.addUser(&u3, *this);
+					// str = "Jack"; u2.setClient(str); u2.setfd(11);
+					// str = "PAPET"; u3.setClient(str); u3.setfd(12);
+
+
+					
+					// _channels.push_back(c1);
+
+					std::cout << *this << std::endl;
+					
 					//////////////////////////
 					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
 					
@@ -281,6 +298,11 @@ bool Server::isUserInList(int fd)
 			return (true);
 	}
 	return (false);
+}
+
+void Server::addNewChannel(Channel& new_channel)
+{
+	_channels.push_back(new_channel);
 }
 
 void Server::send_to_client(int fd, std::vector<unsigned char> buf)
@@ -333,18 +355,23 @@ void Server::printUsersList(void)
 void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
 {
 	std::vector<std::vector<unsigned char> >::size_type j;
+	bool is_last_space = false;
 	
 	v.clear();
 	cmd->_parsedCmd.clear();
 	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
-	{			
-		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
+	{	
+		if (!is_last_space && (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2))
 		{
+			is_last_space = true;
 			cmd->_parsedCmd.push_back(v);
 			v.clear();
 		}
 		else if (cmd->_globalCmd[i][j] != ' ')
+		{
+			is_last_space = false;
 			v.push_back(cmd->_globalCmd[i][j]);
+		}
 	}
 }
 
@@ -368,39 +395,60 @@ std::vector<unsigned char> Server::getPasswd(void) const
 	return (_passwd);
 }
 
-std::ostream & operator<<( std::ostream & o, std::vector<Channel> & i)
+std::list<Channel>::iterator Server::getChannelsbg(void)
 {
-	std::vector<Channel>::size_type m;
+	return (_channels.begin());
+}
+
+std::list<Channel>::iterator Server::getChannelsend(void)
+{
+	return (_channels.end());
+}
+
+bool Server::channelExists(std::vector<unsigned char>& channel_name)
+{
+	std::list<Channel>::iterator it;
+	
+	for (it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (!my_compare(it->getChanName(), channel_name))
+			return (true);
+	}
+	return (false);
+}
+
+
+
+
+std::ostream & operator<<( std::ostream & o, Server & i)
+{
+	std::list<Channel>::iterator m;
 	std::vector<unsigned char>::size_type n;
-	std::list<User *>::iterator itu;
+	std::list<User*>::iterator itu;
 
 	o << "____Channels begin____\n";
-	for (m = 0; m < i.size(); m++)
+	for (m = i.getChannelsbg(); m != i.getChannelsend(); m++)
 	{
-		o << "Channel: ";
-		for (n = 0; n < i[m].getChanName().size(); n++)
-			o << i[m].getChanName()[n];
-		o << "   Password: ";
-		for (n = 0; n < i[m].getChanPassword().size(); n++)
-			o << i[m].getChanPassword()[n];
-		o << "\n--------USERS--------\n";
-		// for (n = 0; n < (*i[m].getUsrListbg())->getClient().size(); n++)
-		// 	o << (*i[m].getUsrListbg())->getClient()[n];
+		o << "Chan:";
+		for (n = 0; n < m->getChanName().size(); n++)
+			o << m->getChanName()[n];
+		o << " Key:";
+		for (n = 0; n < m->getChanPassword().size(); n++)
+			o << m->getChanPassword()[n];
 
-		o << (*i[m].getUsrListbg())->getfd();
-		// for (itu = i[m].getUsrList().begin(); itu != i[m].getUsrList().end(); ++itu)
-		// {
-		// 	// o << *itu;
-		// }
-		// o << " Realname: ";
-		// for (m = 0; m < i.getRealName().size(); m++)
-		// 	o << i.getRealName()[m];
-		// o << " Nick: ";
-		// for (m = 0; m < i.getNick().size(); m++)
-		// 	o << i.getNick()[m];
-		// o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
-		// for (m = 0; m < i.getPasswd().size(); m++)
-		// 	o << i.getPasswd()[m];
+		o << " modes:";
+		std::map<char, bool>::iterator itm;
+		for (itm = m->getModesbg(); itm != m->getModesend(); ++itm)
+		{
+			if (itm->second == true)
+				o << itm->first;
+		}
+		o << "\n--------USERS--------\n";
+		for (itu = m->getUserListbg(); itu != m->getUserListend(); ++itu)
+		{
+			o << (*(*itu));
+		}
+
 		o << std::endl;
 	}
 	o << "____Channels end____\n";

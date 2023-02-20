@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 23:03:39 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 22:07:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class User
 
 		bool						isNickValid(std::vector<unsigned char> nick);
 		
-		std::vector<Channel>& 		getChannels(void);
+		std::list<Channel*>& 		getChannels(void);
 		int							getfd(void) const;
 		int							getPassStatus(void) const;
 		bool						getRegistered(void) const;
@@ -69,13 +69,16 @@ class User
 		void						setPasswd(std::vector<unsigned char>&);
 		
 		void						setClient(std::vector<unsigned char>&);
-		void						setClient(std::string&);
+		void						setClient(std::string);
 		
+		void 						setfd(int);
 		void						setNick(std::vector<unsigned char>&);
 		void						setPasswd(std::string&);
 		void						setUserName(std::vector<unsigned char>&);
 		void						setRealName(std::vector<unsigned char>&);
 		
+		void						addChannel(Channel*);
+
 	private:
 		int							_fd;
 		int							_pass_status;
@@ -86,7 +89,7 @@ class User
 		std::vector<unsigned char>	_real_name;
 		std::vector<unsigned char>	_client;
 		std::vector<unsigned char>	_nick;
-		std::vector<Channel>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		std::list<Channel*>			_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 
 };
 

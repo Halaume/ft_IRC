@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 23:04:48 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 22:08:12 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,9 +115,9 @@ int	User::getNbChan(void)
 	return (static_cast<int>(this->_channels.size()));
 }
 
-std::vector<Channel>& User::getChannels(void)
+std::list<Channel*>& User::getChannels(void)
 {
-	return (this->_channels);
+	return (_channels);
 }
 
 std::vector<unsigned char> User::getClient(void) const
@@ -150,7 +150,7 @@ void User::setClient(std::vector<unsigned char>& client)
 	_client = client;
 }
 
-void User::setClient(std::string& client)
+void User::setClient(std::string client)
 {
 	_client.clear();
 	for (std::string::size_type i = 0; i < client.size(); i++)
@@ -169,20 +169,38 @@ void User::setPassStatus(int pass_status)
 
 void	User::setRegistered(bool registered)
 {
-	this->_registered = registered;
+	_registered = registered;
 }
+
+void User::setfd(int fd)
+{
+	_fd = fd;
+}
+
+void User::addChannel(Channel *channel)
+{
+	_channels.push_back(channel);
+}
+
+
+
+
+
+
+
+
 
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
 	
-	o << "Client: ";
+	o << "Clt: ";
 	for (m = 0; m < i.getClient().size(); m++)
 		o << i.getClient()[m];
-	o << " Username: ";
+	o << " Usrn: ";
 	for (m = 0; m < i.getUserName().size(); m++)
 		o << i.getUserName()[m];
-	o << " Realname: ";
+	o << " Rln: ";
 	for (m = 0; m < i.getRealName().size(); m++)
 		o << i.getRealName()[m];
 	o << " Nick: ";
@@ -191,6 +209,7 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
 	for (m = 0; m < i.getPasswd().size(); m++)
 		o << i.getPasswd()[m];
+	o << " Ad: " << &i;
 	o << std::endl;
 
 	return o;

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 22:18:48 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 22:40:16 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 #include "../inc/utils.hpp"
 
 std::string server_name = "mig.42.fr";
+
+std::vector<unsigned char> no_param;
 
 Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_fd_user(), _cmd_buf(), _error(0), _cmd_user(NULL), _pass_before_nick_user(WAITING_FOR_PASS)
 {
@@ -51,32 +53,6 @@ void Command::setCmdUser(Server &my_server)
 	_cmd_user = my_server.findUser(_cmd_fd_user);
 }
 
-void Command::push_to_buf(int error) // if no client name, put nick name
-{
-	std::vector<unsigned char> generic_nickname;
-
-	generic_nickname.push_back('*');
-	_cmd_buf.clear();
-	// if (my_compare(generic_nickname, _cmd_user->getClient()))
-	// {
-		add_to_vector(_cmd_buf, ":" + server_name);
-	// }
-	// else // to verify
-	// {
-		// add_to_vector(_cmd_buf, ":");
-		// add_to_vector(_cmd_buf, _cmd_user->getClient());
-		// add_to_vector(_cmd_buf, "!");
-		// add_to_vector(_cmd_buf, _cmd_user->getUserName());
-		// add_to_vector(_cmd_buf, "@" + server_name);
-	// }
-	add_to_vector(_cmd_buf, numeric_response(error, *this, server_name));
-
-	std::vector<unsigned char>::size_type m;
-	std::cout << "2:\n";
-	for (m = 0; m < _cmd_buf.size(); m++)
-		std::cout << _cmd_buf[m];
-	std::cout << "\n";
-}
 
 /*''''''''''''''''''''''''''''''''''''
 				CAP > to delete?
@@ -85,21 +61,22 @@ void Command::push_to_buf(int error) // if no client name, put nick name
 ''''''''''''''''''''''''''''''''''''''*/
 void Command::register_user(Server & my_server)
 {
+	
 	(void)my_server;
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
 	{
-		push_to_buf(ERR_PASSWDMISMATCH); // exit disconnect client?
+		push_to_buf(ERR_PASSWDMISMATCH, *this, no_param); // exit disconnect client?
 		_pass_before_nick_user = PASS_CONNECTION_ERROR;
 		return;
 	}
 	(*_cmd_user).setRegistered(true);
-	push_to_buf(RPL_WELCOME);
+	push_to_buf(RPL_WELCOME, *this, no_param);
 	// sendto
-	push_to_buf(RPL_YOURHOST);
+	push_to_buf(RPL_YOURHOST, *this, no_param);
 	// sendto
-	push_to_buf(RPL_CREATED);
+	push_to_buf(RPL_CREATED, *this, no_param);
 	// sendto
-	push_to_buf(RPL_MYINFO);
+	push_to_buf(RPL_MYINFO, *this, no_param);
 	// sendto
 }
 
@@ -114,13 +91,13 @@ void	Command::_fun_PASS(Server &my_server)
 	
 	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false) // && !_cmd_user->getPassStatus())
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS);
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
 		// sendto
 		return;
 	}
 	else if (_cmd_user->getRegistered()) // || _cmd_user->getPassStatus())
 	{
-		push_to_buf(ERR_ALREADYREGISTERED);
+		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
 		// sendto
 		return;
 	}
@@ -147,20 +124,20 @@ void	Command::_fun_NICK(Server &my_server)
 	(void)my_server; //
 	if (_parsedCmd.size() < 2)
 	{
-		push_to_buf(ERR_NONICKNAMEGIVEN);
+		push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param);
 		return;
 	}
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
 	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
 	{
-		push_to_buf(ERR_ERRONEUSNICKNAME);
+		push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param);
 		return;
 	}
 	else if (itu != my_server.getUsers().end())
 	{
 		if (!my_compare(_cmd_user->getNick(), _parsedCmd[1]))
 			return;
-		push_to_buf(ERR_NICKNAMEINUSE);
+		push_to_buf(ERR_NICKNAMEINUSE, *this, no_param);
 		return;
 	}
 	(*_cmd_user).setNick(_parsedCmd[1]);
@@ -184,13 +161,13 @@ void	Command::_fun_USER(Server &my_server)
 	}
 	if (this->_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS);
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
 		// send
 		return ;
 	}
 	if (_cmd_user->getRegistered())
 	{
-		push_to_buf(ERR_ALREADYREGISTERED);
+		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
 		// sendto
 		return;
 	}
@@ -206,39 +183,96 @@ void	Command::_fun_USER(Server &my_server)
 	}
 }
 
+
+
 /*''''''''''''''''''''''''''''''''''''
 				JOIN
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_JOIN(Server &my_server)
 {
 	(void)my_server;
+	std::vector<std::vector<unsigned char> > channels;
+	std::vector<std::vector<unsigned char> > keys;
+	// std::vector<std::vector<unsigned char> > keys;
+	
 	//RFC 2813/4.2.1
 	/*Numeric Replies:
-
-	  ERR_NEEDMOREPARAMS              ERR_BANNEDFROMCHAN
-	  ERR_INVITEONLYCHAN              ERR_BADCHANNELKEY
-	  ERR_CHANNELISFULL               ERR_BADCHANMASK
-	  ERR_NOSUCHCHANNEL               ERR_TOOMANYCHANNELS
-	  ERR_TOOMANYTARGETS              ERR_UNAVAILRESOURCE
-	  RPL_TOPIC*/
+	ERR_NEEDMOREPARAMS		OK
+	ERR_BANNEDFROMCHAN		
+	ERR_INVITEONLYCHAN
+	ERR_BADCHANNELKEY
+	ERR_CHANNELISFULL
+	ERR_BADCHANMASK			OK
+	ERR_NOSUCHCHANNEL
+	ERR_TOOMANYCHANNELS
+	ERR_TOOMANYTARGETS
+	ERR_UNAVAILRESOURCE
+	RPL_TOPIC*/
 	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
 
-	// std::vector<unsigned char> ret;
 
-	// if (this->_parsedCmd.size() < 2)
-	// {
-	// 	ret = this->_parsedCmd[0];
-	// 	insert_all(ret, " :Not enough parameters\r\n");
-	// 	my_server.send(this->_cmdUser.getfd(), ret);
-	// 	return ;
-	// }
-	// std::vector<std::vector<unsigned char> >	chan = splitOnComa(this->_parsedCmd[1]);
+	if (_parsedCmd.size() < 2)
+	{
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
+		// sendto
+		return ;
+	}
+	// print_vector2(_parsedCmd);
+	reparseChannelsKeys(_parsedCmd[1], &channels);
+	// print_vector2(channels);
+	if (_parsedCmd.size() > 2)
+		reparseChannelsKeys(_parsedCmd[2], &keys);
+	// std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
+	// print_vector2(keys);
+	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
+	{
+		
+		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&')
+		{
+			push_to_buf(ERR_BADCHANMASK, *this, channels[it]);
+			// sendto
+		}
+		else if (my_server.channelExists(channels[it]) == false)
+		{
+			std::cout << "User nb chans:" << _cmd_user->getNbChan() << std::endl;
+			if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+			{
+				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
+				//sendto
+				return;
+			}
+			Channel new_channel(channels[it]);
+			new_channel.addUser(*this, &(*_cmd_user), my_server);
+			my_server.addNewChannel(new_channel);				
+		}
+		else if (my_server.channelExists(channels[it]) == true)
+		{
+			my_server.findChan(channels[it]).setMode('k', true);
+			if (my_server.findChan(channels[it]).isUserInChannel(&(*_cmd_user)))
+				return; // user is already in channel
+			// check if key for channel
+		}
+		// if user is already in the channel return and do nothing
+
+			// if (keys_size >= it + 1)
+			// {
+				// Channel new_channel(channels[it], keys[it]);
+				// my_server.addNewChannel(new_channel);
+			// }
+			// else
+			// {
+
+			// + check if limit of chan is reached if mode l
 
 
-	// std::vector<std::vector<unsigned char> >::iterator	it = chan.begin();
-	// std::vector<std::vector<unsigned char> >				passwd;
-	// std::vector<std::vector<unsigned char> >::iterator	itpasswd;
 
+	}
+
+
+
+	// for (std::list<Channel>::iterator it = my_server.getChannelsbg(); it != my_server.getChannelsend(); ++it)
+
+	
 	// if (this->_parsedCmd.size() == 3)
 	// {
 	// 	passwd = splitOnComa(this->_parsedCmd[2]);
