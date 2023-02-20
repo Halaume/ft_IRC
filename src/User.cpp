@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 15:56:18 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 15:52:43 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,9 +179,14 @@ void	User::setOperator(bool val)
 	this->_operator = val;
 }
 
-void	User::insertCurrCmd(std::vector<unsigned char> vec)
+void	User::clearCurrCmd(void)
 {
-	this->_currCmd.insert(this->_currCmd.end(), vec.begin(), vec.end());
+	this->_currCmd.clear();
+}
+
+void	User::insertcmd(std::vector<unsigned char>::iterator start, std::vector<unsigned char>::iterator end)
+{
+	this->_currCmd.insert(this->_currCmd.end(), start, end);
 }
 
 std::ostream &		operator<<( std::ostream & o, User const & i)

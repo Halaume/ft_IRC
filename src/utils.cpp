@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:52:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:50:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,14 +72,6 @@ void print_vector(std::vector<unsigned char> v)
 	std::cout << "\n";
 }
 
-int ft_strlen(const unsigned char* str)
-{
-	int i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
 std::string itos(int n)
 {
 	std::string str;
@@ -126,20 +118,14 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 
 int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 {
-	// std::cout << "vec size:" << my_vec.size() << std::endl;
 	if (my_vec.size() != str.length())
-	{
-		// std::cout << "error 1\n";
 		return (1);
-	}
-		
+
 	for (std::vector<unsigned char>::size_type i = 0; str[i]; i++)
 	{
+		std::cerr << my_vec[i] << std::endl;
 		if (my_vec[i] != str[i])
-		{
-			// std::cout << "error 2\n";
 			return (1);
-		}
 			
 	}
 	return (0);

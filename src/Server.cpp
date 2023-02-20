@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/18 15:53:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:50:49 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,26 +130,6 @@ bool Server::isUserInList(int fd)
 	return (false);
 }
 
-void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
-{
-	std::vector<std::vector<unsigned char> >::size_type j;
-
-	v.clear();
-	cmd->_parsedCmd.clear();
-	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
-	{			
-		if (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2)
-		{
-			cmd->_parsedCmd.push_back(v);
-			v.clear();
-		}
-		else if (cmd->_globalCmd[i][j] != ' ')
-			v.push_back(cmd->_globalCmd[i][j]);
-	}
-}
-
-#include <errno.h>
-
 void	Server::run(void)
 {
 	int accepted = 0;
@@ -159,12 +139,13 @@ void	Server::run(void)
 	_ev.events = EPOLLIN | EPOLLET;
 	std::vector<unsigned char> v;
 	Command	cmd;
-	std::vector<unsigned char>::iterator last;
 
 	while (true)
 	{	
 		unsigned char buf[BUFFER_SIZE] = "";
 		int	wait_ret = epoll_wait(_epollfd, _events, 1000, 1);
+		std::vector<unsigned char>::iterator read;
+		std::list<User>::iterator Usr;
 		check_kill(*this);
 		if (wait_ret == -1)
 			return ;
@@ -187,14 +168,14 @@ void	Server::run(void)
 			{
 				try
 				{
-					std::list<User>::iterator Usr = this->getUsr(this->_events[k].data.fd);
+					Usr = this->getUsr(this->_events[k].data.fd);
+					read = Usr->getCurrCmdend();
+					std::vector<std::vector<unsigned char> >	ParsedCommand;
 					switch (this->_events[k].events)
 					{
 						case EPOLLOUT:
-							std::cerr << "epollout" << std::endl;
 							if (Usr == this->_Users.end())
 							{
-								std::cerr << "ALED" << std::endl;
 								_ev.events = EPOLLIN | EPOLLET;
 								if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
 								{
@@ -205,30 +186,29 @@ void	Server::run(void)
 								}
 							}
 							this->sendto(Usr->getfd(), Usr->getRet());
-							_ev.events = EPOLLIN | EPOLLET;
+							this->_ev.events = EPOLLIN | EPOLLET;
+							ParsedCommand.clear();
 							if (Usr->getCurrCmd().size() > 0)
 							{
-								last = Usr->getCurrCmdbg();
-								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
+								for (std::vector<unsigned char>::iterator it = read; it != Usr->getCurrCmdend(); it++)
 								{
 									std::cerr << static_cast<int>(*it) << std::endl;
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										std::vector<unsigned char>	CmdNoParse(last, it);
-										for (std::vector<unsigned char>::iterator j = last; j != it; j++)
+										for (std::vector<unsigned char>::iterator j = ((read == Usr->getCurrCmdend()) ? Usr->getCurrCmdbg() : read); j != it + 1; j++)
 										{
 											if (*j == ' ' || j == it - 2)
-												cmd.getCommand().insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
+												ParsedCommand.insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
 										}
-										cmd.answer(*this);
-										Usr->getCurrCmd().erase(last, it + 1);
-										last = it + 1;
+										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
+										cmd.answer(*this);
+										it++;
+										read = it;
 										_ev.events = EPOLLOUT | EPOLLET;
 									}
 								}
 							}
-							std::cerr << "lezgongue" << std::endl;
 							if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &(this->_ev)) == - 1)
 							{
 								epoll_ctl(this->_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
@@ -237,7 +217,6 @@ void	Server::run(void)
 							}
 							break;
 						case EPOLLIN:
-							std::cerr << "epollin" << std::endl;
 							if (isUserInList(_events[k].data.fd) == false)
 							{
 								User new_user(this->_events[k].data.fd);
@@ -254,35 +233,38 @@ void	Server::run(void)
 							{
 								for (int i = 0; i < BUFFER_SIZE; i++)
 									v.push_back(buf[i]);
-								v.push_back('\0');
-								Usr->insertCurrCmd(v);
+								Usr->insertcmd(v.begin(), v.end());
 							}
 							else
 							{
-								std::vector<std::vector<unsigned char> >	ParsedCommand;
 								for (int i = 0; i < retrec; i++)
 									v.push_back(buf[i]);
-								Usr->insertCurrCmd(v);
-								last = Usr->getCurrCmdbg();
+								v.push_back('\0');
+								Usr->insertcmd(v.begin(), v.end());
+								read = Usr->getCurrCmdend();
+								ParsedCommand.clear();
 								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
 								{
+									std::cerr << "\\r = " << static_cast<int>('\r') << " | \\n = " << static_cast<int>('\n') << " | it = " << static_cast<int>(*it) << std::endl;
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										std::vector<unsigned char>	CmdNoParse(last, it);
-										for (std::vector<unsigned char>::iterator j = last; j != it; j++)
+										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != it + 1; j++)
 										{
 											if (*j == ' ' || j == it - 2)
-												cmd.getCommand().insert(cmd.getCommand().end(), std::vector<unsigned char>(j, it));
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j, it));
 										}
-										cmd.answer(*this);
-										Usr->getCurrCmd().erase(last, it + 1);
-										last = it + 1;
-										_ev.events = EPOLLOUT | EPOLLET;
+										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
+										cmd.answer(*this);
+										it++;
+										read = it;
+										if (it == Usr->getCurrCmdend())
+											Usr->clearCurrCmd();
+										this->_ev.events = EPOLLOUT | EPOLLET;
 										if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
 										{
-											epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
-											close(_events[k].data.fd);
+											epoll_ctl(this->_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &this->_ev);
+											close(this->_events[k].data.fd);
 											if (Usr != this->_Users.end())
 												this->_Users.erase(Usr);
 										}
@@ -296,6 +278,8 @@ void	Server::run(void)
 							if (Usr != this->_Users.end())
 								this->_Users.erase(Usr);
 							break;
+						if (read != Usr->getCurrCmdend())
+							Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), read);
 					}
 				}
 				catch (std::exception &)

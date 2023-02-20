@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 17:09:55 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:50:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void	Command::_fun_PASS(Server &my_server)
 	// 2 verify enough arguments
 	// 3 ver
 
-	std::cout << "PASS COMMAND REALIZED\n";
+	std::cerr << "PASS COMMAND REALIZED\n";
 	std::vector<unsigned char> v;
 	
 	if (this->_parsedCmd.size() < 2 && my_server.findUser(_cmd_fd_user)->getRegistered() == false)
@@ -107,6 +107,7 @@ void	Command::_fun_PASS(Server &my_server)
 		push_to_buf(ERR_NEEDMOREPARAMS, _parsedCmd[0]);
 		return;
 	}
+	this->_cmdUser->setRet(this->_parsedCmd[0]);
 	// else if (my_server.findUser(_cmd_fd_user)->getRegistered())
 	// {
 	// 	std::cout << "PASS already registered\n";
@@ -291,7 +292,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		return ;
 	}
 //PAS SUR DE CELLE CI
-	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
 	{
 		this->_cmdUser->setRet(this->_parsedCmd[0]);// RET SHOULD BE <TARGET>
 		insert_all(this->_cmdUser->getRet(), " :Duplicate recipients. No message delivered\r\n");
@@ -309,7 +310,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		this->_cmdUser->getRet().push_back(' ');
 		this->_cmdUser->getRet().insert(this->_cmdUser->getRet().end(), it->begin(), it->end());
 	}
-	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~')
+	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
 		do_chan(receiver, my_server, this->_cmdUser->getRet());
 	else
 	{
@@ -424,8 +425,6 @@ void	Command::answer(Server &my_server)
 {
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
 	int i = 0;
-	setCmdUser(my_server);
-	// _cmd_user = my_compare.findUser(_cmd_fd_user);
 
 	if (this->_parsedCmd.size() == 0)
 		return ;
@@ -505,6 +504,7 @@ void	Command::answer(Server &my_server)
 		default:
 			break;
 	}
+	this->_parsedCmd.clear();
 }
 
 // Getters
@@ -519,6 +519,11 @@ std::vector<std::vector<unsigned char> > Command::getParsedCmd()
 }
 
 // Setters
+void	Command::setParsedCmd(std::vector<std::vector<unsigned char> > val)
+{
+	this->_parsedCmd = val;
+}
+
 void Command::setCmdFdUser(int fd)
 {
 	_cmd_fd_user = fd;	

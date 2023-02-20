@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/17 16:48:42 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:50:50 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,6 @@ class Server
 		void							sendto(int, std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		std::list<User>::iterator		getUsr(int);
-
-		void 						getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
-		
 		bool						isUserInList(int);
 
 		std::list<User>				getUsers(void) const;
