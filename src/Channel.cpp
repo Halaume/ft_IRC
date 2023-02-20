@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/14 18:00:37 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/20 12:49:14 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,32 @@ bool	Channel::operator!=(const Channel & lhs) const
 	return (this->_chanName != lhs._chanName);
 }
 
-void Channel::addUser(User *newUser, Server &my_server)
+std::vector<unsigned char>	 Channel::getTopic(void) const
+{
+	return (this->_topic);	
+}
+
+std::map<char, bool>		 Channel::getModes(void) const
+{
+	return (this->_modes);
+}
+
+void        Channel::setTopic(std::vector<unsigned char> topic)
+{
+	this->_topic = topic;
+}
+
+bool    Channel::isOp(User usr) const
+{
+    for (std::list<User *>::const_iterator it = _opList.begin(); it != _opList.end(); it++)
+    {
+		if (**it == usr)
+            return (true);
+	}
+    return (false);
+}
+
+void Channel::addUser(User * newUser, Server &my_server)
 {
 	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
 	bool	connected = false;
@@ -196,4 +221,16 @@ bool	Channel::isOp(User *usr) const
 		if (*it == usr)
 			return (true);
 	return (false);
+}
+
+std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
+{
+	std::list<User *>::iterator it;
+	
+	for (it = this->_userLst.begin(); it != this->_userLst.end(); it++)
+	{
+		if ((*it)->getUserName() == nick)
+			return (it);
+	}
+	return (it);
 }

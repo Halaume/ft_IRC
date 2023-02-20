@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:26:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 13:10:34 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ void	Command::_fun_USER(Server &my_server)
 		return ;
 	}
 	this->_cmdUser->setUserName(this->_parsedCmd[1]);
-	//	this->_cmdUser.setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
+	//	this->_cmdUser->setMode(this->_parsedCmd[2]);Some weird thing to do : RFC 2812/3.1.3
 	this->_cmdUser->setRealName(this->_parsedCmd[4]);
 	this->_cmdUser->setRegistered(true);
 }
@@ -192,10 +192,10 @@ void	Command::_fun_JOIN(Server &my_server)
 	}
 }
 
-void	Command::_fun_QUIT(Server &my_server)
-{
-	std::vector<unsigned char> ret;
-	
+//void	Command::_fun_QUIT(Server &my_server)
+//{
+//	std::vector<unsigned char> ret;
+//
 // 	if (this->_parsedCmd.size() > 1)
 // 	{
 // 		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
@@ -208,16 +208,16 @@ void	Command::_fun_QUIT(Server &my_server)
 // 		}
 // 	}
 	
-	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
-	{
-		for (std::list<User *>::const_iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
-			my_server.sendto((*itu)->getfd(), ret);
-		this->_cmdUser->getChannels().erase(itc);
-	}
+// 	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
+// 	{
+// 		for (std::list<User *>::const_iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
+// 			my_server.sendto((*itu)->getfd(), ret);
+// 		this->_cmdUser->getChannels().erase(itc);
+// 	}
 	
-	my_server.getUsers().remove(*(this->_cmdUser));
-	close(_cmdUser->getfd());
-}
+// 	my_server.getUsers().remove(*(this->_cmdUser));
+// 	close(_cmdUser->getfd());
+// }
 
 
 void	Command::_fun_RESTART(Server &my_server)
@@ -257,7 +257,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		dest.clear();
 		dest = this->_parsedCmd[0];
 		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
-		my_server.sendto(this->_cmdUser.getfd(), dest);
+		my_server.sendto(this->_cmdUser->getfd(), dest);
 		return ;
 	}*/
 	if (chan != *my_server.getChannel().end() && is_op)
@@ -298,20 +298,19 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		return ;
 	}
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
-	std::vector<unsigned char>	msg;
 
 	if (this->_parsedCmd[2][0] == ':')
-		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+		ret = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
 	else
-		msg = this->_parsedCmd[2];
+		ret = this->_parsedCmd[2];
 	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
 	while (it != this->_parsedCmd.end())
 	{
-		msg.push_back(' ');
-		msg.insert(msg.end(), it->begin(), it->end());
+		ret.push_back(' ');
+		ret.insert(ret.end(), it->begin(), it->end());
 	}
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~')
-		do_chan(receiver, my_server, msg);
+		do_chan(receiver, my_server, ret);
 	else
 	{
 		std::list<User>::iterator	itu = my_server.findUser(receiver);
@@ -322,28 +321,212 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 			my_server.sendto(this->_cmdUser->getfd(), ret);
 		}
 		else
-			my_server.sendto(itu->getfd(), msg);
+			my_server.sendto(itu->getfd(), ret);
 	}
 }
 
 void	Command::_fun_OPER(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> ret;
+	
+	if (_parsedCmd.size() == 3)
+	{
+		std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
+		if (itu == my_server.getUsers().end())
+		{
+			insert_all(ret, " ERR_PASSWMISMTCH\r\n");
+			my_server.sendto(_cmdUser->getfd(),ret);
+			return ;
+		}
+		else 
+		{
+			if (_parsedCmd[2] != my_server.getPassword())
+			{
+				insert_all(ret, " ERR_PASSWMISMTCH\r\n");
+				my_server.sendto(_cmdUser->getfd(),ret);
+				return ;
+			}
+		}
+	}
+	insert_all(ret, " ERR_PASSWMISMATCH\r\n");
+	my_server.sendto(_cmdUser->getfd(), ret);
+	return ;
 }
 
 void	Command::_fun_ERROR(Server &my_server)
 {
-	(void)my_server;
+	(void)my_server;	
 }
 
 void	Command::_fun_MODE(Server &my_server)
 {
+	std::vector<unsigned char> ret;
+
+	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
+	if (itu == my_server.getUsers().end())
+	{
+		insert_all(ret, "ERR_NOSUCHNICK\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	
 	(void)my_server;
 }
 
+
+void	Command::_fun_INVITE(Server &my_server)
+{
+	std::vector<unsigned char>	ret;
+
+	if (this->_parsedCmd.size() > 3)
+	{
+		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[2]);
+	if (itc == my_server.getChannel().end())
+	{
+		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	std::list<User *>::iterator	itu = itc->findUser(_cmdUser->getUserName());
+	if (itu == itc->getUsrListend())
+	{
+		insert_all(ret, " ERR_NOTONCHANNEL\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	itu = itc->findUser(_parsedCmd[1]);
+	if (itu != itc->getUsrListend())
+	{
+		insert_all(ret, " ERR_USERONCHANNEL\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	if (itc->getModes().find('i')->second && !itc->isOp(_cmdUser))
+	{
+		insert_all(ret, " ERR_CHANOPRIVSNEEDED\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	insert_all(ret, " RPL_INVITING\r\n");
+	my_server.sendto(_cmdUser->getfd(), ret);
+	return ;
+}
+
+void	Command::_fun_QUIT(Server &my_server)
+{
+	std::vector<unsigned char> ret;
+	unsigned long i = 1;
+	
+	if (_parsedCmd.size() > 1)
+	{
+		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+		i++;
+		while (i < _parsedCmd.size())
+		{
+			ret.push_back(' ');
+			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+			i++;
+		}
+	}
+	
+	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
+	{
+		for (std::list<User *>::iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
+			my_server.sendto((*itu)->getfd(), ret);
+		_cmdUser->getChannels().erase(itc);
+	}
+	my_server.getUsers().remove(*_cmdUser);
+	close(_cmdUser->getfd());
+	
+}
+
+
 void	Command::_fun_TOPIC(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> 		ret;
+	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[1]);
+	std::list<User *>::iterator		Usrlst = itc->getUsrListbg();
+
+	ret = _parsedCmd[0];
+	if (_parsedCmd.size() < 2)
+	{
+		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	if (itc == my_server.getChannel().end())
+	{
+		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	while (Usrlst != itc->getUsrListend() && *Usrlst != this->_cmdUser)
+        Usrlst++;
+    if (Usrlst == itc->getUsrListend())
+    {
+        ret = _cmdUser->getUserName();
+        ret.insert(ret.end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
+        insert_all(ret, " ERR_NOTONCHANNEL\r\n");
+        my_server.sendto(_cmdUser->getfd(), ret);
+        return ;
+    }
+	
+	if (itc->isOp(*Usrlst) == false)
+	{
+		insert_all(ret, " ERR_CHOPRIVSNEEDED\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
+	std::vector<unsigned char>	Topic = itc->getTopic();
+	if (_parsedCmd.size() == 2)
+	{
+		if (Topic.size() > 0)
+			insert_all(ret, " RPL_TOPIC\r\n");
+		else
+			insert_all(ret, " RPL_NOTOPIC\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
+	{
+		Topic.clear();
+		itc->setTopic(Topic);
+		insert_all(ret, " RPL_TOPIC\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		for (std::list<User *>::iterator itu = itc->getUsrListbg(); itu != itc->getUsrListend(); itu++)
+			my_server.sendto((*itu)->getfd(), ret);
+	}
+	else
+	{
+		Topic.clear();
+		std::vector<std::vector<unsigned char> >::iterator iterator = _parsedCmd.begin();
+		if (*(iterator->begin()) == ':')
+			Topic.insert(Topic.end(), iterator->begin() + 1, iterator->end());
+		iterator++;
+		Topic.push_back(' ');
+		while (iterator != _parsedCmd.end())
+		{
+			iterator++;
+			Topic.insert(Topic.end(), iterator->begin(), iterator->end());
+			Topic.push_back(' ');
+		}
+		itc->setTopic(Topic);
+		for (std::list<User *>::iterator itu = itc->getUsrListbg(); itu != itc->getUsrListend(); itu++)
+			my_server.sendto((*itu)->getfd(), ret);
+	}
 }
 
 void	Command::_fun_KICK(Server &my_server)
@@ -413,11 +596,6 @@ void	Command::_fun_KICK(Server &my_server)
 	
 }
 
-void	Command::_fun_INVITE(Server &my_server)
-{
-	(void)my_server;
-}
-
 void	Command::_fun_KILL(Server &my_server)
 {
 	(void)my_server;
@@ -426,13 +604,18 @@ void	Command::_fun_KILL(Server &my_server)
 
 void	Command::_fun_PONG(Server &my_server)
 {
-//	std::vector<User>::iterator	it = my_server.getUsers().begin();
 	(void)my_server;
 }
 
-void	Command::answer(Server &my_server)
+void	Command::_fun_NOTICE(Server &my_server)
 {
-	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING"};
+	(void)my_server;
+}
+
+
+void	Command::_answer(Server &my_server)
+{
+	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
 	int i = 0;
 	setCmdUser(my_server);
 	// _cmd_user = my_compare.findUser(_cmd_fd_user);
@@ -440,7 +623,7 @@ void	Command::answer(Server &my_server)
 	std::cout << "find user for fd: " << _cmd_fd_user << " result:" << *_cmd_user << std::endl;
 
 	
-	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
+	while (i < 16 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
@@ -517,6 +700,11 @@ void	Command::answer(Server &my_server)
 		case 14:
 		{
 			this->_fun_PONG(my_server);
+			break;
+		}
+		case 15:
+		{
+			this->_fun_NOTICE(my_server);
 			break;
 		}
 		default:

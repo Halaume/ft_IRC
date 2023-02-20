@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 14:47:59 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 12:33:54 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class User
 		std::vector<unsigned char>	getUserName(void) const;
 		std::vector<unsigned char>	getPasswd(void) const;
 		void						setPassStatus(int);
+		std::vector<unsigned char>	getRealName(void) const;
 		void						setRegistered(bool);
 		void						setPasswd(std::vector<unsigned char>);
 		void						setPasswd(std::string);

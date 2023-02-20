@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:52:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 12:37:46 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,3 +144,20 @@ int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 	}
 	return (0);
 }
+
+
+int	my_compare_vec(std::vector<unsigned char> vec1, std::vector<unsigned char> vec2)
+{
+	if (vec1.size() != vec2.size())
+		return (1);
+
+	std::vector<unsigned char>::size_type i = 0;
+	while (vec2.size())
+	{
+		if (vec1[i] != vec2[i])
+			return (1);
+		i++;
+	}
+	return (0);
+}
+

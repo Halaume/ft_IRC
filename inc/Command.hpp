@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 15:26:09 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 12:33:10 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ class Command
 		void									_fun_KILL(Server &my_server);
 		void									_fun_RESTART(Server &my_server);
 		void									_fun_PONG(Server &my_server);
+		void									_fun_NOTICE(Server &my_server);
 
 		void	do_chan(std::vector<unsigned char>, Server &my_server, std::vector<unsigned char>);
 
