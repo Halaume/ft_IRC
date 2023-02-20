@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:36:34 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 16:37:01 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ class Channel
 			std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
 
 	private:
-	
 			std::vector<unsigned char>	_chanName;
 			std::vector<unsigned char>	_chanPassword;
 			std::vector<unsigned char>  _topic;

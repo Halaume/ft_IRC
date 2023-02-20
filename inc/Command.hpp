@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:21:26 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 16:38:40 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,9 @@ class Command
 			std::vector<std::vector<unsigned char> >	_globalCmd;
 			std::vector<std::vector<unsigned char> >	_parsedCmd;
 	
-			unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
-			std::vector<std::vector<unsigned char> >	getGobalCmd();
 			std::vector<std::vector<unsigned char> >	getParsedCmd();
 			std::vector<std::vector<unsigned char> >	getCommand(void) const;
+			unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 
 			void	setCmdFdUser(int);
 			void	setCmdUser(Server &);
@@ -77,7 +76,6 @@ class Command
 			void	_fun_RESTART(Server &my_server);
 			void	_fun_PONG(Server &my_server);
 			void	_fun_NOTICE(Server &my_server);
-
 			void	do_chan(std::vector<unsigned char>, Server &my_server, std::vector<unsigned char>);
 
 };
