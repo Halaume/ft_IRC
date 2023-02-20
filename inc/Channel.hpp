@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:32:46 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 16:36:34 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,14 +35,14 @@ class Channel
 			bool		operator!=(const Channel &) const;
 		
 			std::vector<unsigned char>		getChanName(void) const;
+			std::vector<unsigned char>		getTopic(void) const;
+			std::map<char, bool>			getModes(void) const;
 			std::list<User *>::iterator		getOpListbg(void);
 			std::list<User *>::iterator		getOpListend(void);
 			std::list<User *>::iterator		getUsrListbg(void);
 			std::list<User *>::iterator		getUsrListend(void);
 			std::list<User *>				getUsrList(void);
 			std::list<User *>				getUsers(void) const;
-			std::vector<unsigned char>		getTopic(void) const;
-			std::map<char, bool>			getModes(void) const;
 
 			void   setTopic(std::vector<unsigned char>);
 			
