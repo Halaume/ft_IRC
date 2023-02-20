@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 15:11:14 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 16:15:36 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void Command::push_to_buf(int error, std::vector<unsigned char> cmd)
 	(void)error; (void)cmd;
 	_cmd_buf.clear();
 	add_to_vector(&_cmd_buf, ":" + server_name + " ");
-	add_to_vector(&_cmd_buf, _cmd_user->getUserName());
+	add_to_vector(&_cmd_buf, _cmd_user->getNickName());
 	add_to_vector(&_cmd_buf, " ");
 	add_to_vector(&_cmd_buf, numeric_response(ERR_NEEDMOREPARAMS, cmd));
 	// add_to_vector(&_cmd_buf, cmd);
@@ -197,7 +197,7 @@ void	Command::_fun_RESTART(Server &my_server)
 {
 	if (!this->_cmdUser->getOperator())
 	{
-		std::vector<unsigned char> msg = this->_cmdUser->getUserName();
+		std::vector<unsigned char> msg = this->_cmdUser->getNickName();
 		insert_all(msg, " :Permission Denied- You're not an IRC operator");
 		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
@@ -378,6 +378,13 @@ void	Command::_fun_MODE(Server &my_server)
 		return ;
 	}
 	
+	if (_parsedCmd[1] != _cmdUser->getNickName())
+	{
+		insert_all(ret, " ERR_USERSDONTMATCH\r\n");
+		my_server.sendto(_cmdUser->getfd(), ret);
+		return ;
+	}
+	
 	
 	(void)my_server;
 }
@@ -402,7 +409,7 @@ void	Command::_fun_INVITE(Server &my_server)
 		return ;
 	}
 	
-	std::list<User *>::iterator	itu = itc->findUser(_cmdUser->getUserName());
+	std::list<User *>::iterator	itu = itc->findUser(_cmdUser->getNickName());
 	if (itu == itc->getUsrListend())
 	{
 		insert_all(ret, " ERR_NOTONCHANNEL\r\n");
@@ -484,7 +491,7 @@ void	Command::_fun_TOPIC(Server &my_server)
         Usrlst++;
     if (Usrlst == itc->getUsrListend())
     {
-        ret = _cmdUser->getUserName();
+        ret = _cmdUser->getNickName();
         ret.insert(ret.end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
         insert_all(ret, " ERR_NOTONCHANNEL\r\n");
         my_server.sendto(_cmdUser->getfd(), ret);
@@ -551,7 +558,7 @@ void	Command::_fun_KICK(Server &my_server)
 
 	if (tmp == my_server.getChannel().end())
 	{
-		msg = this->_cmdUser->getUserName();
+		msg = this->_cmdUser->getNickName();
 		insert_all(msg, " ERR_NOSUCHCHANNEL\r\n");
 		my_server.sendto(this->_cmdUser->getfd(), msg);
 		return ;
@@ -559,7 +566,7 @@ void	Command::_fun_KICK(Server &my_server)
 
 	if (!tmp->isOp(this->_cmdUser))
 	{
-		msg = this->_cmdUser->getUserName();
+		msg = this->_cmdUser->getNickName();
 		msg.insert(msg.end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
 		insert_all(msg, " :You're not channel operator\r\n");
 		my_server.sendto(this->_cmdUser->getfd(), msg);
@@ -571,7 +578,7 @@ void	Command::_fun_KICK(Server &my_server)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser->getUserName();
+		msg = this->_cmdUser->getNickName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_NOTONCHANNEL\r\n");
 		my_server.sendto(this->_cmdUser->getfd(), msg);
@@ -582,7 +589,7 @@ void	Command::_fun_KICK(Server &my_server)
 		Usrlst++;
 	if (Usrlst == tmp->getUsrListend())
 	{
-		msg = this->_cmdUser->getUserName();
+		msg = this->_cmdUser->getNickName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_USERNOTINCHANNEL\r\n");
 		my_server.sendto(this->_cmdUser->getfd(), msg);
@@ -590,7 +597,7 @@ void	Command::_fun_KICK(Server &my_server)
 	}
 	if (tmp->isOp(*Usrlst))
 	{
-		msg = this->_cmdUser->getUserName();
+		msg = this->_cmdUser->getNickName();
 		msg.insert(msg.end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
 		insert_all(msg, " ERR_CANNOTKICKADMIN\r\n");
 		my_server.sendto(this->_cmdUser->getfd(), msg);

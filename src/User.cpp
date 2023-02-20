@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 12:38:07 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 15:56:47 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,18 @@
 #include <unistd.h>
 #include "../inc/User.hpp"
 
-User::User(void): _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _ret(), _channels()
+User::User(void): _pass_status(0), _registered(false), _passwd(), _nickName(), _realName(), _client(), _ret(), _channels()
 {
 	this->_fd = 0;
-	_userName.push_back('*');
+	_nickName.push_back('*');
 }
 
-User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _userName(), _realName(), _client(), _ret(), _channels()
+User::User(int fd): _fd(fd), _pass_status(0), _registered(false), _passwd(), _nickName(), _realName(), _client(), _ret(), _channels()
 {
-	_userName.push_back('*');
+	_nickName.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _userName(copy._userName), _realName(copy._realName), _client(copy._client), _ret(copy._ret),_channels(copy._channels)
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _nickName(copy._nickName), _realName(copy._realName), _client(copy._client), _ret(copy._ret),_channels(copy._channels)
 {
 }
 
@@ -42,7 +42,7 @@ User &	User::operator=(const User & src)
 	this->_pass_status = src._pass_status;
 	this->_registered = src._registered;
 	this->_passwd = src._passwd;
-	this->_userName = src._userName;
+	this->_nickName = src._nickName;
 	this->_realName = src._realName;
 	this->_client = src._client;
 	this->_ret = src._ret;
@@ -57,7 +57,7 @@ bool	User::operator==(User test) const
 
 bool	User::operator==(std::vector<unsigned char> test) const
 {
-	return (this->_userName == test);
+	return (this->_nickName == test);
 }
 
 bool	User::operator!=(User test) const
@@ -110,9 +110,9 @@ std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
 	return (this->_currCmd.end());
 }
 
-std::vector<unsigned char>	User::getUserName(void) const
+std::vector<unsigned char>	User::getNickName(void) const
 {
-	return (this->_userName);
+	return (this->_nickName);
 }
 
 void	User::setPassStatus(int pass_status)
@@ -147,9 +147,9 @@ void	User::setRet(std::vector<unsigned char> ret)
 // 		_passwd.push_back((char)passwd[it]);
 // }
 
-void User::setUserName(std::vector<unsigned char> userName)
+void User::setUserName(std::vector<unsigned char> nickName)
 {
-	this->_userName = userName;
+	this->_nickName = nickName;
 	// std::vector<unsigned char>::size_type m;
 	// std::cout << "un1:";
 	// for (m = 0; m < userName.size(); m++)
@@ -194,8 +194,8 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	std::vector<unsigned char>::size_type m;
 	
 	o << "Username: ";
-	for (m = 0; m < i.getUserName().size(); m++)
-		o << i.getUserName()[m];
+	for (m = 0; m < i.getNickName().size(); m++)
+		o << i.getNickName()[m];
 	o << " fd: " << i.getfd() << std::endl;
 
 	return o;

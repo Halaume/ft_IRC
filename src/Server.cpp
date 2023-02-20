@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 12:58:44 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 15:54:28 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -376,7 +376,7 @@ std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 	
 	for (it = this->_Users.begin(); it != this->_Users.end(); it++)
 	{
-		if (it->getUserName() == nick)
+		if (it->getNickName() == nick)
 			return (it);
 	}
 	return (it);
