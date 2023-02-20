@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 13:10:34 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 15:11:14 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,33 +192,6 @@ void	Command::_fun_JOIN(Server &my_server)
 	}
 }
 
-//void	Command::_fun_QUIT(Server &my_server)
-//{
-//	std::vector<unsigned char> ret;
-//
-// 	if (this->_parsedCmd.size() > 1)
-// 	{
-// 		ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-// 		i++;
-// 		while (i < _parsedCmd.size())
-// 		{
-// 			ret.push_back(' ');
-// 			ret.insert(ret.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
-// 			i++;
-// 		}
-// 	}
-	
-// 	for (std::vector<Channel *>::iterator itc = _cmdUser->getChannelsbg(); itc != _cmdUser->getChannelsend(); itc++)
-// 	{
-// 		for (std::list<User *>::const_iterator itu = (*itc)->getUsrListbg(); itu != (*itc)->getUsrListend(); itu++)
-// 			my_server.sendto((*itu)->getfd(), ret);
-// 		this->_cmdUser->getChannels().erase(itc);
-// 	}
-	
-// 	my_server.getUsers().remove(*(this->_cmdUser));
-// 	close(_cmdUser->getfd());
-// }
-
 
 void	Command::_fun_RESTART(Server &my_server)
 {
@@ -290,7 +263,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		return ;
 	}
 //PAS SUR DE CELLE CI
-	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] == ':')
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
 	{
 		ret = this->_parsedCmd[0];// RET SHOULD BE <TARGET>
 		insert_all(ret, " :Duplicate recipients. No message delivered\r\n");
@@ -309,7 +282,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 		ret.push_back(' ');
 		ret.insert(ret.end(), it->begin(), it->end());
 	}
-	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~')
+	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
 		do_chan(receiver, my_server, ret);
 	else
 	{
@@ -320,6 +293,41 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 			insert_all(ret, " ERR_NOSUCHNICK\r\n");
 			my_server.sendto(this->_cmdUser->getfd(), ret);
 		}
+		else
+			my_server.sendto(itu->getfd(), ret);
+	}
+}
+
+
+void	Command::_fun_NOTICE(Server &my_server)
+{
+	if (this->_parsedCmd.size() < 3)
+		return ;
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
+		return ;
+	
+	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
+	std::vector<unsigned char> ret;
+	
+	if (this->_parsedCmd[2][0] == ':')
+		ret = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+	else
+		ret = this->_parsedCmd[2];
+	
+	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
+	while (it != this->_parsedCmd.end())
+	{
+		ret.push_back(' ');
+		ret.insert(ret.end(), it->begin(), it->end());
+	}
+	
+	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
+		do_chan(receiver, my_server, ret);
+	else
+	{
+		std::list<User>::iterator	itu = my_server.findUser(receiver);
+		if (itu == my_server.getUsers().end())
+			return ;
 		else
 			my_server.sendto(itu->getfd(), ret);
 	}
@@ -603,11 +611,6 @@ void	Command::_fun_KILL(Server &my_server)
 
 
 void	Command::_fun_PONG(Server &my_server)
-{
-	(void)my_server;
-}
-
-void	Command::_fun_NOTICE(Server &my_server)
 {
 	(void)my_server;
 }
