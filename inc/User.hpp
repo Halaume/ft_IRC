@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 15:52:21 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 14:24:52 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class User
 		int							getNbChan(void);
 		bool						getOperator(void) const;
 		void						setOperator(bool);
-		void						insertcmd(std::vector<unsigned char>::iterator, std::vector<unsigned char>::iterator);
+		void						insertcmd(std::vector<unsigned char> &);
 		void						clearCurrCmd(void);
 		
 	private:

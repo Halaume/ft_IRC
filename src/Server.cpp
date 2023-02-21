@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 17:50:49 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 15:37:21 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,32 +233,40 @@ void	Server::run(void)
 							{
 								for (int i = 0; i < BUFFER_SIZE; i++)
 									v.push_back(buf[i]);
-								Usr->insertcmd(v.begin(), v.end());
+								Usr->insertcmd(v);
+								v.clear();
 							}
 							else
 							{
 								for (int i = 0; i < retrec; i++)
+								{
 									v.push_back(buf[i]);
-								v.push_back('\0');
-								Usr->insertcmd(v.begin(), v.end());
+									std::cerr << static_cast<int>(v.back()) << std::endl;
+									std::cerr << static_cast<int>(buf[i]) << std::endl;
+								}
+								Usr->insertcmd(v);
+								v.clear();
 								read = Usr->getCurrCmdend();
 								ParsedCommand.clear();
 								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
 								{
-									std::cerr << "\\r = " << static_cast<int>('\r') << " | \\n = " << static_cast<int>('\n') << " | it = " << static_cast<int>(*it) << std::endl;
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != it + 1; j++)
+										std::cerr << "\\r = " << static_cast<int>('\r') << " | \\n = " << static_cast<int>('\n') << " | it = " << static_cast<int>(*it) << std::endl;
+										int i = 0;
+										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++, i++)
 										{
-											if (*j == ' ' || j == it - 2)
-												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j, it));
+											if (*j == ' ' || j == (it - 2))
+											{
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j - i, j));
+												i = 0;
+											}
 										}
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
-										it++;
-										read = it;
-										if (it == Usr->getCurrCmdend())
+										read = (it + 1);
+										if ((it + 1) == Usr->getCurrCmdend())
 											Usr->clearCurrCmd();
 										this->_ev.events = EPOLLOUT | EPOLLET;
 										if (epoll_ctl(this->_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &this->_ev) == - 1)
@@ -268,6 +276,7 @@ void	Server::run(void)
 											if (Usr != this->_Users.end())
 												this->_Users.erase(Usr);
 										}
+										break;
 									}
 								}
 								break;
