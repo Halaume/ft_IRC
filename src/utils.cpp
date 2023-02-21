@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 14:50:23 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 18:32:58 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,14 @@
 #include <vector>
 #include <string>
 #include <string.h>
+#include <unistd.h>
+#include "../inc/Server.hpp"
+
+void	free_fun(Server &my_server)
+{
+	close(my_server.getSct());
+	close(my_server.getEpollfd());
+}
 
 std::string itos(int n)
 {
@@ -205,20 +213,13 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 
 int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 {
-	// std::cout << "vec size:" << my_vec.size() << std::endl;
 	if (my_vec.size() != str.length())
-	{
-		// std::cout << "error 1\n";
 		return (1);
-	}
-		
-	for (std::vector<unsigned char>::size_type i = 0; str[i]; i++)
+
+	for (std::vector<unsigned char>::size_type i = 0; i < my_vec.size(); i++)
 	{
 		if (my_vec[i] != str[i])
-		{
-			// std::cout << "error 2\n";
 			return (1);
-		}
 			
 	}
 	return (0);
@@ -301,3 +302,19 @@ int reparseChannelsKeys(std::vector<unsigned char> cmd, std::vector<std::vector<
 	}
 	return (0);
 }
+
+int	my_compare_vec(std::vector<unsigned char> vec1, std::vector<unsigned char> vec2)
+{
+	if (vec1.size() != vec2.size())
+		return (1);
+
+	std::vector<unsigned char>::size_type i = 0;
+	while (vec2.size())
+	{
+		if (vec1[i] != vec2[i])
+			return (1);
+		i++;
+	}
+	return (0);
+}
+

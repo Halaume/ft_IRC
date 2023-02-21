@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 16:14:41 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 18:45:00 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,58 +32,54 @@ class User
 		~User(void);
 		User &	operator=(const User & src);
 
-		
-		
-		// GETTERS
-		// int					getfd(void) const;
-		// std::string			getCurrCmd(void) const;
-		// std::string			getUserName(void) const;
-		// std::string			getRealName(void) const;
-		// std::string			getClient(void) const;
-
-		// SETTERS
-		// void				setfd(int fd);
-		// void				setCurrCmd(std::string currCmd);
-		// void				setUserName(std::string name);
-		// void				setRealName(std::string name);
-		// void				setClient(std::string client);
-		
 		bool						operator==(User) const;
+		bool						operator==(std::vector<unsigned char>) const;
 		bool						operator!=(User) const;
 
 		bool						isNickValid(std::vector<unsigned char> nick);
 		
-		std::list<Channel*>& 		getChannels(void);
-		int							getfd(void) const;
-		int							getPassStatus(void) const;
-		bool						getRegistered(void) const;
-		std::vector<unsigned char>	getUserName(void) const;
-		std::vector<unsigned char>	getRealName(void) const;
-		std::vector<unsigned char>	getPasswd(void) const;
-		std::vector<unsigned char>	getClient(void) const;
-		std::vector<unsigned char>	getNick(void) const;
-		int							getNbChan(void);
-		std::vector<unsigned char>	getUserMask(void) const;
-		std::vector<unsigned char>	getUserNickNameMask(void) const;
+		std::vector<Channel *> 					getChannels(void) const;
+		std::vector<unsigned char>				getCurrCmd(void) const;
+		std::vector<Channel *>::iterator		getChannelsbg(void);
+		std::vector<Channel *>::iterator		getChannelsend(void);
+		std::vector<unsigned char>::iterator	getCurrCmdbg(void);
+		std::vector<unsigned char>::iterator	getCurrCmdend(void);
+		int										getfd(void) const;
+		int										getPassStatus(void) const;
+		bool									getRegistered(void) const;
+		std::vector<unsigned char>				getUserName(void) const;
+		std::vector<unsigned char>				getPasswd(void) const;
+		std::vector<unsigned char>				getClient(void) const;
+		std::vector<unsigned char>				getNick(void) const;
+		int										getNbChan(void);
+		std::vector<unsigned char>				getUserMask(void) const;
+		std::vector<unsigned char>				getUserNickNameMask(void) const;
 		
-		void						setPassStatus(int);
-		void						setRegistered(bool);
-		void						setPasswd(std::vector<unsigned char>&);
-		
-		void						setClient(std::vector<unsigned char>&);
-		void						setClient(std::string);
-		
-		void 						setfd(int);
-		void						setNick(std::vector<unsigned char>&);
-		void						setPasswd(std::string&);
-		void						setUserName(std::vector<unsigned char>&);
-		void						setRealName(std::vector<unsigned char>&);
-		void						setUserMask(std::vector<unsigned char>&);
-		
-		void						addChannel(Channel*);
+		void									setPassStatus(int);
+		std::vector<unsigned char>				getRealName(void) const;
+		void									setRegistered(bool);
+		void									setPasswd(std::vector<unsigned char>);
+		void									setUserName(std::vector<unsigned char>);
+		void									setRealName(std::vector<unsigned char>);
+		void									setRet(std::vector<unsigned char>);
+		std::vector<unsigned char> &			getRet(void);
+		bool									getOperator(void) const;
+		void									setOperator(bool);
+		void									insertcmd(std::vector<unsigned char> &);
+		void									clearCurrCmd(void);
+		void									clearRet(void);
+					
+		void									setClient(std::vector<unsigned char>&);
+					
+		void 									setfd(int);
+		void									setNick(std::vector<unsigned char>&);
+		void									setUserMask(std::vector<unsigned char>&);
+					
+		void									addChannel(Channel*);
 
 	private:
 		int							_fd;
+		bool						_operator;
 		int							_pass_status;
 		bool						_registered;
 		std::vector<unsigned char>	_passwd;
@@ -92,9 +88,9 @@ class User
 		std::vector<unsigned char>	_real_name;
 		std::vector<unsigned char>	_client;
 		std::vector<unsigned char>	_nick;
-		std::list<Channel*>			_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
+		std::vector<unsigned char>	_ret;
+		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 		std::vector<unsigned char>	_user_mask;
-		
 };
 
 std::ostream &		operator<<( std::ostream & o, User const & i);

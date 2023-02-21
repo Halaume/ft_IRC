@@ -6,17 +6,17 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 16:45:26 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 18:46:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <string>
-
+#include <unistd.h>
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
 
-User::User(void): _fd(), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
+User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
 _user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
 {
 	_user_name.push_back('*');
@@ -59,10 +59,15 @@ User& User::operator=(const User & src)
 
 bool User::operator==(User test) const
 {
-	return (this->_fd == test._fd);
+	return (_fd == test._fd);
 }
 
-bool User::operator!=(User test) const
+bool	User::operator==(std::vector<unsigned char> test) const
+{
+	return (_user_name == test);
+}
+
+bool	User::operator!=(User test) const
 {
 	return (!(*this == test));
 }
@@ -85,7 +90,7 @@ bool User::isNickValid(std::vector<unsigned char> nick)
 
 int User::getfd(void) const
 {
-	return (this->_fd);
+	return (_fd);
 }
 
 std::vector<unsigned char> User::getPasswd(void) const
@@ -100,25 +105,80 @@ int User::getPassStatus(void) const
 
 bool User::getRegistered(void) const
 {
-	return (this->_registered);
+	return (_registered);
 }
 
-std::vector<unsigned char> User::getUserName(void) const
+std::vector<unsigned char> &	User::getRet(void)
 {
-	return (this->_user_name);
+	return (_ret);
 }
 
-std::vector<unsigned char> User::getRealName(void) const
+std::vector<unsigned char>	User::getCurrCmd(void) const
 {
-	return (this->_real_name);
+	return (_currCmd);
+}
+
+std::vector<Channel *>::iterator	User::getChannelsbg(void)
+{
+	return (_channels.begin());
+}
+
+std::vector<Channel *>::iterator	User::getChannelsend(void)
+{
+	return (_channels.end());
+}
+
+std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
+{
+	return (_currCmd.begin());
+}
+
+std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
+{
+	return (_currCmd.end());
+}
+
+std::vector<unsigned char>	User::getUserName(void) const
+{
+	return (_user_name);
+}
+
+std::vector<unsigned char>	User::getRealName(void) const
+{
+	return (_real_name);
+}
+
+void	User::setRegistered(bool registered)
+{
+	_registered = registered;
+}
+
+void	User::setPasswd(std::vector<unsigned char> passwd)
+{
+	_passwd = passwd;
+}
+
+void	User::setRet(std::vector<unsigned char> ret)
+{
+	_ret = ret;
+}
+
+void User::setUserName(std::vector<unsigned char> userName)
+{
+	_user_name = userName;
+}
+
+void	User::setRealName(std::vector<unsigned char> realname)
+{
+	_real_name = realname;
 }
 
 int	User::getNbChan(void)
 {
-	return (static_cast<int>(this->_channels.size()));
+	return (static_cast<int>(_channels.size()));
 }
 
-std::list<Channel*>& User::getChannels(void)
+std::vector<Channel *> User::getChannels(void) const
 {
 	return (_channels);
 }
@@ -154,31 +214,9 @@ std::vector<unsigned char> User::getUserNickNameMask(void) const
 	return (ret);
 }
 
-void User::setUserName(std::vector<unsigned char>& user_name)
-{
-	_user_name = user_name;
-}
-
-void User::setRealName(std::vector<unsigned char>& real_name)
-{
-	this->_real_name = real_name;
-}
-
-void User::setPasswd(std::vector<unsigned char>& passwd)
-{
-	_passwd = passwd;
-}
-
 void User::setClient(std::vector<unsigned char>& client)
 {
 	_client = client;
-}
-
-void User::setClient(std::string client)
-{
-	_client.clear();
-	for (std::string::size_type i = 0; i < client.size(); i++)
-		_client.push_back(client[i]);
 }
 
 void User::setNick(std::vector<unsigned char>& nick)
@@ -189,11 +227,6 @@ void User::setNick(std::vector<unsigned char>& nick)
 void User::setPassStatus(int pass_status)
 {
 	_pass_status = pass_status;
-}
-
-void	User::setRegistered(bool registered)
-{
-	_registered = registered;
 }
 
 void User::setfd(int fd)
@@ -211,13 +244,30 @@ void User::addChannel(Channel *channel)
 	_channels.push_back(channel);
 }
 
+bool	User::getOperator(void) const
+{
+	return (_operator);
+}
 
+void	User::setOperator(bool val)
+{
+	_operator = val;
+}
 
+void	User::clearCurrCmd(void)
+{
+	_currCmd.clear();
+}
 
+void	User::clearRet(void)
+{
+	_ret.clear();
+}
 
-
-
-
+void	User::insertcmd(std::vector<unsigned char> & vec)
+{
+	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
+}
 
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {

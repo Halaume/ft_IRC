@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 21:31:04 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 19:43:27 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,49 +46,55 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
+		
+		
+		void										setCommand(std::vector<std::vector<unsigned char> >);
+		void										setUser(User*);
+		void										answer(Server &);
 
 		// void										push_to_buf(int error);
 		
 		// Getters
+		std::vector<std::vector<unsigned char> >	getCommand(void) const;
+		User*										getCmdUser(void) const;
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
-		std::list<User>::iterator					getCmdUser();
+		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
 		// Setters
-		void										setCmdFdUser(int);
-		void										setCmdUser(Server &);
 	
 		std::vector<std::vector<unsigned char> >	_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		void										_answer(Server &);
 		void										register_user(Server &);	
-	private:
-		// User										_cmdUser;
 		
-		int										_cmd_fd_user;
+	private:
+		User*									_cmd_user;
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
-		std::list<User>::iterator				_cmd_user;
+		// std::list<User>::iterator				_cmd_user;
 		int										_pass_before_nick_user;
 		
-		void									_fun_CAP(Server &my_server);
-		void									_fun_NICK(Server &my_server);
-		void									_fun_USER(Server &my_server);
-		void									_fun_PASS(Server &my_server);
-		void									_fun_JOIN(Server &my_server);
-		void									_fun_PRIVMSG(Server &my_server);
-		void									_fun_OPER(Server &my_server);
-		void									_fun_QUIT(Server &my_server);
-		void									_fun_ERROR(Server &my_server);
-		void									_fun_MODE(Server &my_server);
-		void									_fun_TOPIC(Server &my_server);
-		void									_fun_KICK(Server &my_server);
-		void									_fun_INVITE(Server &my_server);
-		void									_fun_KILL(Server &my_server);
-		void									_fun_RESTART(Server &my_server);
-		void									_fun_PING(Server &my_server);
+		void									_fun_CAP(Server &);
+		void									_fun_NICK(Server &);
+		void									_fun_USER(Server &);
+		void									_fun_PASS(Server &);
+		void									_fun_JOIN(Server &);
+		void									_fun_PRIVMSG(Server &);
+		void									_fun_OPER(Server &);
+		void									_fun_QUIT(Server &);
+		void									_fun_ERROR(Server &);
+		void									_fun_MODE(Server &);
+		void									_fun_TOPIC(Server &);
+		void									_fun_KICK(Server &);
+		void									_fun_INVITE(Server &);
+		void									_fun_KILL(Server &);
+		void									_fun_RESTART(Server &);
+		void									_fun_PONG(Server &);
+		void									_fun_NOTICE(Server &);
+
+		void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 
 };
 

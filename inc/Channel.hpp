@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 17:11:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 18:15:57 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,13 @@ class Command;
 class Channel
 {
 	public:
+	
 		Channel(void);
 		Channel(const Channel &copy);
 		Channel(std::vector<unsigned char> chanName);
 		Channel(std::vector<unsigned char> chanName, std::vector<unsigned char> chan_password);
 		~Channel(void);
+		
 		Channel &	operator=(const Channel & src);
 		bool		operator!=(const Channel &) const;
 
@@ -62,7 +64,7 @@ class Channel
 		void							setNbUsersLimit(int nb_users_limit);
 		void 							setMode(char, bool);
 	
-		void							addUser(Command, User*, Server&);
+		void							addUser(User *);
 		void 							addUserToBan(User*);
 		void 							addUserToInvite(User*);
 		
@@ -76,6 +78,14 @@ class Channel
 	
 		// Getters	
 		std::list<User *>				getUsers(void) const;
+
+		std::vector<unsigned char>	 getTopic(void) const;
+		std::map<char, bool>		 getModes(void) const;
+
+		void        setTopic(std::vector<unsigned char>);
+		bool        isOp(User usr) const;
+
+		std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
 			
 	private:	
 		std::vector<unsigned char>		_chan_name;
@@ -87,6 +97,7 @@ class Channel
 		std::list<User *>				_ban_list;
 		int								_nb_users_limit;
 		std::list<User *>				_invite_list;
+		std::vector<unsigned char>  _topic;
 
 
 };
