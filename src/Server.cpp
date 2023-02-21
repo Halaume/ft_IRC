@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 15:37:21 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 15:57:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,11 +239,7 @@ void	Server::run(void)
 							else
 							{
 								for (int i = 0; i < retrec; i++)
-								{
 									v.push_back(buf[i]);
-									std::cerr << static_cast<int>(v.back()) << std::endl;
-									std::cerr << static_cast<int>(buf[i]) << std::endl;
-								}
 								Usr->insertcmd(v);
 								v.clear();
 								read = Usr->getCurrCmdend();
@@ -252,7 +248,6 @@ void	Server::run(void)
 								{
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										std::cerr << "\\r = " << static_cast<int>('\r') << " | \\n = " << static_cast<int>('\n') << " | it = " << static_cast<int>(*it) << std::endl;
 										int i = 0;
 										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++, i++)
 										{

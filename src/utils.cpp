@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 13:27:13 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 15:56:48 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,8 +123,6 @@ int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 
 	for (std::vector<unsigned char>::size_type i = 0; i < my_vec.size(); i++)
 	{
-		std::cerr << i << std::endl;
-		std::cerr << my_vec[i] << std::endl;
 		if (my_vec[i] != str[i])
 			return (1);
 			
