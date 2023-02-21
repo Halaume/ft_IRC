@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 12:38:07 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/21 14:47:14 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ int		User::getPassStatus(void) const
 	return (this->_pass_status);
 }
 
-std::vector<unsigned char>	User::getRet(void) const
+std::vector<unsigned char> &	User::getRet(void)
 {
 	return (this->_ret);
 }
@@ -184,7 +184,12 @@ void	User::setOperator(bool val)
 	this->_operator = val;
 }
 
-void	User::insertCurrCmd(std::vector<unsigned char> vec)
+void	User::clearCurrCmd(void)
+{
+	this->_currCmd.clear();
+}
+
+void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	this->_currCmd.insert(this->_currCmd.end(), vec.begin(), vec.end());
 }

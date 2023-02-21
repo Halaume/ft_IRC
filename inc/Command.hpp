@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 12:33:10 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 14:57:00 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Command
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
+		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
 		// Setters
 		void										setCmdFdUser(int);
@@ -67,7 +68,7 @@ class Command
 		
 		void									_fun_CAP(Server &my_server);
 		void									_fun_NICK(Server &my_server);
-		void									_fun_USER(Server &my_server);
+		void									_fun_USER(void);
 		void									_fun_PASS(Server &my_server);
 		void									_fun_JOIN(Server &my_server);
 		void									_fun_PRIVMSG(Server &my_server);
