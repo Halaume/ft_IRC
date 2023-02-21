@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 14:47:14 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:16:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,11 @@ void	User::setOperator(bool val)
 void	User::clearCurrCmd(void)
 {
 	this->_currCmd.clear();
+}
+
+void	User::clearRet(void)
+{
+	this->_ret.clear();
 }
 
 void	User::insertcmd(std::vector<unsigned char> & vec)

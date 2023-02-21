@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 15:57:02 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:17:01 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,6 +194,7 @@ void	Server::run(void)
 							this->sendto(Usr->getfd(), Usr->getRet());
 							this->_ev.events = EPOLLIN | EPOLLET;
 							ParsedCommand.clear();
+							Usr->clearRet();
 							if (Usr->getCurrCmd().size() > 0)
 							{
 								for (std::vector<unsigned char>::iterator it = read; it != Usr->getCurrCmdend(); it++)

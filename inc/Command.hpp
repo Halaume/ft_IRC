@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 14:57:00 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:05:05 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,6 @@ class Command
 		std::vector<std::vector<unsigned char> >	_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		void										_answer(Server &);
-		
 	private:
 		User *									_cmdUser;
 		
