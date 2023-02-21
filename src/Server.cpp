@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
 /*   Updated: 2023/02/21 15:57:02 by ghanquer         ###   ########.fr       */
@@ -66,12 +66,18 @@ Server &	Server::operator=(const Server & src)
 	return (*this);
 }
 
-std::vector<Channel>::iterator	Server::findExistingChan(std::vector<unsigned char> channel)
+std::vector<unsigned char>	Server::getPassword(void) const
 {
-	std::vector<Channel>::iterator	it = this->_channels.begin();
-	while (it != this->_channels.end() && it->getChanName() != channel)
-		it++;
-	return (it);
+	return (this->_passwd);
+}
+
+
+std::vector<Channel>::iterator    Server::findExistingChan(std::vector<unsigned char> channel)
+{
+    std::vector<Channel>::iterator    it = this->_channels.begin();
+    while (it != this->_channels.end() && it->getChanName() != channel)
+        it++;
+    return (it);
 }
 
 Channel &	Server::findChan(std::vector<unsigned char> channel)
@@ -315,6 +321,7 @@ void	Server::sendto(int fd, std::vector<unsigned char> buf)
 std::list<User>::iterator	Server::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User>::iterator it;
+	
 	for (it = this->_Users.begin(); it != this->_Users.end(); it++)
 	{
 		if (it->getUserName() == nick)

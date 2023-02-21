@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/15 14:47:28 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/20 12:48:56 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,12 @@ class Server;
 class Channel
 {
 	public:
+	
 		Channel(void);
 		Channel(const Channel &copy);
 		Channel(std::vector<unsigned char> chanName);
 		~Channel(void);
+		
 		Channel &	operator=(const Channel & src);
 		bool		operator!=(const Channel &) const;
 		std::vector<unsigned char>	getChanName(void) const;
@@ -44,11 +46,22 @@ class Channel
 
 		// Getters
 		std::list<User *>			getUsers(void) const;
+	
+		std::vector<unsigned char>	 getTopic(void) const;
+		std::map<char, bool>		 getModes(void) const;
 		
+		void        setTopic(std::vector<unsigned char>);
+		bool        isOp(User usr) const;
+		std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
+
+		
+
 	private:
+	
 		std::vector<unsigned char>	_chanName;
 		std::vector<unsigned char>	_chanPassword;
-		std::map<char, bool>		_modes;
+		std::vector<unsigned char>  _topic;
+		std::map<char, bool>		_modes;	//A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
 		int							_userConnected;
 		std::list<User *>			_opList;
 		std::list<User *>			_userLst;

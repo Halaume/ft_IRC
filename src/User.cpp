@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
 /*   Updated: 2023/02/21 14:47:14 by ghanquer         ###   ########.fr       */
@@ -118,6 +118,11 @@ std::vector<unsigned char>	User::getUserName(void) const
 void	User::setPassStatus(int pass_status)
 {
 	this->_pass_status = pass_status;
+}
+
+std::vector<unsigned char>	User::getRealName(void) const
+{
+	return (this->_realName);
 }
 
 void	User::setRegistered(bool registered)
