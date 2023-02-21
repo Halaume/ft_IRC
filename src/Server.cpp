@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 22:38:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 17:58:20 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,21 +53,16 @@ Server &	Server::operator=(const Server & src)
 	return (*this);
 }
 
-Channel &	Server::findChan(std::vector<unsigned char> channel)
+Channel* 	Server::findChan(std::vector<unsigned char> channel)
 {
 	std::list<Channel>::iterator it; // = _channels.begin();
 	
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		if (!my_compare(it->getChanName(), channel))
-			return (*it);
+			return (&(*it));
 	}
-	return (*(++it));
-	// while (it != this->_channels.end() && it->getChanName() != channel)
-	// 	it++;
-	// if (it == this->_channels.end())
-	// 	it = this->_channels.insert(this->_channels.end(), Channel(channel));
-	// return (*it);
+	return (NULL);
 }
 
 int	Server::init(char **argv)
@@ -249,36 +244,8 @@ int	Server::run(void)
 					
 					cmd._parsedCmd.clear();
 
-					//////////////////////////
 					printUsersList();
-					/////////////////////////
-					// Channel c1;
-					// User u1, u2, u3;
-
-					// channel
-					// std::string str = "lolo";
-					// c1.setChanName(str);
-					// str = "supersecretpass12345!";
-					// c1.setChanPassword(str);
-					
-					// users
-					// str = "JOE"; u1.setClient(str); u1.setfd(10);
-					// c1.addUser(&u1, *this);
-					// c1.addUser(&u2, *this);
-					// c1.addUser(&u3, *this);
-					// str = "Jack"; u2.setClient(str); u2.setfd(11);
-					// str = "PAPET"; u3.setClient(str); u3.setfd(12);
-
-
-					
-					// _channels.push_back(c1);
-
 					std::cout << *this << std::endl;
-					
-					//////////////////////////
-					// 	::send(_events[k].data.fd, ":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n", strlen(":irc.la_team.com 001 iguscett: Welcome to La Team's Network, iguscett\r\n"), 0);
-					
-					// Parse scommand
 					
 				}
 				cmd._globalCmd.clear();
@@ -331,15 +298,25 @@ std::list<User>::iterator Server::findUserNick(std::vector<unsigned char> nick)
 
 	for (itu = _Users.begin(); itu != _Users.end(); ++itu)
 	{
-		// std::cout << i << std::endl;
 		if (!my_compare(itu->getNick(), nick))
 			return (itu);
 		i++;
 	}
-	// std::cout << i << std::endl;
-	// if (itu == _Users.end())
-	// 	std::cout << "OK == end()\n";
 	return (itu);
+}
+
+User* Server::findUserPtrNick(std::vector<unsigned char> nick)
+{
+	int i = 0;
+	std::list<User>::iterator itu;
+
+	for (itu = _Users.begin(); itu != _Users.end(); ++itu)
+	{
+		if (!my_compare(itu->getNick(), nick))
+			return (&(*itu));
+		i++;
+	}
+	return (NULL);
 }
 
 void Server::printUsersList(void)
@@ -448,7 +425,18 @@ std::ostream & operator<<( std::ostream & o, Server & i)
 		{
 			o << (*(*itu));
 		}
-
+		o << "\n--------USERS BANNED--------\n";
+		for (itu = m->getUserListBanbg(); itu != m->getUserListBanend(); ++itu)
+		{
+			if (*itu != NULL)
+				o << (*(*itu));
+		}
+		o << "\n--------USERS INVITED--------\n";
+		for (itu = m->getUserListInvitebg(); itu != m->getUserListInviteend(); ++itu)
+		{
+			if (*itu != NULL)
+				o << (*(*itu));
+		}
 		o << std::endl;
 	}
 	o << "____Channels end____\n";

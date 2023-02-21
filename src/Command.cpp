@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 14:02:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 17:57:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,14 +161,12 @@ void	Command::_fun_USER(Server &my_server)
 	}
 	if (this->_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
-		// send
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param); // send
 		return ;
 	}
 	if (_cmd_user->getRegistered())
 	{
-		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
-		// sendto
+		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param); // sendto
 		return;
 	}
 	else if (_parsedCmd[4].empty() == false && _parsedCmd[4][0] == ':')
@@ -176,6 +174,7 @@ void	Command::_fun_USER(Server &my_server)
 		std::vector<unsigned char> real_name = concat_real_name(_parsedCmd, 4);
 		(*_cmd_user).setUserName(_parsedCmd[1]);
 		(*_cmd_user).setRealName(real_name);
+		(*_cmd_user).setUserMask(_parsedCmd[3]);
 		if (_pass_before_nick_user == PASS_NICK_OK)
 			register_user(my_server);
 		else
@@ -198,103 +197,68 @@ void	Command::_fun_JOIN(Server &my_server)
 	//RFC 2813/4.2.1
 	/*Numeric Replies:
 	ERR_NEEDMOREPARAMS		OK
-	ERR_BANNEDFROMCHAN		
-	ERR_INVITEONLYCHAN
-	ERR_BADCHANNELKEY
-	ERR_CHANNELISFULL
+	ERR_BANNEDFROMCHAN		OK
+	ERR_INVITEONLYCHAN		OK
+	ERR_BADCHANNELKEY		OK
+	ERR_CHANNELISFULL		OK
 	ERR_BADCHANMASK			OK
-	ERR_NOSUCHCHANNEL
-	ERR_TOOMANYCHANNELS
-	ERR_TOOMANYTARGETS
-	ERR_UNAVAILRESOURCE
+	ERR_NOSUCHCHANNEL		OK	
+	ERR_TOOMANYCHANNELS		OK
 	RPL_TOPIC*/
 	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
 
 
 	if (_parsedCmd.size() < 2)
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
-		// sendto
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param); // sendto
 		return ;
 	}
-	// print_vector2(_parsedCmd);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
-	// print_vector2(channels);
 	if (_parsedCmd.size() > 2)
 		reparseChannelsKeys(_parsedCmd[2], &keys);
-	// std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
-	// print_vector2(keys);
+	std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
 	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
 	{
 		
-		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&')
-		{
-			push_to_buf(ERR_BADCHANMASK, *this, channels[it]);
-			// sendto
-		}
+		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
+			push_to_buf(ERR_BADCHANMASK, *this, channels[it]); // sendto
+		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+			push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]); //sendto
 		else if (my_server.channelExists(channels[it]) == false)
 		{
-			// std::cout << "User nb chans:" << _cmd_user->getNbChan() << std::endl;
-			if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-			{
-				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
-				//sendto
-				return;
-			}
+
 			Channel new_channel(channels[it]);
 			new_channel.addUser(*this, &(*_cmd_user), my_server);
-			my_server.addNewChannel(new_channel);				
+			my_server.addNewChannel(new_channel);
+			// send messages to accept user RPL
 		}
 		else if (my_server.channelExists(channels[it]) == true)
 		{
-			/////////////////////////////////////
-			my_server.findChan(channels[it]).setMode('k', true);
-			/////////////////////////////////////
-			if (my_server.findChan(channels[it]).isUserInChannel(&(*_cmd_user)))
-				return; // user is already in channel
-			// check if channel mode k
-			if (my_server.findChan(channels[it]).getMode('k') == true)
-				std::cout << "Chan mode k OOOOOOOOOOOOOOKKKKKKKKKKK\n";
-			std::cout << "chan mode k is bool:" << my_server.findChan(channels[it]).getMode('k') << std::endl;
+			// protect findchan
+			if (my_server.findChan(channels[it]) == NULL)
+				push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]); // sendto
+			else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
+			{
+				// user is already in channel -> not sure about this one -> del?
+			}
+			else if (my_server.findChan(channels[it])->getMode('k') == true // check if channel mode k
+				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
+				push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]); // sendto
+			else if (my_server.findChan(channels[it])->getMode('l') == true // check if channel mode l
+				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
+				push_to_buf(ERR_CHANNELISFULL, *this, channels[it]);
+			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]); //sendto
+			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
+				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
+				push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]); //sendto
+			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
+				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
+				push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]); //sendto
+			else
+				my_server.findChan(channels[it])->addUser(*this, &(*_cmd_user), my_server);
 		}
-		// if user is already in the channel return and do nothing
-
-			// if (keys_size >= it + 1)
-			// {
-				// Channel new_channel(channels[it], keys[it]);
-				// my_server.addNewChannel(new_channel);
-			// }
-			// else
-			// {
-
-			// + check if limit of chan is reached if mode l
-
-
-
 	}
-
-
-
-	// for (std::list<Channel>::iterator it = my_server.getChannelsbg(); it != my_server.getChannelsend(); ++it)
-
-	
-	// if (this->_parsedCmd.size() == 3)
-	// {
-	// 	passwd = splitOnComa(this->_parsedCmd[2]);
-	// 	itpasswd = passwd.begin();
-	// }
-	// while (it != chan.end())
-	// {
-	// 	Channel	tmp = my_server.findChan(*it);
-	// 	it++;
-	// 	if (itpasswd != passwd.end())
-	// 	{
-	// 		tmp.addUser(this->_cmdUser, my_server, *itpasswd);
-	// 		itpasswd++;
-	// 	}
-	// 	else
-	// 		tmp.addUser(this->_cmdUser, my_server);
-	// }
 }
 
 
@@ -591,6 +555,31 @@ void Command::setCmdFdUser(int fd)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*''''''''''''''''''''''''''''''''''''
 				CAP > to delete?
 ''''''''''''''''''''''''''''''''''''''*/
@@ -599,3 +588,25 @@ void	Command::_fun_CAP(Server &my_server)
 	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
 	(void)my_server;
 }
+
+
+
+
+
+
+			// /////////////////////////////////////
+			// std::vector<unsigned char> test;
+			// test.push_back('1'); test.push_back('2'); test.push_back('3'); test.push_back('4');
+			// User *user2b;
+			// std::vector<unsigned char> u2b;
+			// u2b.push_back('j'); u2b.push_back('a'); u2b.push_back('c'); u2b.push_back('k');
+			// user2b = my_server.findUserPtrNick(u2b);
+			// my_server.findChan(channels[it])->setMode('k', true);
+			// my_server.findChan(channels[it])->setMode('l', true);
+			// // my_server.findChan(channels[it])->setMode('i', true);
+			// my_server.findChan(channels[it])->setMode('b', true);
+			// my_server.findChan(channels[it])->setChanPassword(test);
+			// my_server.findChan(channels[it])->setNbUsersLimit(2);
+			// // my_server.findChan(channels[it])->addUserToBan(user2b);
+			// my_server.findChan(channels[it])->addUserToInvite(user2b);
+			// /////////////////////////////////////	

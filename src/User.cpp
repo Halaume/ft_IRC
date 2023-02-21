@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 22:08:12 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:45:26 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,24 @@
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
 
-User::User(void): _fd(), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), _user_name(), _real_name(), _client(), _nick(), _channels()
+User::User(void): _fd(), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), _user_name(), _real_name(), _client(), _nick(), _channels()
+User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), _nick(copy._nick), _channels(copy._channels)
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), \
+_user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask)
 {
 }
 
@@ -42,15 +45,15 @@ User& User::operator=(const User & src)
 {
 	if (&src == this)
 		return (*this);
-	this->_fd = src._fd;
-    this->_pass_status = src._pass_status;
-    this->_registered = src._registered;
-    this->_passwd = src._passwd;
-    this->_user_name = src._user_name;
-    this->_real_name = src._real_name;
-    this->_client = src._client;
-    // this->_ret = src._ret;
-    this->_channels = src._channels;
+	_fd = src._fd;
+    _pass_status = src._pass_status;
+    _registered = src._registered;
+    _passwd = src._passwd;
+    _user_name = src._user_name;
+    _real_name = src._real_name;
+    _client = src._client;
+    _channels = src._channels;
+	_user_mask = src._user_mask;
 	return (*this);
 }
 
@@ -130,12 +133,33 @@ std::vector<unsigned char> User::getNick(void) const
 	return (_nick);	
 }
 
+std::vector<unsigned char> User::getUserMask(void) const
+{
+	return (_user_mask);
+}
+
+std::vector<unsigned char> User::getUserNickNameMask(void) const
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type it;
+
+	for (it = 0; it < _nick.size(); ++it)
+		ret.push_back(_nick[it]);
+	ret.push_back('!');
+	for (it = 0; it < _user_name.size(); ++it)
+		ret.push_back(_user_name[it]);
+	ret.push_back('@');
+	for (it = 0; it < _user_mask.size(); ++it)
+		ret.push_back(_user_mask[it]);
+	return (ret);
+}
+
 void User::setUserName(std::vector<unsigned char>& user_name)
 {
 	_user_name = user_name;
 }
 
-void	User::setRealName(std::vector<unsigned char>& real_name)
+void User::setRealName(std::vector<unsigned char>& real_name)
 {
 	this->_real_name = real_name;
 }
@@ -175,6 +199,11 @@ void	User::setRegistered(bool registered)
 void User::setfd(int fd)
 {
 	_fd = fd;
+}
+
+void User::setUserMask(std::vector<unsigned char>& user_mask)
+{
+	_user_mask = user_mask;
 }
 
 void User::addChannel(Channel *channel)

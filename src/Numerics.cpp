@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 21:33:04 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 17:15:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (RPL_MYINFOmsg(RPL_MYINFO, cmd.getCmdUser()->getClient(), server_name));
 		}
+		case ERR_NOSUCHCHANNEL:
+		{
+			return (ERR_NOSUCHCHANNELmsg(ERR_NOSUCHCHANNEL, cmd.getCmdUser()->getClient(), param));
+		}
 		case ERR_TOOMANYCHANNELS:
 		{
 			return (ERR_TOOMANYCHANNELSmsg(ERR_TOOMANYCHANNELS, cmd.getCmdUser()->getClient(), param));
@@ -102,6 +106,22 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_PASSWDMISMATCH:
 		{
 			return (ERR_PASSWDMISMATCHmsg(ERR_PASSWDMISMATCH, cmd.getCmdUser()->getClient()));
+		}
+		case ERR_CHANNELISFULL:
+		{
+			return (ERR_CHANNELISFULLmsg(ERR_CHANNELISFULL, cmd.getCmdUser()->getClient(), param));
+		}
+		case ERR_INVITEONLYCHAN:
+		{
+			return (ERR_INVITEONLYCHANmsg(ERR_INVITEONLYCHAN, cmd.getCmdUser()->getClient(), param));
+		}
+		case ERR_BANNEDFROMCHAN:
+		{
+			return (ERR_BANNEDFROMCHANmsg(ERR_BANNEDFROMCHAN, cmd.getCmdUser()->getClient(), param));
+		}
+		case ERR_BADCHANNELKEY:
+		{
+			return (ERR_BADCHANNELKEYmsg(ERR_BADCHANNELKEY, cmd.getCmdUser()->getClient(), param));
 		}
 		case ERR_BADCHANMASK:
 		{

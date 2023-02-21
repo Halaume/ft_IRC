@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 22:35:53 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 17:27:51 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_u
 
 Channel::Channel(const Channel & copy): _chan_name(copy._chan_name), _chan_password(copy._chan_password), \
 _modes(copy._modes), _user_connected(copy._user_connected), _op_list(copy._op_list), \
-_user_list(copy._user_list), _ban_list(copy._ban_list), _nb_users_limit(copy._nb_users_limit)
+_user_list(copy._user_list), _ban_list(copy._ban_list), _nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list)
 {
 }
 
@@ -81,6 +81,7 @@ Channel::~Channel(void)
 	_op_list.erase(_op_list.begin(), _op_list.end());
 	_user_list.erase(_user_list.begin(), _user_list.end());
 	_ban_list.erase(_ban_list.begin(), _ban_list.end());
+	_invite_list.erase(_invite_list.begin(), _invite_list.end());
 }
 
 Channel &	Channel::operator=(const Channel & src)
@@ -125,6 +126,20 @@ void Channel::addUser(Command cmd, User *new_user, Server &my_server)
 	// insert_all(sendtoer, "RPL_NAMREPLY\r\n");
 	// while (it != _user_list.end())
 	// 	my_server.sendto(newUser->getfd(), sendtoer);
+}
+
+void Channel::addUserToBan(User *new_user)
+{
+	// verify if user not already in list..
+	// check list limit etc...
+	_ban_list.push_back(new_user);
+}
+
+void Channel::addUserToInvite(User *new_user)
+{
+	// verify if user not already in list..
+	// check list limit etc...
+	_invite_list.push_back(new_user);
 }
 
 // void Channel::addUser(User *newUser, Server &my_server)
@@ -211,6 +226,26 @@ std::list<User *>::iterator	Channel::getUserListend(void)
 	return (_user_list.end());
 }
 
+std::list<User *>::iterator	Channel::getUserListBanbg(void)
+{
+	return (_ban_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListBanend(void)
+{
+	return (_ban_list.end());
+}
+
+std::list<User *>::iterator	Channel::getUserListInvitebg(void)
+{
+	return (_invite_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListInviteend(void)
+{
+	return (_invite_list.end());
+}
+
 std::list<User *>	Channel::getUserList(void)
 {
 	return (_user_list);
@@ -219,6 +254,11 @@ std::list<User *>	Channel::getUserList(void)
 std::list<User *> Channel::getUsers(void) const
 {
 	return (_user_list);
+}
+
+int Channel::getNbUsers(void)
+{
+	return (static_cast<int>(_user_list.size()));
 }
 
 int Channel::getNbUsersLimit(void)
@@ -236,14 +276,14 @@ bool Channel::isOp(User *usr) const
 
 bool Channel::getMode(char c)
 {
-	std::map<char, bool>::iterator it;
+	// std::map<char, bool>::iterator it;
 
-	for (it = _modes.begin(); it != _modes.end(); ++it)
-	{
-		if (it->first == c)
-			return (it->second);
-	}
-	return (false);
+	// for (it = _modes.begin(); it != _modes.end(); ++it)
+	// {
+	// 	if (it->first == c)
+	// 		return (it->second);
+	// }
+	return (_modes[c]);
 }
 
 std::map<char, bool>::iterator Channel::getModesbg(void)
@@ -302,6 +342,30 @@ bool Channel::isUserInChannel(User *user)
 	std::list<User *>::iterator it;
 
 	for (it = _user_list.begin(); it != _user_list.end(); ++it)
+	{
+		if (*it == user)
+			return (true);
+	}
+	return (false);
+}
+
+bool Channel::isUserBanned(User *user)
+{
+	std::list<User *>::iterator it;
+
+	for (it = _ban_list.begin(); it != _ban_list.end(); ++it)
+	{
+		if (*it == user)
+			return (true);
+	}
+	return (false);
+}
+
+bool Channel::isUserInvited(User *user)
+{
+	std::list<User *>::iterator it;
+
+	for (it = _invite_list.begin(); it != _invite_list.end(); ++it)
 	{
 		if (*it == user)
 			return (true);

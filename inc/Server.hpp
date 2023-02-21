@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/19 22:34:52 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:28:11 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,12 @@ class Server
 		bool						channelExists(std::vector<unsigned char>&);
 		void						addNewChannel(Channel&);
 
-		Channel&					findChan(std::vector<unsigned char>);
+		Channel*					findChan(std::vector<unsigned char>);
 		void						send_to_client(int, std::vector<unsigned char>);
+		
 		std::list<User>::iterator	findUser(std::string nick);
 		std::list<User>::iterator	findUserNick(std::vector<unsigned char> nick);
+		User*						findUserPtrNick(std::vector<unsigned char> nick);
 		std::list<User>::iterator	findUser(int fd);
 
 		std::list<User>					_Users;

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 15:08:42 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 17:14:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ std::vector<unsigned char> push_to_buf(int error, Command &cmd, std::vector<unsi
 # define RPL_CREATEDmsg(code, client, date_and_time)    concat_resp(code, client,           to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))
 # define RPL_MYINFOmsg(code, client, server_name)       concat_resp(code, client,           to_vector(" :" + server_name + " 1.0\r\n")) // add user modes and channel modes
 
+# define ERR_NOSUCHCHANNELmsg(code, client, channel)    concat_resp(code, client, channel,  to_vector(" :No such channel\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, client, channel)  concat_resp(code, client, channel,  to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code)                   concat_resp(code,                   to_vector(" :No nickname given\r\n"))
 # define ERR_ERRONEUSNICKNAMEmsg(code, client, nick)    concat_resp(code, client, nick,     to_vector(" :Erroneus nickname\r\n"))
@@ -35,6 +36,11 @@ std::vector<unsigned char> push_to_buf(int error, Command &cmd, std::vector<unsi
 # define ERR_NEEDMOREPARAMSmsg(code, client, cmd)       concat_resp(code, client, cmd,      to_vector(" :Not enough parameters\r\n"))
 # define ERR_ALREADYREGISTEREDmsg(code, client)         concat_resp(code, client,           to_vector(" :You may not reregister\r\n"))
 # define ERR_PASSWDMISMATCHmsg(code, client)            concat_resp(code, client,           to_vector(" :Password incorrect\r\n"))
+
+# define ERR_CHANNELISFULLmsg(code, client, channel)    concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+l)\r\n"))
+# define ERR_INVITEONLYCHANmsg(code, client, channel)   concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+i)\r\n"))
+# define ERR_BANNEDFROMCHANmsg(code, client, channel)   concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+b)\r\n"))
+# define ERR_BADCHANNELKEYmsg(code, client, channel)    concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+k)\r\n"))
 # define ERR_BADCHANMASKmsg(code, channel)              concat_resp(code, channel,          to_vector(" :Bad Channel Mask\r\n")) // add client?
 
 // class Command;
@@ -45,6 +51,7 @@ enum numerics {
     RPL_CREATED             = 3,
     RPL_MYINFO              = 4,
     
+    ERR_NOSUCHCHANNEL       = 403,
     ERR_TOOMANYCHANNELS     = 405,
     ERR_NONICKNAMEGIVEN     = 431,
     ERR_ERRONEUSNICKNAME    = 432,
@@ -53,6 +60,10 @@ enum numerics {
     ERR_ALREADYREGISTERED   = 462,
     ERR_PASSWDMISMATCH      = 464,
     
+    ERR_CHANNELISFULL       = 471,
+    ERR_INVITEONLYCHAN      = 473,
+    ERR_BANNEDFROMCHAN      = 474,
+    ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476
 };
 
