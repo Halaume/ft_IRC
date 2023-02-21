@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 22:40:16 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/21 14:02:47 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,7 +234,7 @@ void	Command::_fun_JOIN(Server &my_server)
 		}
 		else if (my_server.channelExists(channels[it]) == false)
 		{
-			std::cout << "User nb chans:" << _cmd_user->getNbChan() << std::endl;
+			// std::cout << "User nb chans:" << _cmd_user->getNbChan() << std::endl;
 			if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
 			{
 				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
@@ -247,10 +247,15 @@ void	Command::_fun_JOIN(Server &my_server)
 		}
 		else if (my_server.channelExists(channels[it]) == true)
 		{
+			/////////////////////////////////////
 			my_server.findChan(channels[it]).setMode('k', true);
+			/////////////////////////////////////
 			if (my_server.findChan(channels[it]).isUserInChannel(&(*_cmd_user)))
 				return; // user is already in channel
-			// check if key for channel
+			// check if channel mode k
+			if (my_server.findChan(channels[it]).getMode('k') == true)
+				std::cout << "Chan mode k OOOOOOOOOOOOOOKKKKKKKKKKK\n";
+			std::cout << "chan mode k is bool:" << my_server.findChan(channels[it]).getMode('k') << std::endl;
 		}
 		// if user is already in the channel return and do nothing
 
