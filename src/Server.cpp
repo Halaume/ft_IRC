@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 14:24:22 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/22 17:18:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,6 @@ void Server::run(void)
 				try
 				{
 					Usr = getUsr(_events[k].data.fd);
-					read = Usr->getCurrCmdend();
 					std::vector<std::vector<unsigned char> >	ParsedCommand;
 					switch (_events[k].events)
 					{
@@ -235,7 +234,7 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
-										read = it + 1;
+										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), it + 1);
 										_ev.events = EPOLLOUT | EPOLLET;
 									}
 								}
@@ -273,7 +272,6 @@ void Server::run(void)
 									v.push_back(buf[i]);
 								Usr->insertcmd(v);
 								v.clear();
-								read = Usr->getCurrCmdend();
 								ParsedCommand.clear();
 								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
 								{
@@ -306,9 +304,10 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
-										read = (it + 1);
 										if ((it + 1) == Usr->getCurrCmdend())
 											Usr->clearCurrCmd();
+										else
+											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), it + 1);
 										_ev.events = EPOLLOUT | EPOLLET;
 										if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
 										{
