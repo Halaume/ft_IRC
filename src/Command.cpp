@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 19:46:57 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 13:53:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -632,9 +632,7 @@ void	Command::_fun_NOTICE(Server &my_server)
 
 void	Command::answer(Server &my_server)
 {
-	print_vector2(_parsedCmd);
-	print_vector(_parsedCmd[1]);
-	
+	print_vector2(this->_parsedCmd);
 	if (_pass_before_nick_user == PASS_ORDER_ERROR || _pass_before_nick_user == PASS_CONNECTION_ERROR)
 		return;
 	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};

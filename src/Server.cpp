@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 19:47:36 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 13:55:05 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,6 @@ int	Server::init(char **argv)
 
 	add_to_vector(_passwd, argv[2]);
 
-	// print_vector(_passwd);
-
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
 	_server.sin_port = htons(atoi(argv[1]));
@@ -111,7 +109,7 @@ int	Server::init(char **argv)
 
 	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))
 		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
-	if (listen(_sct, 1) == -1)
+	if (listen(_sct, 1000) == -1)
 		return (close(_sct), std::cerr << "Error listening socket" << std::endl, 1);
 
 	_epollfd = epoll_create1(0);
@@ -208,7 +206,6 @@ void Server::run(void)
 							{
 								for (std::vector<unsigned char>::iterator it = read; it != Usr->getCurrCmdend(); it++)
 								{
-									std::cerr << static_cast<int>(*it) << std::endl;
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
 										int i = 0;
@@ -228,8 +225,7 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
-										it++;
-										read = it;
+										read = it + 1;
 										_ev.events = EPOLLOUT | EPOLLET;
 									}
 								}
@@ -273,19 +269,18 @@ void Server::run(void)
 								{
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										int i = 0;
-										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++, i++)
+										std::vector<unsigned char>::iterator i = Usr->getCurrCmdbg();
+										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++)
 										{
 											if (*j == ' ')
 											{
-												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j - i, j));
-												i = 0;
+												if (j == Usr->getCurrCmdbg())
+													ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j + 1));
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j));
+												i = j + 1;
 											}
 											else if (j == (it - 2))
-											{
-												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j - (i - 1), j));
-												i = 0;
-											}
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j + 1));
 										}
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
@@ -316,8 +311,9 @@ void Server::run(void)
 							Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), read);
 					}
 				}
-				catch (std::exception &)
+				catch (std::exception & e)
 				{
+					std::cerr << e.what() << std::endl;
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 					if (getUsr(_events[k].data.fd) != _users.end())
 						_users.erase(getUsr(_events[k].data.fd));
