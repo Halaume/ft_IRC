@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 19:47:36 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 15:44:05 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,20 +113,15 @@ int	Server::init(char **argv)
 		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
 	if (listen(_sct, 1) == -1)
 		return (close(_sct), std::cerr << "Error listening socket" << std::endl, 1);
-
 	_epollfd = epoll_create1(0);
-
 	if (_epollfd == -1)
 		return (std::cerr << "Error on epoll create" << std::endl, 1);
 	_ev.events = EPOLLIN;
 	_ev.data.fd = _sct;
-
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-
-	std::cout << "0 : epoll fd: " << _epollfd << std::endl;
+	// std::cout << "0 : epoll fd: " << _epollfd << std::endl;
 	_argv = argv;
-
 	return (0);
 }
 
@@ -304,6 +299,7 @@ void Server::run(void)
 										break;
 									}
 								}
+								// printUsersList();
 								break;
 							}
 						default:
