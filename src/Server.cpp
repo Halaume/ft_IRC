@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 13:55:05 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/22 14:24:22 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,23 +204,33 @@ void Server::run(void)
 							Usr->clearRet();
 							if (Usr->getCurrCmd().size() > 0)
 							{
-								for (std::vector<unsigned char>::iterator it = read; it != Usr->getCurrCmdend(); it++)
+								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
 								{
 									if (it != Usr->getCurrCmdbg() && *(it - 1) == '\r' && *it == '\n')
 									{
-										int i = 0;
-										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++, i++)
+										std::vector<unsigned char>::iterator i = Usr->getCurrCmdbg();
+										for (std::vector<unsigned char>::iterator j = Usr->getCurrCmdbg(); j != (it + 1); j++)
 										{
 											if (*j == ' ')
 											{
-												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j - i, j));
-												i = 0;
+												if (j == Usr->getCurrCmdbg())
+												{
+													while (*j == ' ')
+														j++;
+													while (j != (it - 1) && *j != ' ')
+														j++;
+												}
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j));
+												if (j != it - 1)
+												{
+													while (*j == ' ')
+														j++;
+													j--;
+												}
+												i = j + 1;
 											}
 											else if (j == (it - 2))
-											{
-												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(j - (i - 1), j));
-												i = 0;
-											}
+												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j + 1));
 										}
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
@@ -275,8 +285,19 @@ void Server::run(void)
 											if (*j == ' ')
 											{
 												if (j == Usr->getCurrCmdbg())
-													ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j + 1));
+												{
+													while (*j == ' ')
+														j++;
+													while (j != (it - 1) && *j != ' ')
+														j++;
+												}
 												ParsedCommand.insert(ParsedCommand.end(), std::vector<unsigned char>(i, j));
+												if (j != it - 1)
+												{
+													while (*j == ' ')
+														j++;
+													j--;
+												}
 												i = j + 1;
 											}
 											else if (j == (it - 2))
