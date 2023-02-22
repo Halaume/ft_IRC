@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 13:53:51 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/22 14:24:23 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,6 @@ void	Command::_fun_PASS(Server &my_server)
 	std::vector<unsigned char> v;
 	
 	print_vector2(_parsedCmd);
-	print_vector(_parsedCmd[1]);
 
 	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false) // && !_cmd_user->getPassStatus())
 	{
