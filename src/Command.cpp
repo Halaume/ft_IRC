@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 19:46:57 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 19:20:13 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,32 +50,36 @@ Command &	Command::operator=(const Command & src)
 
 void	Command::setCommand(std::vector<std::vector<unsigned char> > cmd)
 {
-	this->_parsedCmd = cmd;
+	_parsedCmd = cmd;
 }
 void	Command::setUser(User* usr)
 {
-	this->_cmd_user = usr;
+	_cmd_user = usr;
 }
 
 void Command::register_user(Server & my_server)
 {
+	std::vector<unsigned char> ret;
 	
-	(void)my_server;
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
 	{
-		push_to_buf(ERR_PASSWDMISMATCH, *this, no_param); // exit disconnect client?
+		ret = push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		_pass_before_nick_user = PASS_CONNECTION_ERROR;
 		return;
 	}
-	(*_cmd_user).setRegistered(true);
-	push_to_buf(RPL_WELCOME, *this, no_param);
-	// sendto
-	push_to_buf(RPL_YOURHOST, *this, no_param);
-	// sendto
-	push_to_buf(RPL_CREATED, *this, no_param);
-	// sendto
+	_cmd_user->setRegistered(true);
+	ret = push_to_buf(RPL_WELCOME, *this, no_param);
+	my_server.sendto(_cmd_user->getfd(), ret);
+	ret.clear();
+	ret = push_to_buf(RPL_YOURHOST, *this, no_param);
+	my_server.sendto(_cmd_user->getfd(), ret);
+	ret.clear();
+	ret = push_to_buf(RPL_CREATED, *this, no_param);
+	my_server.sendto(_cmd_user->getfd(), ret);
+	ret.clear();
 	push_to_buf(RPL_MYINFO, *this, no_param);
-	// sendto
+	my_server.sendto(_cmd_user->getfd(), ret);
 }
 
 /*''''''''''''''''''''''''''''''''''''
@@ -84,22 +88,19 @@ void Command::register_user(Server & my_server)
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_PASS(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> ret;
 	std::vector<unsigned char> v;
 	
-	print_vector2(_parsedCmd);
-	print_vector(_parsedCmd[1]);
-
-	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false) // && !_cmd_user->getPassStatus())
+	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false)
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
-		// sendto
+		ret = push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
-	else if (_cmd_user->getRegistered()) // || _cmd_user->getPassStatus())
+	else if (_cmd_user->getRegistered())
 	{
-		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
-		// sendto
+		ret = push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
 	_cmd_user->setPasswd(_parsedCmd[1]);
@@ -117,31 +118,40 @@ void	Command::_fun_PASS(Server &my_server)
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_NICK(Server &my_server)
 {
+	std::vector<unsigned char> ret;
+	
 	if (_pass_before_nick_user == WAITING_FOR_PASS)
 	{
 		_pass_before_nick_user = PASS_ORDER_ERROR;
 		return;
 	}
-	(void)my_server; //
 	if (_parsedCmd.size() < 2)
 	{
-		push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param);
+		ret = push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
 	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
 	{
-		push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param);
+		ret = push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
-	else if (itu != my_server.getUsers().end())
+	else if (itu != my_server.getUsersend())
 	{
 		if (!my_compare(_cmd_user->getNick(), _parsedCmd[1]))
 			return;
-		push_to_buf(ERR_NICKNAMEINUSE, *this, no_param);
+		ret = push_to_buf(ERR_NICKNAMEINUSE, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
-	(*_cmd_user).setNick(_parsedCmd[1]);
+	if (_cmd_user->getRegistered() == true)
+	{
+		ret = push_to_buf(OWN_NICK_RPL, *this, _parsedCmd[1]);
+		my_server.sendto(_cmd_user->getfd(), ret);
+	}
+	_cmd_user->setNick(_parsedCmd[1]);
 	if (_pass_before_nick_user == PASS_USER_OK)
 		register_user(my_server);
 	else
@@ -153,19 +163,23 @@ void	Command::_fun_NICK(Server &my_server)
 ''''''''''''''''''''''''''''''''''''''*/
 void Command::_fun_USER(Server &my_server)
 {
+	std::vector<unsigned char> ret;
+	
 	if (_pass_before_nick_user == WAITING_FOR_PASS)
 	{
 		_pass_before_nick_user = PASS_ORDER_ERROR;
 		return;
 	}
-	if (this->_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
+	if (_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
 	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param); // send
+		ret =push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return ;
 	}
 	if (_cmd_user->getRegistered())
 	{
-		push_to_buf(ERR_ALREADYREGISTERED, *this, no_param); // sendto
+		ret = push_to_buf(ERR_ALREADYREGISTERED, *this, no_param);
+		my_server.sendto(_cmd_user->getfd(), ret);
 		return;
 	}
 	else if (_parsedCmd[4].empty() == false && _parsedCmd[4][0] == ':')
@@ -264,20 +278,20 @@ void	Command::_fun_QUIT(Server &my_server)
 	for (std::vector<Channel *>::iterator itc = _cmd_user->getChannelsbg(); itc != _cmd_user->getChannelsend(); itc++)
 	{
 		for (std::list<User *>::const_iterator itu = (*itc)->getUserListbg(); itu != (*itc)->getUserListend(); itu++)
-		this->_cmd_user->getChannels().erase(itc);
+		_cmd_user->getChannels().erase(itc);
 	}
 }
 
 void	Command::_fun_RESTART(Server &my_server)
 {
-	if (!this->_cmd_user->getOperator())
+	if (!_cmd_user->getOperator())
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		insert_all(_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator");
 		return ;
 	}
 	free_fun(my_server);
-	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
+	_parsedCmd.erase(_parsedCmd.begin(), _parsedCmd.end());
 	my_server.init(my_server.getArgv());
 }
 
@@ -304,9 +318,9 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 /*	else
 	{
 		dest.clear();
-		dest = this->_parsedCmd[0];
+		dest = _parsedCmd[0];
 		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}*/
 	if (chan != &(*my_server.getChannel().end()) && is_op)
@@ -341,39 +355,39 @@ void	Command::_fun_PRIVMSG(Server &my_server)
            ERR_WILDTOPLEVEL                ERR_TOOMANYTARGETS
            ERR_NOSUCHNICK
            RPL_AWAY*/
-	if (this->_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3)
 	{
-		insert_all(this->_cmd_user->getRet(), ":No text to send\r\n");
+		insert_all(_cmd_user->getRet(), ":No text to send\r\n");
 		return ;
 	}
 //PAS SUR DE CELLE CI
-	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
+	if (_parsedCmd.size() > 3 && _parsedCmd[2][0] != ':')
 	{
-		this->_cmd_user->setRet(this->_parsedCmd[0]);// RET SHOULD BE <TARGET>
-		insert_all(this->_cmd_user->getRet(), " :Duplicate recipients. No message delivered\r\n");
+		_cmd_user->setRet(_parsedCmd[0]);// RET SHOULD BE <TARGET>
+		insert_all(_cmd_user->getRet(), " :Duplicate recipients. No message delivered\r\n");
 		return ;
 	}
-	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
+	std::vector<unsigned char>	receiver = _parsedCmd[1];
 
-	if (this->_parsedCmd[2][0] == ':')
-  this->_cmd_user->setRet(std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end()));
+	if (_parsedCmd[2][0] == ':')
+  _cmd_user->setRet(std::vector<unsigned char>(_parsedCmd[2].begin() + 1, _parsedCmd[2].end()));
 	else
-		this->_cmd_user->setRet(this->_parsedCmd[2]);
-	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
-	while (it != this->_parsedCmd.end())
+		_cmd_user->setRet(_parsedCmd[2]);
+	std::vector<std::vector<unsigned char> >::iterator	it = _parsedCmd.begin() + 3;
+	while (it != _parsedCmd.end())
 	{
-		this->_cmd_user->getRet().push_back(' ');
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), it->begin(), it->end());
+		_cmd_user->getRet().push_back(' ');
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), it->begin(), it->end());
 	}
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
-		do_chan(receiver, my_server, this->_cmd_user->getRet());
+		do_chan(receiver, my_server, _cmd_user->getRet());
 	else
 	{
 		std::list<User>::iterator	itu = my_server.findUser(receiver);
 		if (itu == my_server.getUsers().end())
 		{
-			this->_cmd_user->setRet(this->_parsedCmd[0]);
-			insert_all(this->_cmd_user->getRet(), " ERR_NOSUCHNICK\r\n");
+			_cmd_user->setRet(_parsedCmd[0]);
+			insert_all(_cmd_user->getRet(), " ERR_NOSUCHNICK\r\n");
 		}
 	}
 }
@@ -388,7 +402,7 @@ void	Command::_fun_OPER(Server &my_server)
 		if (itu == my_server.getUsers().end())
 		{
 			insert_all(ret, " ERR_PASSWMISMTCH\r\n");
-			this->_cmd_user->setRet(ret);
+			_cmd_user->setRet(ret);
 			return ;
 		}
 		else 
@@ -396,13 +410,13 @@ void	Command::_fun_OPER(Server &my_server)
 			if (_parsedCmd[2] != my_server.getPassword())
 			{
 				insert_all(ret, " ERR_PASSWMISMTCH\r\n");
-				this->_cmd_user->setRet(ret);
+				_cmd_user->setRet(ret);
 				return ;
 			}
 		}
 	}
 	insert_all(ret, " ERR_PASSWMISMATCH\r\n");
-	this->_cmd_user->setRet(ret);
+	_cmd_user->setRet(ret);
 	return ;
 }
 
@@ -419,23 +433,20 @@ void	Command::_fun_MODE(Server &my_server)
 	if (itu == my_server.getUsers().end())
 	{
 		insert_all(ret, "ERR_NOSUCHNICK\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
-	
-	
 	(void)my_server;
 }
-
 
 void	Command::_fun_INVITE(Server &my_server)
 {
 	std::vector<unsigned char>	ret;
 
-	if (this->_parsedCmd.size() > 3)
+	if (_parsedCmd.size() > 3)
 	{
 		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
@@ -443,7 +454,7 @@ void	Command::_fun_INVITE(Server &my_server)
 	if (itc == my_server.getChannel().end())
 	{
 		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
@@ -451,7 +462,7 @@ void	Command::_fun_INVITE(Server &my_server)
 	if (itu == itc->getUserListend())
 	{
 		insert_all(ret, " ERR_NOTONCHANNEL\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
@@ -459,19 +470,19 @@ void	Command::_fun_INVITE(Server &my_server)
 	if (itu != itc->getUserListend())
 	{
 		insert_all(ret, " ERR_USERONCHANNEL\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
 	if (itc->getModes().find('i')->second && !itc->isOp(_cmd_user))
 	{
 		insert_all(ret, " ERR_CHANOPRIVSNEEDED\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
 	insert_all(ret, " RPL_INVITING\r\n");
-	this->_cmd_user->setRet(ret);
+	_cmd_user->setRet(ret);
 	return ;
 }
 
@@ -485,32 +496,32 @@ void	Command::_fun_TOPIC(Server &my_server)
 	if (_parsedCmd.size() < 2)
 	{
 		insert_all(ret, " ERR_NEEDMOREPARAMS\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
 	if (itc == my_server.getChannel().end())
 	{
 		insert_all(ret, " ERR_NOSUCHCHANNEL\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
-	while (Usrlst != itc->getUserListend() && *Usrlst != this->_cmd_user)
+	while (Usrlst != itc->getUserListend() && *Usrlst != _cmd_user)
         Usrlst++;
     if (Usrlst == itc->getUserListend())
     {
         ret = _cmd_user->getUserName();
         ret.insert(ret.end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
         insert_all(ret, " ERR_NOTONCHANNEL\r\n");
-        this->_cmd_user->setRet(ret);
+        _cmd_user->setRet(ret);
         return ;
     }
 	
 	if (itc->isOp(*Usrlst) == false)
 	{
 		insert_all(ret, " ERR_CHOPRIVSNEEDED\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	
@@ -521,7 +532,7 @@ void	Command::_fun_TOPIC(Server &my_server)
 			insert_all(ret, " RPL_TOPIC\r\n");
 		else
 			insert_all(ret, " RPL_NOTOPIC\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		return ;
 	}
 	else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
@@ -529,9 +540,9 @@ void	Command::_fun_TOPIC(Server &my_server)
 		Topic.clear();
 		itc->setTopic(Topic);
 		insert_all(ret, " RPL_TOPIC\r\n");
-		this->_cmd_user->setRet(ret);
+		_cmd_user->setRet(ret);
 		for (std::list<User *>::iterator itu = itc->getUserListbg(); itu != itc->getUserListend(); itu++)
-			this->_cmd_user->setRet(ret);
+			_cmd_user->setRet(ret);
 	}
 	else
 	{
@@ -549,65 +560,65 @@ void	Command::_fun_TOPIC(Server &my_server)
 		}
 		itc->setTopic(Topic);
 		for (std::list<User *>::iterator itu = itc->getUserListbg(); itu != itc->getUserListend(); itu++)
-			this->_cmd_user->setRet(ret);
+			_cmd_user->setRet(ret);
 	}
 }
 
 void	Command::_fun_KICK(Server &my_server)
 {
-	std::vector<Channel>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
+	std::vector<Channel>::iterator	tmp = my_server.findExistingChan(_parsedCmd[1]);
 
-	if (this->_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3)
 	{
-		insert_all(this->_cmd_user->getRet(), " ERR_NEEDMOREPARAM\r\n");
+		insert_all(_cmd_user->getRet(), " ERR_NEEDMOREPARAM\r\n");
 		return ;
 	}
 
 	if (tmp == my_server.getChannel().end())
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " ERR_NOSUCHCHANNEL\r\n");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		insert_all(_cmd_user->getRet(), " ERR_NOSUCHCHANNEL\r\n");
 		return ;
 	}
 
-	if (!tmp->isOp(this->_cmd_user))
+	if (!tmp->isOp(_cmd_user))
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
-		insert_all(this->_cmd_user->getRet(), " :You're not channel operator\r\n");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), _parsedCmd[1].begin(), _parsedCmd[1].end());
+		insert_all(_cmd_user->getRet(), " :You're not channel operator\r\n");
 		return ;
 	}
 
 	std::list<User *>::iterator		Usrlst = tmp->getUserListbg();
-	while (Usrlst != tmp->getUserListend() && *Usrlst != this->_cmd_user)
+	while (Usrlst != tmp->getUserListend() && *Usrlst != _cmd_user)
 		Usrlst++;
 	if (Usrlst == tmp->getUserListend())
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_NOTONCHANNEL\r\n");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
+		insert_all(_cmd_user->getRet(), " ERR_NOTONCHANNEL\r\n");
 		return ;
 	}
 	Usrlst = tmp->getUserListbg();
-	while (Usrlst != tmp->getUserListend() && !(**Usrlst == this->_parsedCmd[2]))
+	while (Usrlst != tmp->getUserListend() && !(**Usrlst == _parsedCmd[2]))
 		Usrlst++;
 	if (Usrlst == tmp->getUserListend())
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_USERNOTINCHANNEL\r\n");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
+		insert_all(_cmd_user->getRet(), " ERR_USERNOTINCHANNEL\r\n");
 		return ;
 	}
 	if (tmp->isOp(*Usrlst))
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_CANNOTKICKADMIN\r\n");
+		_cmd_user->setRet(_cmd_user->getUserName());
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
+		insert_all(_cmd_user->getRet(), " ERR_CANNOTKICKADMIN\r\n");
 		return ;
 	}
 
-	for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), it->begin(), it->end());
+	for (std::vector<std::vector<unsigned char> >::iterator it = _parsedCmd.begin() + 3; it != _parsedCmd.end(); it++)
+		_cmd_user->getRet().insert(_cmd_user->getRet().end(), it->begin(), it->end());
 	tmp->getUserList().erase(Usrlst);
 	//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
 
@@ -633,95 +644,95 @@ void	Command::_fun_NOTICE(Server &my_server)
 void	Command::answer(Server &my_server)
 {
 	print_vector2(_parsedCmd);
-	print_vector(_parsedCmd[1]);
-	
 	if (_pass_before_nick_user == PASS_ORDER_ERROR || _pass_before_nick_user == PASS_CONNECTION_ERROR)
 		return;
-	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
+	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE", "NICK"};
 	int i = 0;
 	// setCmdUser(my_server);
-	if (this->_parsedCmd.size() == 0)
+	if (_parsedCmd.size() == 0)
 		return ;
-	while (i < 16 && my_compare(this->_parsedCmd[0], options[i]) != 0)
+	while (i < 16 && my_compare(_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
 		case 0:
-			this->_fun_CAP(my_server);
+			_fun_CAP(my_server);
 			break;
 		case 1:
-			this->_fun_USER(my_server);
+			_fun_USER(my_server);
 			break;
 		case 2:
-			this->_fun_PASS(my_server);
+			_fun_PASS(my_server);
 			break;
 		case 3:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_JOIN(my_server);
+			_fun_JOIN(my_server);
 			break;
 		case 4:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_PRIVMSG(my_server);
+			_fun_PRIVMSG(my_server);
 			break;
 		case 5:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_OPER(my_server);
+			_fun_OPER(my_server);
 			break;
 		case 6:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_QUIT(my_server);
+			_fun_QUIT(my_server);
 			break;
 		case 7:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_ERROR(my_server);
+			_fun_ERROR(my_server);
 			break;
 		case 8:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_MODE(my_server);
+			_fun_MODE(my_server);
 			break;
 		case 9:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_TOPIC(my_server);
+			_fun_TOPIC(my_server);
 			break;
 		case 10:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_KICK(my_server);
+			_fun_KICK(my_server);
 			break;
 		case 11:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_INVITE(my_server);
+			_fun_INVITE(my_server);
 			break;
 		case 12:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_KILL(my_server);
+			_fun_KILL(my_server);
 			break;
 		case 13:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_RESTART(my_server);
+			_fun_RESTART(my_server);
 			break;
 		case 14:
-			if (!this->_cmd_user->getRegistered())
+			if (!_cmd_user->getRegistered())
 				break;
-			this->_fun_PONG(my_server);
+			_fun_PONG(my_server);
 			break;
 		case 15:
-			this->_fun_NOTICE(my_server);
+			_fun_NOTICE(my_server);
 			break;
+		case 16:
+			_fun_NICK(my_server);
 		default:
 			break;
 	}
-	this->_parsedCmd.clear();
+	_parsedCmd.clear();
 }
 
 // Getters
@@ -738,7 +749,7 @@ std::vector<std::vector<unsigned char> > Command::getParsedCmd()
 // Setters
 void	Command::setParsedCmd(std::vector<std::vector<unsigned char> > val)
 {
-	this->_parsedCmd = val;
+	_parsedCmd = val;
 }
 
 std::vector<std::vector<unsigned char> > Command::getCommand(void) const

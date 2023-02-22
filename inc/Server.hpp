@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:40:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 16:09:07 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ class Server
 		std::list<User>::iterator		findUserNick(std::vector<unsigned char> nick);
 		User*							findUserPtrNick(std::vector<unsigned char> nick);
 		std::list<User>					getUsers(void) const;
+		std::list<User>::iterator		getUsersbg(void);
+		std::list<User>::iterator		getUsersend(void);
 		Channel*						findChan(std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;

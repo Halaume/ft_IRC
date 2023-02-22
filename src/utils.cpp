@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:32:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 19:11:57 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 
 void	free_fun(Server &my_server)
 {
-	close(my_server.getSct());
 	close(my_server.getEpollfd());
+	close(my_server.getSct());
 }
 
 std::string itos(int n)
@@ -51,6 +51,30 @@ void add_to_vector(std::vector<unsigned char>& v, std::string str)
 {
 	for (size_t i = 0; i < str.size(); i++)
 		v.push_back(static_cast<unsigned char>(str[i]));
+}
+
+std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
+{
+	std::vector<unsigned char> ret;
+	
+	ret = v;
+	int i = 0;
+	while (s[i])
+	{
+		ret.push_back(static_cast<unsigned char>(s[i]));
+		i++;
+	}
+	return (ret);
+}
+
+std::vector<unsigned char> add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+	
+	ret = v1;
+	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
+		v1.push_back(v2[i]);
+	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
@@ -318,3 +342,25 @@ int	my_compare_vec(std::vector<unsigned char> vec1, std::vector<unsigned char> v
 	return (0);
 }
 
+std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, std::vector<unsigned char> user_name, std::vector<unsigned char> mask, std::vector<unsigned char> nick_new)
+{
+	std::vector<unsigned char> ret;
+	std::vector<std::vector<unsigned char> >::size_type it;
+	unsigned char text[] = " NICK ";
+	int i = 0;
+	
+	ret = nick_old;
+	ret.push_back('!');
+	for (it = 0; it < user_name.size(); it++)
+		ret.push_back(user_name[it]);
+	ret.push_back('@');
+	for (it = 0; it < mask.size(); it++)
+		ret.push_back(mask[it]);
+	while (text[i])
+		ret.push_back(text[i++]);
+	for (it = 0; it < nick_new.size(); it++)
+		ret.push_back(nick_new[it]);
+	ret.push_back('\r');
+	ret.push_back('\n');
+	return (ret);		
+}

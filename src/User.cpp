@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:46:22 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 19:10:45 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,10 +285,10 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << " Nick: ";
 	for (m = 0; m < i.getNick().size(); m++)
 		o << i.getNick()[m];
-	o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
+	o << " fd: " << i.getfd() << " usr reg:" << i.getRegistered() << " passwd:";
 	for (m = 0; m < i.getPasswd().size(); m++)
 		o << i.getPasswd()[m];
-	o << " Ad: " << &i;
+	// o << " Ad: " << &i;
 	o << std::endl;
 
 	return o;
