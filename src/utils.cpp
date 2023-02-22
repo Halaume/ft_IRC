@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:32:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/22 12:45:51 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 
 void	free_fun(Server &my_server)
 {
-	close(my_server.getSct());
 	close(my_server.getEpollfd());
+	close(my_server.getSct());
 }
 
 std::string itos(int n)
