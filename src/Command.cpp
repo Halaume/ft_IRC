@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 14:24:23 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/23 15:31:19 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -631,88 +631,83 @@ void	Command::_fun_NOTICE(Server &my_server)
 
 void	Command::answer(Server &my_server)
 {
-	print_vector2(this->_parsedCmd);
 	if (_pass_before_nick_user == PASS_ORDER_ERROR || _pass_before_nick_user == PASS_CONNECTION_ERROR)
 		return;
-	std::string	options[] = {"CAP", "USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
+	std::string	options[] = {"USER", "PASS", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
 	int i = 0;
-	// setCmdUser(my_server);
 	if (this->_parsedCmd.size() == 0)
 		return ;
-	while (i < 16 && my_compare(this->_parsedCmd[0], options[i]) != 0)
+	while (i < 15 && my_compare(this->_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
 		case 0:
-			this->_fun_CAP(my_server);
-			break;
-		case 1:
 			this->_fun_USER(my_server);
 			break;
-		case 2:
+		case 1:
 			this->_fun_PASS(my_server);
 			break;
-		case 3:
+		case 2:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_JOIN(my_server);
 			break;
-		case 4:
+		case 3:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_PRIVMSG(my_server);
 			break;
-		case 5:
+		case 4:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_OPER(my_server);
 			break;
-		case 6:
+		case 5:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_QUIT(my_server);
 			break;
-		case 7:
+		case 6:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_ERROR(my_server);
 			break;
-		case 8:
+		case 7:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_MODE(my_server);
 			break;
-		case 9:
+		case 8:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_TOPIC(my_server);
 			break;
-		case 10:
+		case 9:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_KICK(my_server);
 			break;
-		case 11:
+		case 10:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_INVITE(my_server);
 			break;
-		case 12:
+		case 11:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_KILL(my_server);
 			break;
-		case 13:
+		case 12:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_RESTART(my_server);
 			break;
-		case 14:
+		case 13:
 			if (!this->_cmd_user->getRegistered())
 				break;
 			this->_fun_PONG(my_server);
 			break;
-		case 15:
+		case 14:
 			this->_fun_NOTICE(my_server);
 			break;
 		default:
@@ -747,56 +742,3 @@ User* Command::getCmdUser(void) const
 {
 	return (_cmd_user);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*''''''''''''''''''''''''''''''''''''
-				CAP > to delete?
-''''''''''''''''''''''''''''''''''''''*/
-void	Command::_fun_CAP(Server &my_server)
-{
-	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
-	(void)my_server;
-}
-
-
-
-
-
-
-			// /////////////////////////////////////
-			// std::vector<unsigned char> test;
-			// test.push_back('1'); test.push_back('2'); test.push_back('3'); test.push_back('4');
-			// User *user2b;
-			// std::vector<unsigned char> u2b;
-			// u2b.push_back('j'); u2b.push_back('a'); u2b.push_back('c'); u2b.push_back('k');
-			// user2b = my_server.findUserPtrNick(u2b);
-			// my_server.findChan(channels[it])->setMode('k', true);
-			// my_server.findChan(channels[it])->setMode('l', true);
-			// // my_server.findChan(channels[it])->setMode('i', true);
-			// my_server.findChan(channels[it])->setMode('b', true);
-			// my_server.findChan(channels[it])->setChanPassword(test);
-			// my_server.findChan(channels[it])->setNbUsersLimit(2);
-			// // my_server.findChan(channels[it])->addUserToBan(user2b);
-			// my_server.findChan(channels[it])->addUserToInvite(user2b);
-			// /////////////////////////////////////	
