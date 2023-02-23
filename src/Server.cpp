@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 17:01:07 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/23 18:42:45 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,7 @@ void Server::run(void)
 				{
 					std::cerr << "2 : accepted fd:" << _events[k].data.fd << std::endl;
 					Usr = getUsr(_events[k].data.fd);
-					std::vector<std::vector<unsigned char> >	ParsedCommand;
+					std::vector<std::vector<unsigned char> > ParsedCommand;
 					switch (_events[k].events)
 					{
 						case EPOLLOUT:
@@ -204,6 +204,7 @@ void Server::run(void)
 							sendto(Usr->getfd(), Usr->getRet());
 							ParsedCommand.clear();
 							Usr->clearRet();
+							print_vector(Usr->getCurrCmd());
 							if (Usr->getCurrCmd().size() > 0)
 							{
 								for (std::vector<unsigned char>::iterator it = Usr->getCurrCmdbg(); it != Usr->getCurrCmdend(); it++)
@@ -238,6 +239,7 @@ void Server::run(void)
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
 										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), it + 1);
+										print_vector(Usr->getCurrCmd());
 										break ;
 									}
 								}
@@ -308,10 +310,7 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.answer(*this);
-										if ((it + 1) == Usr->getCurrCmdend())
-											Usr->clearCurrCmd();
-										else
-											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), it + 1);
+										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), it + 1);
 										_ev.events = EPOLLOUT | EPOLLET;
 										_ev.data.fd = Usr->getfd();
 										if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
@@ -324,8 +323,8 @@ void Server::run(void)
 										break;
 									}
 								}
-								break;
 							}
+							break;
 						default:
 							epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 							close(_events[k].data.fd);
