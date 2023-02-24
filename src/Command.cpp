@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/24 13:27:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/24 13:34:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -760,56 +760,3 @@ User* Command::getCmdUser(void) const
 {
 	return (_cmd_user);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*''''''''''''''''''''''''''''''''''''
-				CAP > to delete?
-''''''''''''''''''''''''''''''''''''''*/
-void	Command::_fun_CAP(Server &my_server)
-{
-	std::cout << "CAP COMMAND REALIZED : nothing to do here\n";
-	(void)my_server;
-}
-
-
-
-
-
-
-			// /////////////////////////////////////
-			// std::vector<unsigned char> test;
-			// test.push_back('1'); test.push_back('2'); test.push_back('3'); test.push_back('4');
-			// User *user2b;
-			// std::vector<unsigned char> u2b;
-			// u2b.push_back('j'); u2b.push_back('a'); u2b.push_back('c'); u2b.push_back('k');
-			// user2b = my_server.findUserPtrNick(u2b);
-			// my_server.findChan(channels[it])->setMode('k', true);
-			// my_server.findChan(channels[it])->setMode('l', true);
-			// // my_server.findChan(channels[it])->setMode('i', true);
-			// my_server.findChan(channels[it])->setMode('b', true);
-			// my_server.findChan(channels[it])->setChanPassword(test);
-			// my_server.findChan(channels[it])->setNbUsersLimit(2);
-			// // my_server.findChan(channels[it])->addUserToBan(user2b);
-			// my_server.findChan(channels[it])->addUserToInvite(user2b);
-			// /////////////////////////////////////	

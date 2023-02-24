@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 19:43:27 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/23 16:14:23 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,6 @@ class Command
 		// std::list<User>::iterator				_cmd_user;
 		int										_pass_before_nick_user;
 		
-		void									_fun_CAP(Server &);
 		void									_fun_NICK(Server &);
 		void									_fun_USER(Server &);
 		void									_fun_PASS(Server &);

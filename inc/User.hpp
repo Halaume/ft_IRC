@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:45:00 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/23 18:23:35 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,10 @@ class User
 		bool						operator==(std::vector<unsigned char>) const;
 		bool						operator!=(User) const;
 
-		bool						isNickValid(std::vector<unsigned char> nick);
+		bool									isNickValid(std::vector<unsigned char> nick);
 		
 		std::vector<Channel *> 					getChannels(void) const;
-		std::vector<unsigned char>				getCurrCmd(void) const;
+		std::vector<unsigned char>&				getCurrCmd(void);
 		std::vector<Channel *>::iterator		getChannelsbg(void);
 		std::vector<Channel *>::iterator		getChannelsend(void);
 		std::vector<unsigned char>::iterator	getCurrCmdbg(void);

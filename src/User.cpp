@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 19:10:45 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/24 13:34:49 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ std::vector<unsigned char> &	User::getRet(void)
 	return (_ret);
 }
 
-std::vector<unsigned char>	User::getCurrCmd(void) const
+std::vector<unsigned char>&	User::getCurrCmd(void)
 {
 	return (_currCmd);
 }
