@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 19:20:13 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/24 13:27:28 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,7 @@ void Command::register_user(Server & my_server)
 }
 
 /*''''''''''''''''''''''''''''''''''''
-				PASS TODO + sendto +++ exit and close connection when password mismatch
-				Verifier que pas nick ou USER
+				PASS TODO:exit and close connection when password mismatches on registration?
 ''''''''''''''''''''''''''''''''''''''*/
 void	Command::_fun_PASS(Server &my_server)
 {
