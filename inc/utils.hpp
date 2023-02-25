@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 18:50:53 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/25 21:32:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,13 @@ std::string                                 v_to_str(std::vector<unsigned char> 
 std::vector<unsigned char>                  to_vector(std::string str);
 void                                        add_to_vector(std::vector<unsigned char> &v, char *str);
 void                                        add_to_vector(std::vector<unsigned char>& v, std::string str);
+// void                                        add_to_vector(std::vector<unsigned char>& v, std::string& str);
 void                                        add_to_vector(std::vector<unsigned char>&, std::vector<unsigned char>);
 std::vector<unsigned char>                  add_to_v(std::vector<unsigned char> v, std::string str);
 std::vector<unsigned char>                  add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
+void                                        add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str);
+
 
 std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> msg);
 std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg);
@@ -41,10 +44,10 @@ std::vector<unsigned char>                  concat_resp(int code, std::vector<un
 std::vector<unsigned char>                  concat_nick_rpl(std::vector<unsigned char> nick_old, std::vector<unsigned char> user_name, std::vector<unsigned char> mask, std::vector<unsigned char> nick_new);
 bool                                        isValidCharacter(unsigned char);
 
-std::vector<unsigned char>                  concat_real_name(std::vector<std::vector<unsigned char> > parsedCmd, int start);
+std::vector<unsigned char>                  concat_real_name(std::vector<unsigned char>);
 
-void                                        print_vector(std::vector<unsigned char> v);
-void                                        print_vector2(std::vector<std::vector<unsigned char> > v);
+void                                        print_vector(std::string s, std::vector<unsigned char> v);
+void                                        print_vector2(std::string s, std::vector<std::vector<unsigned char> > v);
 
 // Responses
 std::vector<unsigned char>                  server_response(std::string client, std::string code, std::string command, std::string to_insert);

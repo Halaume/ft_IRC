@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 16:09:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/25 17:46:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ class Server
 
 		char **							getArgv(void) const;
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
-		void							sendto(int, std::vector<unsigned char>);
+		void							sendto(int, std::vector<std::vector <unsigned char> >&);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		std::list<User>::iterator		getUsr(int);
 		bool							isUserInList(int);

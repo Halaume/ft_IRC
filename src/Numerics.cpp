@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 18:54:04 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/25 21:33:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,9 @@
 #include "../inc/utils.hpp"
 
 // TODO : if no client name, put nick name
-std::vector<unsigned char> push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
+void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 {
+	(void)param;
 	std::vector<unsigned char> buf;
 	std::string server_name = "mig.42.fr";
 	std::string ddots = ":";
@@ -32,16 +33,10 @@ std::vector<unsigned char> push_to_buf(int code, Command &cmd, std::vector<unsig
 	if (code == OWN_NICK_RPL)
 		add_to_vector(buf, ddots);
 	else
-		add_to_vector(buf, ":" + server_name);
+		add_to_vector(buf, ddots + server_name);
 	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
-
-	std::vector<unsigned char>::size_type m;
-	std::cout << "2:\n";
-	for (m = 0; m < buf.size(); m++)
-		std::cout << buf[m];
-	std::cout << "\n";
-
-	return (buf);
+	// print_vector(buf);
+	cmd.getRet().push_back(buf);
 }
 
 std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)
@@ -81,7 +76,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_ERRONEUSNICKNAME:
 		{
-			return (ERR_ERRONEUSNICKNAMEmsg(ERR_ERRONEUSNICKNAME, cmd.getCmdUser()->getClient(), cmd.getCmdUser()->getNick()));
+			return (ERR_ERRONEUSNICKNAMEmsg(ERR_ERRONEUSNICKNAME, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1]));
 		}
 		case ERR_NICKNAMEINUSE:
 		{
