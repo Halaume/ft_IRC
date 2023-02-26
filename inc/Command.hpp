@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 21:02:51 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/26 22:42:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,9 +68,9 @@ class Command
 		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		int											register_user(Server &);	
+		int											register_user(Server &, User &);	
 		
-		int										answer(Server &);
+		int											answer(Server &, User &);
 
 
 		
@@ -79,13 +79,12 @@ class Command
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
 		// std::list<User>::iterator				_cmd_user;
-		int										_pass_before_nick_user;
 		std::vector<std::vector<unsigned char> > _ret;
 
 		
-		int										_fun_PASS(Server &);
-		int										_fun_NICK(Server &);
-		int										_fun_USER(Server &);
+		int										_fun_PASS(Server &, User &);
+		int										_fun_NICK(Server &, User &);
+		int										_fun_USER(Server &, User &);
 		void									_fun_JOIN(Server &);
 		void									_fun_PRIVMSG(Server &);
 		void									_fun_OPER(Server &);

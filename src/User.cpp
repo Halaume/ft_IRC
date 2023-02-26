@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/24 13:34:49 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/26 22:51:10 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,15 @@
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
 
+# define WAITING_FOR_PASS 0
+# define PASS_ORDER_OK 1
+# define PASS_ORDER_ERROR -1
+# define PASS_NICK_OK 2
+# define PASS_USER_OK 3
+# define PASS_CONNECTION_ERROR 4
+
 User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
@@ -25,15 +32,16 @@ _user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
 }
 
 User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), \
-_user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask)
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
+_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), \
+_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user), _allCmd(copy._allCmd)
 {
 }
 
@@ -54,6 +62,8 @@ User& User::operator=(const User & src)
     _client = src._client;
     _channels = src._channels;
 	_user_mask = src._user_mask;
+	_currCmd = src._currCmd;
+	_allCmd = src._allCmd;
 	return (*this);
 }
 
@@ -118,6 +128,16 @@ std::vector<unsigned char>&	User::getCurrCmd(void)
 	return (_currCmd);
 }
 
+std::vector<unsigned char>&	User::getAllCmd(void)
+{
+	return (_allCmd);
+}
+
+int User::getPassBeforeNickUser(void) const
+{
+	return (_pass_before_nick_user);
+}
+
 std::vector<Channel *>::iterator	User::getChannelsbg(void)
 {
 	return (_channels.begin());
@@ -136,6 +156,16 @@ std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
 std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
 {
 	return (_currCmd.end());
+}
+
+std::vector<unsigned char>::iterator	User::getAllCmdbg(void)
+{
+	return (_allCmd.begin());
+}
+
+std::vector<unsigned char>::iterator	User::getAllCmdend(void)
+{
+	return (_allCmd.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const
@@ -171,6 +201,11 @@ void User::setUserName(std::vector<unsigned char> userName)
 void	User::setRealName(std::vector<unsigned char> realname)
 {
 	_real_name = realname;
+}
+
+void User::setPassBeforeNickUser(int value)
+{
+	_pass_before_nick_user = value;
 }
 
 int	User::getNbChan(void)
@@ -267,6 +302,11 @@ void	User::clearRet(void)
 void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
+}
+
+void	User::insertAllCmd(std::vector<unsigned char> & vec)
+{
+	_allCmd.insert(_allCmd.end(), vec.begin(), vec.end());
 }
 
 std::ostream &		operator<<( std::ostream & o, User const & i)
