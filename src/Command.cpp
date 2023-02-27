@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 18:57:53 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/25 16:20:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,18 @@ void Command::register_user(Server & my_server)
 	// sendto
 	push_to_buf(RPL_MYINFO, *this, no_param);
 	// sendto
+}
+
+void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
+{
+	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			my_server.getEv().data.fd = (*itc)->getfd();
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
 }
 
 /*''''''''''''''''''''''''''''''''''''
@@ -217,9 +229,9 @@ void	Command::_fun_JOIN(Server &my_server)
 	{
 		
 		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
-			push_to_buf(ERR_BADCHANMASK, *this, channels[it]); // sendto
+			push_to_buf(ERR_BADCHANMASK, *this, channels[it]);
 		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-			push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]); //sendto
+			push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
 
@@ -228,7 +240,7 @@ void	Command::_fun_JOIN(Server &my_server)
 			my_server.addNewChannel(new_channel);
 			// send messages to accept user RPL
 		}
-		else if (my_server.channelExists(channels[it]) == true)
+		else
 		{
 			// protect findchan
 			if (my_server.findChan(channels[it]) == NULL)
@@ -244,13 +256,13 @@ void	Command::_fun_JOIN(Server &my_server)
 				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
 				push_to_buf(ERR_CHANNELISFULL, *this, channels[it]);
 			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]); //sendto
+				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
 			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
 				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
-				push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]); //sendto
+				push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]);
 			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
-				push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]); //sendto
+				push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]);
 			else
 				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
 		}
@@ -529,8 +541,7 @@ void	Command::_fun_TOPIC(Server &my_server)
 		itc->setTopic(Topic);
 		insert_all(ret, " RPL_TOPIC\r\n");
 		this->_cmd_user->setRet(ret);
-		for (std::list<User *>::iterator itu = itc->getUserListbg(); itu != itc->getUserListend(); itu++)
-			this->_cmd_user->setRet(ret);
+		sendToChan(my_server, itc, ret);
 	}
 	else
 	{
@@ -547,8 +558,7 @@ void	Command::_fun_TOPIC(Server &my_server)
 			Topic.push_back(' ');
 		}
 		itc->setTopic(Topic);
-		for (std::list<User *>::iterator itu = itc->getUserListbg(); itu != itc->getUserListend(); itu++)
-			this->_cmd_user->setRet(ret);
+		sendToChan(my_server, itc, ret);
 	}
 }
 

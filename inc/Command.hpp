@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 16:14:23 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/25 13:38:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,12 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
-		
-		
+
+
 		void										setCommand(std::vector<std::vector<unsigned char> >);
 		void										setUser(User*);
 		void										answer(Server &);
 
-		// void										push_to_buf(int error);
-		
 		// Getters
 		std::vector<std::vector<unsigned char> >	getCommand(void) const;
 		User*										getCmdUser(void) const;
@@ -62,8 +60,7 @@ class Command
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
 		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
-		// Setters
-	
+		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
 		std::vector<std::vector<unsigned char> >	_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
