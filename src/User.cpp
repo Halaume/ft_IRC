@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 18:23:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 11:54:36 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,7 +219,7 @@ void User::setClient(std::vector<unsigned char>& client)
 	_client = client;
 }
 
-void User::setNick(std::vector<unsigned char>& nick)
+void User::setNick(std::vector<unsigned char> nick)
 {
 	_nick = nick;
 }

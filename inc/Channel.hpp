@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 12:29:40 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/27 11:51:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,7 @@ class Channel
 		bool							getMode(char c);
 
 		// SETTERS
-		void							setChanName(std::string&);
-		void							setChanName(std::vector<unsigned char>&);
-		void							setChanPassword(std::string&);
+		void							setChanName(std::vector<unsigned char>);
 		void							setChanPassword(std::vector<unsigned char>&);
 		void							setNbUsersLimit(int nb_users_limit);
 		void 							setMode(char, bool);
@@ -97,7 +95,7 @@ class Channel
 		std::list<User *>				_ban_list;
 		int								_nb_users_limit;
 		std::list<User *>				_invite_list;
-		std::vector<unsigned char>  _topic;
+		std::vector<unsigned char>		_topic;
 
 
 };

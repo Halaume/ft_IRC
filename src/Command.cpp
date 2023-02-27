@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 16:20:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:18:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -367,7 +367,7 @@ void	Command::_fun_PRIVMSG(Server &my_server)
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
 
 	if (this->_parsedCmd[2][0] == ':')
-  this->_cmd_user->setRet(std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end()));
+		this->_cmd_user->setRet(std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end()));
 	else
 		this->_cmd_user->setRet(this->_parsedCmd[2]);
 	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
@@ -624,13 +624,37 @@ void	Command::_fun_KICK(Server &my_server)
 
 void	Command::_fun_KILL(Server &my_server)
 {
-	(void)my_server;
+	if (!this->_cmd_user->getOperator())
+	{
+		this->_cmd_user->setRet(this->_cmd_user->getUserName());
+		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator");
+		return ;
+	}
+	if (this->_parsedCmd.size() < 3)
+	{
+		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
+		return;
+	}
+	std::list<User>::iterator	Usr = my_server.findUserNick(this->_parsedCmd[1]);
+	if (Usr == my_server.getUsersend())
+		return ;
+	for (unsigned int i = 0; i < Usr->getChannels().size(); i++)
+		Usr->getChannels()[i]->delUser(Usr->getfd());
+	my_server.getUsers().erase(Usr);
 }
 
 
-void	Command::_fun_PONG(Server &my_server)
+void	Command::_fun_PONG(void)
 {
-	(void)my_server;
+	this->_cmd_user->setRet(to_vector("PONG Awesome_Irc "));
+	for (unsigned int i = 1; i < this->_parsedCmd.size(); i++)
+	{
+		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[i].begin(), this->_parsedCmd[i].end());
+		if (i + 1 != this->_parsedCmd.size())
+			this->_cmd_user->getRet().push_back(' ');
+	}
+	this->_cmd_user->getRet().push_back('\r');
+	this->_cmd_user->getRet().push_back('\n');
 }
 
 void	Command::_fun_NOTICE(Server &my_server)
@@ -716,7 +740,7 @@ void	Command::answer(Server &my_server)
 		case 13:
 			if (!this->_cmd_user->getRegistered())
 				break;
-			this->_fun_PONG(my_server);
+			this->_fun_PONG();
 			break;
 		case 14:
 			this->_fun_NOTICE(my_server);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 16:21:01 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:18:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,23 @@ Channel*	Server::findChan(std::vector<unsigned char> channel)
 	return (NULL);
 }
 
+void	Server::setBot(void)
+{
+	this->_bot = User();
+	Channel	botchan = Channel();
+
+	std::vector<unsigned char>	botvec = to_vector("bot");
+
+	this->_bot.setNick(botvec);
+	this->_bot.setRegistered(true);
+	this->_bot.setOperator(true);
+	this->_bot.setRealName(botvec);
+	this->_bot.setUserName(botvec);
+	botchan.setChanName(botvec);
+	this->_channels.push_back(botchan);
+	this->_bot.addChannel(this->findChan(botvec));
+}
+
 int	Server::init(char **argv)
 {
 	_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -153,6 +170,8 @@ void Server::run(void)
 	std::vector<unsigned char> v;
 	Command	cmd;
 
+	this->setBot();
+
 	while (true)
 	{	
 		unsigned char buf[BUFFER_SIZE] = "";
@@ -181,7 +200,7 @@ void Server::run(void)
 				try
 				{
 					std::cerr << "2 : accepted fd:" << _events[k].data.fd << std::endl;
-					Usr = getUsr(_events[k].data.fd);
+					Usr = findUser(_events[k].data.fd);
 					std::vector<std::vector<unsigned char> > ParsedCommand;
 					switch (_events[k].events)
 					{
@@ -189,7 +208,7 @@ void Server::run(void)
 							std::cerr << "EVENT EPOLLOUT" << std::endl;
 							_ev.events = EPOLLIN | EPOLLET;
 							_ev.data.fd = Usr->getfd();
-							Usr = getUsr(_events[k].data.fd);
+							Usr = findUser(_events[k].data.fd);
 
 							if (Usr == _users.end())
 							{
@@ -260,7 +279,7 @@ void Server::run(void)
 									new_user.setOperator(true);
 								_users.push_back(new_user);
 							}
-							Usr = getUsr(_events[k].data.fd);
+							Usr = findUser(_events[k].data.fd);
 							retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, 0);
 							if (retrec <= 0)
 							{
@@ -336,8 +355,8 @@ void Server::run(void)
 				catch (std::exception & e)
 				{
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
-					if (getUsr(_events[k].data.fd) != _users.end())
-						_users.erase(getUsr(_events[k].data.fd));
+					if (findUser(_events[k].data.fd) != _users.end())
+						_users.erase(findUser(_events[k].data.fd));
 					close(_events[k].data.fd);
 				}
 			}
@@ -351,7 +370,7 @@ void	Server::sendto(int fd, std::vector<unsigned char> buf)
 	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 	{
-		std::list<User>::iterator Usr = getUsr(fd);
+		std::list<User>::iterator Usr = findUser(fd);
 		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
 		_users.erase(Usr);
 		close(fd);
@@ -444,16 +463,6 @@ void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vecto
 
 // GETTERS
 
-std::list<User>::iterator	Server::getUsr(int fd)
-{
-	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
-	{
-		if (it->getfd() == fd)
-			return (it);
-	}
-	return (_users.end());
-}
-
 std::vector<Channel>	Server::getChannel(void) const
 {
 	return (_channels);
@@ -492,6 +501,15 @@ std::vector<Channel>::iterator Server::getChannelsbg(void)
 std::vector<Channel>::iterator Server::getChannelsend(void)
 {
 	return (_channels.end());
+}
+
+std::list<User>::iterator	Server::getUsersbg(void)
+{
+	return (_users.begin());
+}
+std::list<User>::iterator	Server::getUsersend(void)
+{
+	return (_users.end());
 }
 
 bool Server::channelExists(std::vector<unsigned char>& channel_name)

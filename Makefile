@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/15 15:38:14 by iguscett         ###   ########.fr        #
+#    Updated: 2023/02/27 11:51:26 by ghanquer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = ircserv
 
 INC_DIR =		./inc/
 OBJ_DIR = 		obj
-SRC_DIR	= 		./src/
+SRC_DIR	= 		./src
 
 INC =			$(addsuffix .hpp, $(addprefix $(INC_DIR), Server User Channel Command utils Numerics))
 

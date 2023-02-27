@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:40:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:17:05 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ class Server
 		void 							getParsedCmd();
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
+		std::list<User>::iterator		getUsersbg(void);
+		std::list<User>::iterator		getUsersend(void);
 		std::vector<Channel>			getChannel(void) const;
 		epoll_event &					getEv(void);
 		
@@ -76,7 +78,6 @@ class Server
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
 		void							sendto(int, std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
-		std::list<User>::iterator		getUsr(int);
 		bool							isUserInList(int);
 		
 		// Channels
@@ -93,6 +94,7 @@ class Server
 		Channel*						findChan(std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;
+		void							setBot(void);
 
 
 	private:
@@ -105,6 +107,7 @@ class Server
 		epoll_event					_ev;
 		std::vector<Channel>		_channels;
 		std::list<User>				_users;
+		User						_bot;
 
 		
 };

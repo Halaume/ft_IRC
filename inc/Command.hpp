@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 13:38:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:08:56 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ class Command
 		void									_fun_INVITE(Server &);
 		void									_fun_KILL(Server &);
 		void									_fun_RESTART(Server &);
-		void									_fun_PONG(Server &);
+		void									_fun_PONG(void);
 		void									_fun_NOTICE(Server &);
 
 		void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);

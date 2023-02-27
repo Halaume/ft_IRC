@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 18:23:35 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 11:38:25 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,8 @@ class User
 		void									setClient(std::vector<unsigned char>&);
 					
 		void 									setfd(int);
-		void									setNick(std::vector<unsigned char>&);
+		void									setNick(std::vector<unsigned char>);
 		void									setUserMask(std::vector<unsigned char>&);
-					
 		void									addChannel(Channel*);
 
 	private:
