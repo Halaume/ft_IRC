@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 15:18:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:35:25 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -398,22 +398,19 @@ void	Command::_fun_OPER(Server &my_server)
 		std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
 		if (itu == my_server.getUsers().end())
 		{
-			insert_all(ret, " ERR_PASSWMISMTCH\r\n");
-			this->_cmd_user->setRet(ret);
+			push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
 			return ;
 		}
 		else 
 		{
 			if (_parsedCmd[2] != my_server.getPassword())
 			{
-				insert_all(ret, " ERR_PASSWMISMTCH\r\n");
-				this->_cmd_user->setRet(ret);
+				push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
 				return ;
 			}
 		}
 	}
-	insert_all(ret, " ERR_PASSWMISMATCH\r\n");
-	this->_cmd_user->setRet(ret);
+	push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
 	return ;
 }
 
@@ -433,9 +430,6 @@ void	Command::_fun_MODE(Server &my_server)
 		this->_cmd_user->setRet(ret);
 		return ;
 	}
-	
-	
-	(void)my_server;
 }
 
 
