@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/23 18:34:54 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 16:12:48 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 
 void	free_fun(Server &my_server)
 {
+	for (std::list<User>::iterator it = my_server.getUsersbg(); it != my_server.getUsersend(); it++)
+		close(it->getfd());
 	close(my_server.getEpollfd());
 	close(my_server.getSct());
 }
