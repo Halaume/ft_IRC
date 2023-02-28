@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/26 22:49:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:54:37 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class User
 		void									setClient(std::vector<unsigned char>&);
 					
 		void 									setfd(int);
-		void									setNick(std::vector<unsigned char>&);
+		void									setNick(std::vector<unsigned char>);
 		void									setUserMask(std::vector<unsigned char>&);
 		void									setPassBeforeNickUser(int);
 					

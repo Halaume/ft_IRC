@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 21:37:33 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:26:33 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ void print_vector(std::string s, std::vector<unsigned char> v)
 
 void	free_fun(Server &my_server)
 {
+	for (std::list<User>::iterator it = my_server.getUsersbg(); it != my_server.getUsersend(); it++)
+		close(it->getfd());
 	close(my_server.getEpollfd());
 	close(my_server.getSct());
 }

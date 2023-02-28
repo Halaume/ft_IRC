@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 22:19:28 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:57:23 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 		add_to_vector(buf, ddots + server_name);
 	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
 	// print_vector(buf);
-	cmd.getRet().push_back(buf);
+	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 
 std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)

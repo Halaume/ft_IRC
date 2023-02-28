@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 22:56:19 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:59:26 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ class Server
 		std::vector<unsigned char>		getPasswd(void) const;
 		// User*							getUser(int fd);
 		void							getGobalCmd(Command*, std::vector<unsigned char>, int);
-		void 							getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
-		void 							getParsedCmd();
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
 		std::vector<Channel>			getChannel(void) const;
@@ -74,9 +72,8 @@ class Server
 
 		char **							getArgv(void) const;
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
-		void							sendto(int, std::vector<std::vector <unsigned char> >&);
+		void							sendto(int, std::vector <unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
-		std::list<User>::iterator		getUsr(int);
 		bool							isUserInList(int);
 		
 		// Channels
@@ -95,6 +92,7 @@ class Server
 		Channel*						findChan(std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;
+		void							setBot(void);
 
 		int								nbConnections(User &);
 
@@ -109,6 +107,7 @@ class Server
 		epoll_event					_ev;
 		std::vector<Channel>		_channels;
 		std::list<User>				_users;
+		User						_bot;
 
 		
 };

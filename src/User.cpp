@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/26 22:51:10 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:26:19 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,7 +254,7 @@ void User::setClient(std::vector<unsigned char>& client)
 	_client = client;
 }
 
-void User::setNick(std::vector<unsigned char>& nick)
+void User::setNick(std::vector<unsigned char> nick)
 {
 	_nick = nick;
 }

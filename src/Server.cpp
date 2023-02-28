@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 22:58:34 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 16:10:34 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,23 @@ Channel*	Server::findChan(std::vector<unsigned char> channel)
 	return (NULL);
 }
 
+void	Server::setBot(void)
+{
+	this->_bot = User();
+	Channel	botchan = Channel();
+
+	std::vector<unsigned char>	botvec = to_vector("bot");
+
+	this->_bot.setNick(botvec);
+	this->_bot.setRegistered(true);
+	this->_bot.setOperator(true);
+	this->_bot.setRealName(botvec);
+	this->_bot.setUserName(botvec);
+	botchan.setChanName(botvec);
+	this->_channels.push_back(botchan);
+	this->_bot.addChannel(this->findChan(botvec));
+}
+
 int	Server::init(char **argv)
 {
 	_sct = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -107,7 +124,8 @@ int	Server::init(char **argv)
 	_server.sin_port = htons(atoi(argv[1]));
 	if (_server.sin_port == 0)
 		return (close(_sct), std::cerr << "Error on port" << std::endl, 1);
-
+	int	oof = 1;
+	setsockopt(this->_sct, SOL_SOCKET, SO_REUSEADDR, &oof, sizeof(int));
 	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))
 		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
 	if (listen(_sct, 1000) == -1)
@@ -153,6 +171,8 @@ void Server::run(void)
 	std::vector<unsigned char>::iterator iter;
 	Command	cmd;
 
+	this->setBot();
+
 	while (true)
 	{	
 		unsigned char buf[BUFFER_SIZE] = "";
@@ -182,22 +202,24 @@ void Server::run(void)
 			{
 				try
 				{
-					// std::cerr << "2 : accepted fd:" << _events[k].data.fd << std::endl;
-					Usr = getUsr(_events[k].data.fd);
+					std::cerr << "2 : accepted fd:" << _events[k].data.fd << std::endl;
+					Usr = findUser(_events[k].data.fd);
 					std::vector<std::vector<unsigned char> > ParsedCommand;
 					switch (_events[k].events)
 					{
 						case EPOLLOUT:
 							std::cout << "OOOOOOO EVENT EPOLLOUT" << std::endl;
 							// print_vector("1.1", Usr->getCurrCmd());
-							sendto(Usr->getfd(), cmd.getRet());
+							sendto(Usr->getfd(), Usr->getRet());
+							cmd.getRet().clear();
+
 							
 							// print_vector("1.2", Usr->getCurrCmd());
-							_ev.events = EPOLLIN | EPOLLET;
-							_ev.data.fd = Usr->getfd();
-							Usr = getUsr(_events[k].data.fd);
+							Usr = findUser(_events[k].data.fd);
 							if (Usr == _users.end())
 							{
+								_ev.events = EPOLLIN | EPOLLET;
+								_ev.data.fd = Usr->getfd();
 								if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
 								{
 									close(_events[k].data.fd);
@@ -208,7 +230,6 @@ void Server::run(void)
 							}
 							ParsedCommand.clear();
 							Usr->clearRet();
-							cmd.getRet().clear();
 							cmd._globalCmd.clear();
 							CmdIt.clear();
 							shift = 0;
@@ -226,19 +247,19 @@ void Server::run(void)
 										{
 											if (j == 0 && cmd._globalCmd[j] == ' ')
 											{
-												while (j < cmd._globalCmd.size() -2 && cmd._globalCmd[j] == ' ')
+												while (j < cmd._globalCmd.size() - 2 && cmd._globalCmd[j] == ' ')
 													iv.push_back(cmd._globalCmd[j++]);
-												while (j < cmd._globalCmd.size() -2 && cmd._globalCmd[j] != ' ')
+												while (j < cmd._globalCmd.size() - 2 && cmd._globalCmd[j] != ' ')
 													iv.push_back(cmd._globalCmd[j++]);
 											}
 											else
 											{
-												while (j < cmd._globalCmd.size() -2 && cmd._globalCmd[j] == ' ')
+												while (j < cmd._globalCmd.size() - 2 && cmd._globalCmd[j] == ' ')
 													j++;
-												while (j < cmd._globalCmd.size() -2 && cmd._globalCmd[j] != ' ')
+												while (j < cmd._globalCmd.size() - 2 && cmd._globalCmd[j] != ' ')
 													iv.push_back(cmd._globalCmd[j++]);
 											}
-											if ((j == cmd._globalCmd.size() -2) || cmd._globalCmd[j] == ' ')
+											if ((j == cmd._globalCmd.size() - 2) || cmd._globalCmd[j] == ' ')
 											{
 												ParsedCommand.push_back(iv);
 												print_vector("PC", iv);
@@ -248,11 +269,18 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.getRet().clear();
-										cmd.answer(*this, *Usr); // NICK space space space does not give a ERR_NONICKNAME...
-										sendto(Usr->getfd(), cmd.getRet());
-										cmd._globalCmd.clear();
-										ParsedCommand.clear();
-										printUsersList();
+										if (cmd.answer(*this, *Usr) == 1)
+											break;
+										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), (Usr->getCurrCmdbg() + it + 1));
+										_ev.events = EPOLLIN | EPOLLET;
+										_ev.data.fd = Usr->getfd();
+										if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
+										{
+											epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
+											close(_events[k].data.fd);
+											if (Usr != _users.end())
+												_users.erase(Usr);
+										}
 									}
 								}
 								// break;
@@ -260,7 +288,7 @@ void Server::run(void)
 
 							_ev.events = EPOLLIN | EPOLLET;
 							_ev.data.fd = Usr->getfd();
-							Usr = getUsr(_events[k].data.fd);
+							Usr = findUser(_events[k].data.fd);
 							// if (Usr == _users.end())
 							// {
 							// 	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
@@ -289,10 +317,17 @@ void Server::run(void)
 									new_user.setOperator(true);
 								_users.push_back(new_user);
 							}
-							Usr = getUsr(_events[k].data.fd);
-							retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, 0);
-							std::cout << "----->>>>>>Retrec:" << retrec << std::endl;
-							if (retrec == BUFFER_SIZE)
+							Usr = findUser(_events[k].data.fd);
+							retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, MSG_DONTWAIT);
+							if (retrec <= 0)
+							{
+								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
+								close(_events[k].data.fd);
+								if (Usr != _users.end())
+									_users.erase(Usr);
+								break ;
+							}
+							else if (retrec == BUFFER_SIZE)
 							{
 								for (int i = 0; i < BUFFER_SIZE; i++)
 									v.push_back(buf[i]);
@@ -392,8 +427,8 @@ void Server::run(void)
 				catch (std::exception & e)
 				{
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
-					if (getUsr(_events[k].data.fd) != _users.end())
-						_users.erase(getUsr(_events[k].data.fd));
+					if (findUser(_events[k].data.fd) != _users.end())
+						_users.erase(findUser(_events[k].data.fd));
 					close(_events[k].data.fd);
 				}
 			}
@@ -401,23 +436,17 @@ void Server::run(void)
 	}
 }
 
-void Server::sendto(int fd, std::vector<std::vector<unsigned char> >& buf)
+void Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
-	std::vector<std::vector<unsigned char> >::size_type it;
-	
-	for (it = 0; it < buf.size(); it++)
-	{
-		ret = send(fd, reinterpret_cast<char *>(buf[it].data()), buf[it].size(), MSG_NOSIGNAL);
-		if (ret < 0)
-		{
-			// std::list<User>::iterator Usr = getUsr(fd);
-			// epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
-			// _users.erase(Usr);
-			// close(fd);
-			return;
-		}
-	}
+    ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
+    if (ret < 0)
+    {
+        std::list<User>::iterator Usr = findUser(fd);
+        epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
+        _users.erase(Usr);
+        close(fd);
+    }
 }
 
 std::list<User>::iterator Server::findUser(std::vector<unsigned char> nick)
@@ -479,16 +508,6 @@ void Server::printUsersList(void)
 
 // GETTERS
 
-std::list<User>::iterator	Server::getUsr(int fd)
-{
-	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
-	{
-		if (it->getfd() == fd)
-			return (it);
-	}
-	return (_users.end());
-}
-
 std::vector<Channel>	Server::getChannel(void) const
 {
 	return (_channels);
@@ -514,16 +533,6 @@ std::list<User> Server::getUsers(void) const
 	return (_users);
 }
 
-std::list<User>::iterator Server::getUsersbg(void)
-{
-	return (_users.begin());
-}
-
-std::list<User>::iterator Server::getUsersend(void)
-{
-	return (_users.end());
-}
-
 std::vector<unsigned char> Server::getPasswd(void) const
 {
 	return (_passwd);
@@ -537,6 +546,15 @@ std::vector<Channel>::iterator Server::getChannelsbg(void)
 std::vector<Channel>::iterator Server::getChannelsend(void)
 {
 	return (_channels.end());
+}
+
+std::list<User>::iterator	Server::getUsersbg(void)
+{
+	return (_users.begin());
+}
+std::list<User>::iterator	Server::getUsersend(void)
+{
+	return (_users.end());
 }
 
 bool Server::channelExists(std::vector<unsigned char>& channel_name)
@@ -613,42 +631,3 @@ epoll_event &	Server::getEv(void)
 {
 	return (_ev);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// void Server::getParsedCmd(Command* cmd, std::vector<unsigned char> v, std::vector<std::vector<unsigned char> >::size_type i)
-// {
-// 	std::vector<std::vector<unsigned char> >::size_type j;
-// 	bool is_last_space = false;
-	
-// 	v.clear();
-// 	cmd->_parsedCmd.clear();
-// 	for (j = 0; j < cmd->_globalCmd[i].size(); j++)
-// 	{	
-// 		if (!is_last_space && (cmd->_globalCmd[i][j] == ' ' || j == cmd->_globalCmd[i].size() - 2))
-// 		{
-// 			is_last_space = true;
-// 			cmd->_parsedCmd.push_back(v);
-// 			v.clear();
-// 		}
-// 		else if (cmd->_globalCmd[i][j] != ' ')
-// 		{
-// 			is_last_space = false;
-// 			v.push_back(cmd->_globalCmd[i][j]);
-// 		}
-// 	}
-// }

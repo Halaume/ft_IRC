@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 18:49:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 11:51:40 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,28 +251,14 @@ std::map<char, bool>::iterator Channel::getModesend(void)
 }
 
 // SETTERS
-void Channel::setChanName(std::vector<unsigned char>& chan_name)
+void Channel::setChanName(std::vector<unsigned char> chan_name)
 {
 	_chan_name = chan_name;
-}
-
-void Channel::setChanName(std::string& chan_name)
-{
-	_chan_name.clear();
-	for (std::string::size_type i = 0; i < chan_name.size(); i++)
-		_chan_name.push_back(chan_name[i]);
 }
 
 void Channel::setChanPassword(std::vector<unsigned char>& chan_password)
 {
 	_chan_password = chan_password;
-}
-
-void Channel::setChanPassword(std::string& chan_password)
-{
-	_chan_password.clear();
-	for (std::string::size_type i = 0; i < chan_password.size(); i++)
-		_chan_password.push_back(chan_password[i]);
 }
 
 void Channel::setNbUsersLimit(int nb_users_limit)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/26 22:42:42 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 15:30:37 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,12 @@ class Command
 		Command(const Command &copy);
 		~Command(void);
 		Command &	operator=(const Command & src);
-		
-		
+
+
 		void										setCommand(std::vector<std::vector<unsigned char> >);
 		void										setUser(User*);
 		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
-		// void										push_to_buf(int error);
-		
 		// Getters
 		std::vector<std::vector<unsigned char> >	getCommand(void) const;
 		User*										getCmdUser(void) const;
@@ -63,8 +61,7 @@ class Command
 		std::vector<std::vector<unsigned char> >&	getRet();
 		
 
-		// Setters
-	
+		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
 		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
@@ -96,7 +93,7 @@ class Command
 		void									_fun_INVITE(Server &);
 		void									_fun_KILL(Server &);
 		void									_fun_RESTART(Server &);
-		void									_fun_PONG(Server &);
+		void									_fun_PONG(void);
 		void									_fun_NOTICE(Server &);
 
 		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
