@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/26 22:42:09 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 23:06:23 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,25 @@ void	Command::setUser(User* usr)
 	_cmd_user = usr;
 }
 
-int Command::register_user(Server & my_server, User &user)
+int Command::register_user(Server &my_server, User &user)
 {
 	(void)my_server;
 	std::vector<unsigned char> v;
+	// std::vector<unsigned char> new_nick;
 	
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
 	{
 		user.setPassBeforeNickUser(PASS_CONNECTION_ERROR);
 		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
 	}
+	
+	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
+	if (itu != my_server.getUsersend())
+		std::cout << "SAAAAAAAAMMMEEE NAME OKKKKKKKK\n";
+	// 	return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
+
+	std::cout << "number of conenctions from user:" << my_server.nbConnections(user) << std::endl;// change to ip check?
+	
 	_cmd_user->setRegistered(true);
 	push_to_buf(RPL_WELCOME, *this, no_param);
 	push_to_buf(RPL_YOURHOST, *this, no_param);
@@ -107,17 +116,14 @@ int Command::_fun_NICK(Server &my_server, User &user)
 		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
-	if (_parsedCmd.size() < 2) // check if I enter only NICK after connection irssi must send "your nickname is..."
+	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
-	if (_cmd_user->isNickValid(_parsedCmd[1]) == false) // check ctrl+G
+	if (_cmd_user->isNickValid(_parsedCmd[1]) == false) // add ctrl+G to invalid chars
 		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param), 1);
-	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true)
-	{
-		if (!my_compare(_cmd_user->getNick(), _parsedCmd[1]))
-			return (0);
+	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
+			&& my_compare(_cmd_user->getNick(), _parsedCmd[1]))
 		return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
-	}
 	if (_cmd_user->getRegistered() == true)
 	{
 		push_to_buf(OWN_NICK_RPL, *this, _parsedCmd[1]);

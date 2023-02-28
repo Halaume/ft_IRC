@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 18:11:34 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 22:22:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@
 
 void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 
-// pimp intro message   
+// pimp intro message 
+// add nick of user to RPL_WELCOME?
 # define RPL_WELCOMEmsg(code, client)                       concat_resp(code, client,           to_vector(" :Welcome to gim irc\r\n"))
 # define RPL_YOURHOSTmsg(code, client, server_name)         concat_resp(code, client,           to_vector(" :Your host is " + server_name + ", running version 1.0\r\n"))
 # define RPL_CREATEDmsg(code, client, date_and_time)        concat_resp(code, client,           to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))

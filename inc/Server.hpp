@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/25 17:46:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 22:56:19 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,8 @@ class Server
 		Channel*						findChan(std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;
+
+		int								nbConnections(User &);
 
 
 	private:

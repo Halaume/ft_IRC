@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/26 23:21:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/27 22:58:34 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -549,6 +549,18 @@ bool Server::channelExists(std::vector<unsigned char>& channel_name)
 			return (true);
 	}
 	return (false);
+}
+
+int Server::nbConnections(User &user)
+{
+	int nb = 0;
+	
+	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
+	{
+		if (it->getUserMask() == user.getUserMask())
+			nb++;
+	}
+	return (nb);
 }
 
 std::ostream & operator<<( std::ostream & o, Server & i)
