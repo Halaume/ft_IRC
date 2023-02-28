@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/21 17:15:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 14:57:15 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,12 @@ std::vector<unsigned char> push_to_buf(int error, Command &cmd, std::vector<unsi
 	// }
 	add_to_vector(buf, numeric_response(error, cmd, server_name, param));
 
-	std::vector<unsigned char>::size_type m;
+	//std::vector<unsigned char>::size_type m;
 	std::cout << "2:\n";
-	for (m = 0; m < buf.size(); m++)
-		std::cout << buf[m];
+	// for (m = 0; m < buf.size(); m++)
+	// 	std::cout << buf[m];
 	std::cout << "\n";
+	cmd.getCmdUser()->setRet(buf);
 
 	return (buf);
 }
