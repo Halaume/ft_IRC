@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:57:23 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 17:32:36 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 	else
 		add_to_vector(buf, ddots + server_name);
 	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
-	// print_vector(buf);
 	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 
@@ -80,7 +79,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_NICKNAMEINUSE:
 		{
-			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, cmd.getCmdUser()->getClient(), cmd.getParsedCmd()[1]));
+			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, cmd.getCmdUser()->getClient(), param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{

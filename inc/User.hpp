@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:54:37 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 19:03:59 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,14 @@
 #include <vector>
 
 #include "Channel.hpp"
+#include "Server.hpp"
 
 #define PASSWORD_NOT_SET	0
 #define PASSWORD_SET		1
 
 class Channel;
+
+class Server;
 
 class User
 {
@@ -79,9 +82,9 @@ class User
 		void 									setfd(int);
 		void									setNick(std::vector<unsigned char>);
 		void									setUserMask(std::vector<unsigned char>&);
-		void									setPassBeforeNickUser(int);
-					
+		void									setPassBeforeNickUser(int);					
 		void									addChannel(Channel*);
+		int										createNewNick(Server &my_server);
 
 	private:
 		int							_fd;

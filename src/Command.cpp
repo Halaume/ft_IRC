@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:48:18 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 19:05:10 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,25 +56,29 @@ void	Command::setUser(User* usr)
 	_cmd_user = usr;
 }
 
+/*''''''''''''''''''''''''''''''''''''
+				Register
+''''''''''''''''''''''''''''''''''''''*/
 int Command::register_user(Server &my_server, User &user)
 {
 	(void)my_server;
+	(void)user;
 	std::vector<unsigned char> v;
-	// std::vector<unsigned char> new_nick;
 	
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
 	{
 		user.setPassBeforeNickUser(PASS_CONNECTION_ERROR);
 		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
 	}
-	
-	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
-	if (itu != my_server.getUsersend())
-		std::cout << "SAAAAAAAAMMMEEE NAME OKKKKKKKK\n";
-	// 	return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
-
-	std::cout << "number of conenctions from user:" << my_server.nbConnections(user) << std::endl;// change to ip check?
-	
+	v = _cmd_user->getNick();
+	std::list<User>::iterator itu = my_server.findUserNick(_cmd_user->getNick());
+	if (itu->getUserMask() != _cmd_user->getUserMask())
+		return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
+	if (my_server.nbConnectionsWithSameNick(*_cmd_user) > 1)
+	{
+		if (_cmd_user->createNewNick(my_server) == 1)
+			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
+	}
 	_cmd_user->setRegistered(true);
 	push_to_buf(RPL_WELCOME, *this, no_param);
 	push_to_buf(RPL_YOURHOST, *this, no_param);
@@ -128,11 +132,11 @@ int Command::_fun_NICK(Server &my_server, User &user)
 		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
-	if (_parsedCmd.size() < 2)
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
-	if (_cmd_user->isNickValid(_parsedCmd[1]) == false) // add ctrl+G to invalid chars
-		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param), 1);
+	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
+		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1);
 	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
 			&& my_compare(_cmd_user->getNick(), _parsedCmd[1]))
 		return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
@@ -143,7 +147,7 @@ int Command::_fun_NICK(Server &my_server, User &user)
 	}
 	_cmd_user->setNick(_parsedCmd[1]);
 	if (user.getPassBeforeNickUser() == PASS_USER_OK)
-		return (register_user(my_server, user)); // si pas encore enregistré ajouter _ 1 2 etc pour permettre
+		return (register_user(my_server, user));
 	else
 		user.setPassBeforeNickUser(PASS_NICK_OK);
 	return (to_send);
@@ -174,7 +178,7 @@ int Command::_fun_USER(Server &my_server, User &user)
 		_cmd_user->setRealName(real_name);
 		_cmd_user->setUserMask(_parsedCmd[3]);
 		if (user.getPassBeforeNickUser() == PASS_NICK_OK)
-			return (register_user(my_server, user)); // to finish -> same user name/mask and nick -> iterate nick -> set a limit of connections?
+			return (register_user(my_server, user));
 		else
 			user.setPassBeforeNickUser(PASS_USER_OK);
 	}

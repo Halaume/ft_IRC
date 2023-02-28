@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:19 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 19:39:32 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
+#include "../inc/Server.hpp"
 
 # define WAITING_FOR_PASS 0
 # define PASS_ORDER_OK 1
@@ -297,6 +298,50 @@ void	User::clearCurrCmd(void)
 void	User::clearRet(void)
 {
 	_ret.clear();
+}
+
+int User::createNewNick(Server &my_server)
+{
+	std::vector<unsigned char> nick_mem;
+	std::vector<unsigned char> num;
+	std::vector<unsigned char>::size_type pos;
+	int it = 1;
+	std::vector<unsigned char>::size_type numit;
+	int lastnum = 1;
+	(void)pos;
+	(void)numit;
+
+	num = _nick;
+	if (_nick.size() == 9)
+		_nick[8] = '_';
+	else
+		_nick.push_back('_');
+	if (my_server.nbConnectionsWithSameNick(*this) == 1)
+		return (0);
+	_nick = num;
+	nick_mem = _nick;
+	while (my_server.nbConnectionsWithSameNick(*this) > 1 && lastnum < 9999)
+	{
+		_nick = nick_mem;
+		num.clear();
+		num = numToVec(it++);
+		if (_nick.size() + num.size() > 9)
+			pos = _nick.size() - num.size();
+		else
+			pos = _nick.size();
+		numit = 0;
+		for (std::vector<unsigned char>::size_type p = 0; p < 9; p++)
+		{
+			if (p >= pos && p < _nick.size())
+				_nick[p] = num[numit++];
+			else if (p >= pos && p >= _nick.size() && numit < num.size())
+				_nick.push_back(num[numit++]);
+		}
+		lastnum++;
+	}
+	if (lastnum == 9999)
+		return (1);
+	return (0);
 }
 
 void	User::insertcmd(std::vector<unsigned char> & vec)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:55 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 18:06:16 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,5 @@ std::vector<unsigned char>                  server_response(std::string client, 
 
 int                                        reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
 
+std::vector<unsigned char>                 numToVec(int);
 #endif

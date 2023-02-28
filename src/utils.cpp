@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:33 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 18:35:41 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -294,6 +294,20 @@ bool isValidCharacter(unsigned char c)
 		(c == '|'))
 		return (true);
 	return (false);
+}
+
+std::vector<unsigned char> numToVec(int num)
+{
+	std::vector<unsigned char> v;
+	
+	while (num > 0)
+	{
+		v.push_back('0' + num % 10);
+		num /= 10;
+	}
+	for (std::vector<unsigned char>::size_type i = 0; i < v.size() / 2; i++)
+        std::swap(v[i], v[v.size() - i - 1]);
+	return (v);
 }
 
 std::vector<unsigned char> concat_real_name(std::vector<unsigned char> cmd)
