@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:37:01 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:29:45 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ class Channel
 			void						addUser(User *, Server&);
 			void						addUser(User *, Server&, std::vector<unsigned char>);
 			bool						isOp(User *) const;
-			void						delUser(int);
 			bool      					isOp(User usr) const;
+			void						delUser(int);
 			std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
 
 	private:

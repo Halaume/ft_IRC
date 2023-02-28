@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 15:57:06 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/20 17:29:25 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,35 +68,6 @@ Channel &	Channel::operator=(const Channel & src)
 	return (*this);
 }
 
-bool	Channel::operator!=(const Channel & lhs) const
-{
-	return (this->_chanName != lhs._chanName);
-}
-
-std::vector<unsigned char>	 Channel::getTopic(void) const
-{
-	return (this->_topic);	
-}
-
-std::map<char, bool>		 Channel::getModes(void) const
-{
-	return (this->_modes);
-}
-
-void        Channel::setTopic(std::vector<unsigned char> topic)
-{
-	this->_topic = topic;
-}
-
-bool    Channel::isOp(User usr) const
-{
-    for (std::list<User *>::const_iterator it = _opList.begin(); it != _opList.end(); it++)
-    {
-		if (**it == usr)
-            return (true);
-	}
-    return (false);
-}
 
 void Channel::addUser(User * newUser, Server &my_server)
 {
@@ -215,12 +186,43 @@ std::list<User *> Channel::getUsers(void) const
 	return (_userLst);
 }
 
+bool	Channel::operator!=(const Channel & lhs) const
+{
+	return (this->_chanName != lhs._chanName);
+}
+
+std::vector<unsigned char>	 Channel::getTopic(void) const
+{
+	return (this->_topic);	
+}
+
+std::map<char, bool>		 Channel::getModes(void) const
+{
+	return (this->_modes);
+}
+
+void        Channel::setTopic(std::vector<unsigned char> topic)
+{
+	this->_topic = topic;
+}
+
+
 bool	Channel::isOp(User *usr) const
 {
 	for (std::list<User *>::const_iterator it = this->_opList.begin(); it != this->_opList.end(); it++)
 		if (*it == usr)
 			return (true);
 	return (false);
+}
+
+bool    Channel::isOp(User usr) const
+{
+    for (std::list<User *>::const_iterator it = _opList.begin(); it != _opList.end(); it++)
+    {
+		if (**it == usr)
+            return (true);
+	}
+    return (false);
 }
 
 std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
