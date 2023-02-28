@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 13:38:34 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/28 14:10:48 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,9 +281,14 @@ void Server::run(void)
 								_users.push_back(new_user);
 							}
 							Usr = findUser(_events[k].data.fd);
-							retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, 0);
+							retrec = recv(Usr->getfd(), buf, BUFFER_SIZE, MSG_DONTWAIT);
 							if (retrec <= 0)
 							{
+								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
+								close(_events[k].data.fd);
+								if (Usr != _users.end())
+									_users.erase(Usr);
+								break ;
 							}
 							else if (retrec == BUFFER_SIZE)
 							{
