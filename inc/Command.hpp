@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:30:37 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 19:47:52 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,9 @@ class Command
 		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		int											register_user(Server &, User &);	
+		int											register_user(Server &);	
 		
-		int											answer(Server &, User &);
+		int											answer(Server &);
 
 
 		
@@ -79,10 +79,10 @@ class Command
 		std::vector<std::vector<unsigned char> > _ret;
 
 		
-		int										_fun_PASS(Server &, User &);
-		int										_fun_NICK(Server &, User &);
-		int										_fun_USER(Server &, User &);
-		void									_fun_JOIN(Server &);
+		int										_fun_PASS(Server &);
+		int										_fun_NICK(Server &);
+		int										_fun_USER(Server &);
+		int										_fun_JOIN(Server &);
 		void									_fun_PRIVMSG(Server &);
 		void									_fun_OPER(Server &);
 		void									_fun_QUIT(Server &);

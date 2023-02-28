@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 19:05:10 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 20:02:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,15 +59,14 @@ void	Command::setUser(User* usr)
 /*''''''''''''''''''''''''''''''''''''
 				Register
 ''''''''''''''''''''''''''''''''''''''*/
-int Command::register_user(Server &my_server, User &user)
+int Command::register_user(Server &my_server)
 {
 	(void)my_server;
-	(void)user;
 	std::vector<unsigned char> v;
 	
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
 	{
-		user.setPassBeforeNickUser(PASS_CONNECTION_ERROR);
+		_cmd_user->setPassBeforeNickUser(PASS_CONNECTION_ERROR);
 		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
 	}
 	v = _cmd_user->getNick();
@@ -102,7 +101,7 @@ void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan
 /*''''''''''''''''''''''''''''''''''''
 				PASS TODO:exit and close connection when password mismatches on registration?
 ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_PASS(Server &my_server, User &user)
+int Command::_fun_PASS(Server &my_server)
 {
 	std::cout << ">>>>>>>> PASS OK\n";
 	(void)my_server;
@@ -114,22 +113,22 @@ int Command::_fun_PASS(Server &my_server, User &user)
 		return (push_to_buf(ERR_ALREADYREGISTERED, *this, no_param), 1);
 	_cmd_user->setPasswd(_parsedCmd[1]);
 	_cmd_user->setPassStatus(PASSWORD_SET);
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
-		user.setPassBeforeNickUser(PASS_ORDER_OK);
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_OK);
 	return (0);
 }
 
 /*''''''''''''''''''''''''''''''''''''
 				NICK
 ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_NICK(Server &my_server, User &user)
+int Command::_fun_NICK(Server &my_server)
 {
 	std::vector<unsigned char> ret;
 	int to_send = 0;
 	
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
 	{
-		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
 	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
@@ -146,23 +145,23 @@ int Command::_fun_NICK(Server &my_server, User &user)
 		to_send = 1;
 	}
 	_cmd_user->setNick(_parsedCmd[1]);
-	if (user.getPassBeforeNickUser() == PASS_USER_OK)
-		return (register_user(my_server, user));
+	if (_cmd_user->getPassBeforeNickUser() == PASS_USER_OK)
+		return (register_user(my_server));
 	else
-		user.setPassBeforeNickUser(PASS_NICK_OK);
+		_cmd_user->setPassBeforeNickUser(PASS_NICK_OK);
 	return (to_send);
 }
 
 // /*''''''''''''''''''''''''''''''''''''
 // 				USER
 // ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_USER(Server &my_server, User &user)
+int Command::_fun_USER(Server &my_server)
 {
 	std::vector<unsigned char> ret;
 	
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
 	{
-		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
 	if (_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
@@ -177,54 +176,34 @@ int Command::_fun_USER(Server &my_server, User &user)
 		_cmd_user->setUserName(_parsedCmd[1]);
 		_cmd_user->setRealName(real_name);
 		_cmd_user->setUserMask(_parsedCmd[3]);
-		if (user.getPassBeforeNickUser() == PASS_NICK_OK)
-			return (register_user(my_server, user));
+		if (_cmd_user->getPassBeforeNickUser() == PASS_NICK_OK)
+			return (register_user(my_server));
 		else
-			user.setPassBeforeNickUser(PASS_USER_OK);
+			_cmd_user->setPassBeforeNickUser(PASS_USER_OK);
 	}
 	return (0);
 }
 
-void Command::_fun_JOIN(Server &my_server)
+int Command::_fun_JOIN(Server &my_server)
 {
 	(void)my_server;
 	std::vector<std::vector<unsigned char> > channels;
 	std::vector<std::vector<unsigned char> > keys;
-	// std::vector<std::vector<unsigned char> > keys;
-	
-	//RFC 2813/4.2.1
-	/*Numeric Replies:
-	ERR_NEEDMOREPARAMS		OK
-	ERR_BANNEDFROMCHAN		OK
-	ERR_INVITEONLYCHAN		OK
-	ERR_BADCHANNELKEY		OK
-	ERR_CHANNELISFULL		OK
-	ERR_BADCHANMASK			OK
-	ERR_NOSUCHCHANNEL		OK	
-	ERR_TOOMANYCHANNELS		OK
-	RPL_TOPIC*/
-	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
-
 
 	if (_parsedCmd.size() < 2)
-	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param); // sendto
-		return ;
-	}
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
 	if (_parsedCmd.size() > 2)
 		reparseChannelsKeys(_parsedCmd[2], &keys);
 	std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
 	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
 	{
-		
 		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
-			push_to_buf(ERR_BADCHANMASK, *this, channels[it]);
+			return (push_to_buf(ERR_BADCHANMASK, *this, channels[it]), 1);
 		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-			push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
+			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
-
 			Channel new_channel(channels[it]);
 			new_channel.addUser(&(*_cmd_user));
 			my_server.addNewChannel(new_channel);
@@ -232,31 +211,31 @@ void Command::_fun_JOIN(Server &my_server)
 		}
 		else
 		{
-			// protect findchan
-			if (my_server.findChan(channels[it]) == NULL)
-				push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]); // sendto
+			if (my_server.findChan(channels[it]) == NULL) // protect findchan
+				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
 			else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
 			{
-				// user is already in channel -> not sure about this one -> del?
+				// user is already in channel do nothing
 			}
-			else if (my_server.findChan(channels[it])->getMode('k') == true // check if channel mode k
+			else if (my_server.findChan(channels[it])->getMode('k') == true
 				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
-				push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]); // sendto
-			else if (my_server.findChan(channels[it])->getMode('l') == true // check if channel mode l
+				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
+			else if (my_server.findChan(channels[it])->getMode('l') == true
 				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
-				push_to_buf(ERR_CHANNELISFULL, *this, channels[it]);
+				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
 			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
+				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
 				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
-				push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]);
+				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
 			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
-				push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]);
+				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
 			else
 				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
 		}
 	}
+	return (0);
 }
 
 void	Command::_fun_QUIT(Server &my_server)
@@ -647,11 +626,11 @@ void	Command::_fun_NOTICE(Server &my_server)
 }
 
 
-int Command::answer(Server &my_server, User &user)
+int Command::answer(Server &my_server)
 {
     std::cout << "___Command\n";
     print_vector2("Answer", _parsedCmd);
-    if (user.getPassBeforeNickUser() == PASS_ORDER_ERROR || user.getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+    if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR || _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
         return (0);
     std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
     int i = 0;
@@ -662,13 +641,16 @@ int Command::answer(Server &my_server, User &user)
     switch (i)
     {
         case 0:
-            return (_fun_PASS(my_server, user));
+            return (_fun_PASS(my_server));
             break;
         case 1:
-            return (_fun_NICK(my_server, user));
+            return (_fun_NICK(my_server));
             break;
         case 2:
-            return (_fun_USER(my_server, user));
+            return (_fun_USER(my_server));
+            break;
+		case 3:
+            return (_fun_JOIN(my_server));
             break;
         default:
             return (0);

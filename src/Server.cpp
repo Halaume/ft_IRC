@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 19:39:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/02/28 19:42:44 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ void Server::run(void) // checker le nombre de connexions max?
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.getRet().clear();
-										if (cmd.answer(*this, *Usr) == 1)
+										if (cmd.answer(*this) == 1)
 											break;
 										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), (Usr->getCurrCmdbg() + it + 1));
 										_ev.events = EPOLLIN | EPOLLET;
@@ -381,7 +381,7 @@ void Server::run(void) // checker le nombre de connexions max?
 										std::cout << "----------------------\n---   IN FDuser " << Usr->getfd() << "cmd:    ------\n";
 										print_vector2("2.2", cmd.getParsedCmd());
 										cmd.getRet().clear();
-										if (cmd.answer(*this, *Usr) == 1)
+										if (cmd.answer(*this) == 1)
 										{
 											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), iter);
 											std::cout << "--------> GO TO POLLOUT\n";
