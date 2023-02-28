@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 15:25:54 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/28 13:38:34 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,8 @@ int	Server::init(char **argv)
 	_server.sin_port = htons(atoi(argv[1]));
 	if (_server.sin_port == 0)
 		return (close(_sct), std::cerr << "Error on port" << std::endl, 1);
-
+	int	oof = 1;
+	setsockopt(this->_sct, SOL_SOCKET, SO_REUSEADDR, &oof, sizeof(int));
 	if (bind(_sct, (sockaddr *)(&_server), sizeof(_server)))
 		return (close(_sct), std::cerr << "Error connecting socket" << std::endl, 1);
 	if (listen(_sct, 1000) == -1)
