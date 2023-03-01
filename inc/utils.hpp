@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 16:39:38 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 23:02:04 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include <vector>
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
+#include "../inc/User.hpp"
 #include <string>
 
 std::string                                 itos(int n);
@@ -32,14 +34,16 @@ void                                        add_to_vector(std::vector<unsigned c
 // void                                        add_to_vector(std::vector<unsigned char>& v, std::string& str);
 void                                        add_to_vector(std::vector<unsigned char>&, std::vector<unsigned char>);
 std::vector<unsigned char>                  add_to_v(std::vector<unsigned char> v, std::string str);
-std::vector<unsigned char>                  add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 void                                        add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str);
+void                                        add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2);
 
 
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3);
+
 
 std::vector<unsigned char>                  concat_nick_rpl(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 bool                                        isValidCharacter(unsigned char);
@@ -55,6 +59,10 @@ std::vector<unsigned char>                  server_response(std::string, std::st
 int                                         reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
     
 std::vector<unsigned char>                  numToVec(int);
+
+std::vector<unsigned char>                  rpl_topic(std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  rpl_name(Channel *);
+
     
 bool                                        contains_ctrl_g(std::vector<unsigned char> v);
 

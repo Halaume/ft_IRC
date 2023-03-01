@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 15:06:14 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 21:10:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,6 @@ class User
 		std::vector<Channel *>::iterator		getChannelsend(void);
 		std::vector<unsigned char>::iterator	getCurrCmdbg(void);
 		std::vector<unsigned char>::iterator	getCurrCmdend(void);
-		std::vector<unsigned char>&				getAllCmd(void);
-		std::vector<unsigned char>::iterator	getAllCmdbg(void);
-		std::vector<unsigned char>::iterator	getAllCmdend(void);
 		int										getfd(void) const;
 		int										getPassStatus(void) const;
 		bool									getRegistered(void) const;
@@ -58,7 +55,6 @@ class User
 		std::vector<unsigned char>				getNick(void) const;
 		int										getNbChan(void);
 		std::vector<unsigned char>				getUserMask(void) const;
-		std::vector<unsigned char>				getUserNickNameMask(void) const;
 		int										getPassBeforeNickUser(void) const;
 		
 		void									setPassStatus(int);
@@ -71,8 +67,8 @@ class User
 		std::vector<unsigned char> &			getRet(void);
 		bool									getOperator(void) const;
 		void									setOperator(bool);
+		std::vector<unsigned char>				getClient();
 		void									insertcmd(std::vector<unsigned char> &);
-		void									insertAllCmd(std::vector<unsigned char> &);
 		void									clearCurrCmd(void);
 		void									clearRet(void);
 		void 									setfd(int);
@@ -96,7 +92,6 @@ class User
 		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 		std::vector<unsigned char>	_user_mask;
 		int							_pass_before_nick_user;
-		std::vector<unsigned char>	_allCmd;
 };
 
 std::ostream &		operator<<( std::ostream & o, User const & i);

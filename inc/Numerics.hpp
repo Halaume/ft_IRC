@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 15:58:59 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 22:22:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,10 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define RPL_YOURHOSTmsg(code, nick, server_name)         concat_resp(code, nick,           to_vector(" :Your host is " + server_name + ", running version 1.0\r\n"))
 # define RPL_CREATEDmsg(code, nick, date_and_time)        concat_resp(code, nick,           to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))
 # define RPL_MYINFOmsg(code, nick, server_name)           concat_resp(code, nick,           to_vector(" :" + server_name + " 1.0\r\n")) // add user modes and channel modes
-    
+
+# define RPL_TOPICmsg(code, nick, channel_and_topic)      concat_resp(code, nick, channel_and_topic)
+# define RPL_NAMREPLYmsg(code, nick, all_the_rest)        concat_resp(code, nick, all_the_rest)
+
 # define ERR_NOSUCHCHANNELmsg(code, nick, channel)        concat_resp(code, nick, channel,  to_vector(" :No such channel\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, nick, channel)      concat_resp(code, nick, channel,  to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code, nick)               concat_resp(code, nick,           to_vector(" :No nickname given\r\n"))
@@ -46,8 +49,9 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
 # define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)  concat_nick_rpl(nick, user_name, mask, nickold)
+# define JOINED_CHANNELmsg(client, channel)               concat_resp(client, to_vector("JOIN"), channel)
 
-
+// # define JOINED_CHANNELmsg(client, channel)               concat_resp(client, to_vector("JOIN"), add_to_vector(channel, static_cast<std::string>("\r\n")))
 // class Command;
 
 enum numerics {
@@ -55,6 +59,9 @@ enum numerics {
     RPL_YOURHOST            = 2,
     RPL_CREATED             = 3,
     RPL_MYINFO              = 4,
+    
+    RPL_TOPIC               = 332,
+    RPL_NAMREPLY            = 353,
     
     ERR_NOSUCHCHANNEL       = 403,
     ERR_TOOMANYCHANNELS     = 405,
@@ -71,7 +78,8 @@ enum numerics {
     ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476,
 
-    OWN_NICK_RPL            = 1000
+    OWN_NICK_RPL            = 1000,
+    JOINED_CHANNEL          = 1001
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);

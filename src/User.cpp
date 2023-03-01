@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 16:06:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 21:14:21 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ _user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nic
 
 User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
 _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
-_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user), _allCmd(copy._allCmd)
+_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
 {
 }
 
@@ -61,7 +61,6 @@ User& User::operator=(const User & src)
     _channels = src._channels;
 	_user_mask = src._user_mask;
 	_currCmd = src._currCmd;
-	_allCmd = src._allCmd;
 	return (*this);
 }
 
@@ -126,11 +125,6 @@ std::vector<unsigned char>&	User::getCurrCmd(void)
 	return (_currCmd);
 }
 
-std::vector<unsigned char>&	User::getAllCmd(void)
-{
-	return (_allCmd);
-}
-
 int User::getPassBeforeNickUser(void) const
 {
 	return (_pass_before_nick_user);
@@ -154,16 +148,6 @@ std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
 std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
 {
 	return (_currCmd.end());
-}
-
-std::vector<unsigned char>::iterator	User::getAllCmdbg(void)
-{
-	return (_allCmd.begin());
-}
-
-std::vector<unsigned char>::iterator	User::getAllCmdend(void)
-{
-	return (_allCmd.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const
@@ -226,7 +210,7 @@ std::vector<unsigned char> User::getUserMask(void) const
 	return (_user_mask);
 }
 
-std::vector<unsigned char> User::getUserNickNameMask(void) const
+std::vector<unsigned char> User::getClient(void)
 {
 	std::vector<unsigned char> ret;
 	std::vector<unsigned char>::size_type it;
@@ -332,11 +316,6 @@ int User::createNewNick(Server &my_server)
 void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
-}
-
-void	User::insertAllCmd(std::vector<unsigned char> & vec)
-{
-	_allCmd.insert(_allCmd.end(), vec.begin(), vec.end());
 }
 
 std::ostream &		operator<<( std::ostream & o, User const & i)

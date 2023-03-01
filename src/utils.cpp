@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 16:48:05 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 23:02:09 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <string.h>
 #include <unistd.h>
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
+#include "../inc/User.hpp"
 
 void print_vector(std::string s, std::vector<unsigned char> v)
 {
@@ -94,14 +96,10 @@ std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
 	return (ret);
 }
 
-std::vector<unsigned char> add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+void add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2)
 {
-	std::vector<unsigned char> ret;
-	
-	ret = v1;
 	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
 		v1.push_back(v2[i]);
-	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
@@ -204,7 +202,21 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
-
+std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v3.size(); i++)
+		ret.push_back(v3[i]);
+	return (ret);
+}
 
 void print_vector2(std::string s, std::vector<std::vector<unsigned char> > v)
 {
@@ -417,4 +429,44 @@ bool contains_ctrl_g(std::vector<unsigned char> v)
 			return (true);
 	}
 	return (false);
+}
+
+std::vector<unsigned char> rpl_topic(std::vector<unsigned char> channel, std::vector<unsigned char> topic)
+{
+	std::vector<unsigned char> ret;
+	
+	add_to_vector(ret, static_cast<std::string>(" "));
+	add_to_v(ret, channel);
+	add_to_vector(ret, static_cast<std::string>(" :"));
+	add_to_v(ret, topic);
+	add_to_vector(ret, static_cast<std::string>("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> rpl_name(Channel *channel)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char> v;
+	
+	ret.push_back(' ');
+	if (channel->getMode('s') == true)
+		ret.push_back('@');
+	else
+		ret.push_back('=');
+	ret.push_back(' ');
+	v = channel->getChanName();
+	add_to_v(ret, v);
+	add_to_vector(ret, static_cast<std::string>(" :"));	
+	for (std::list<User *>::iterator it = channel->getUserListbg(); it != channel->getUserListend();)
+	{
+		v.clear();
+		v = (*it)->getNick();
+		if (channel->isOp(*it) == true)
+			ret.push_back('@');
+		add_to_v(ret, v);
+		if (++it != channel->getUserListend())
+			ret.push_back(' ');
+	}
+	add_to_vector(ret, static_cast<std::string>("\r\n"));
+	return (ret);
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 18:55:57 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 23:02:41 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ _ban_list(), _nb_users_limit(), _invite_list(), _topic()
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::Channel(std::vector<unsigned char> name, std::vector<unsigned char> password): _chan_name(name), \
@@ -73,6 +74,7 @@ _chan_password(password), _op_list(), _user_list(), _nb_users_limit(), _invite_l
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::~Channel(void)
@@ -87,29 +89,29 @@ Channel::~Channel(void)
 	_topic.erase(_topic.begin(), _topic.end());
 }
 
-Channel &	Channel::operator=(const Channel & src)
+Channel& Channel::operator=(const Channel & src)
 {
 	if (&src == this)
 		return (*this);
 	return (*this);
 }
 
-bool	Channel::operator!=(const Channel & lhs) const
+bool Channel::operator!=(const Channel & lhs) const
 {
 	return (this->_chan_name != lhs._chan_name);
 }
 
-std::vector<unsigned char>	 Channel::getTopic(void) const
+std::vector<unsigned char>& Channel::getTopic(void)
 {
-	return (this->_topic);	
+	return (_topic);	
 }
 
-std::map<char, bool>		 Channel::getModes(void) const
+std::map<char, bool> Channel::getModes(void) const
 {
-	return (this->_modes);
+	return (_modes);
 }
 
-void        Channel::setTopic(std::vector<unsigned char> topic)
+void Channel::setTopic(std::vector<unsigned char> topic)
 {
 	this->_topic = topic;
 }
@@ -123,11 +125,13 @@ bool    Channel::isOp(User usr) const
 	}
     return (false);
 }
-
-void Channel::addUser(User * new_user)
+	
+void Channel::addUser(User *user)
 {
-	_user_list.push_back(new_user);
-	new_user->addChannel(this);
+	if (_user_list.size() == 0)
+		_op_list.push_back(user);
+	_user_list.push_back(user);
+	user->addChannel(this);
 }
 
 void	Channel::delUser(int fd)
@@ -228,6 +232,13 @@ int Channel::getNbUsers(void)
 int Channel::getNbUsersLimit(void)
 {
 	return (_nb_users_limit);
+}
+
+void Channel::makeOp(User *user)
+{
+	if (user == NULL)
+		return;
+	_op_list.push_back(user);
 }
 
 bool	Channel::isOp(User *usr) const

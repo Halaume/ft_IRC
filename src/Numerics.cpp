@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 15:15:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 22:22:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 	std::string server_name = "mig.42.fr";
 	std::string ddots = ":";
 	
-	if (code == OWN_NICK_RPL)
+	if (code == OWN_NICK_RPL || code == JOINED_CHANNEL)
 		add_to_vector(buf, ddots);
 	else
 		add_to_vector(buf, ddots + server_name);
@@ -60,6 +60,14 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case RPL_MYINFO:
 		{
 			return (RPL_MYINFOmsg(RPL_MYINFO, cmd.getCmdUser()->getNick(), server_name));
+		}
+		case RPL_TOPIC:
+		{
+			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_NAMREPLY:
+		{
+			return (RPL_NAMREPLYmsg(RPL_NAMREPLY, cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NOSUCHCHANNEL:
 		{
@@ -116,6 +124,12 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case OWN_NICK_RPL:
 		{
 			return (OWN_NICK_RPLmsg(cmd.getCmdUser()->getNick(), cmd.getCmdUser()->getUserName(),cmd.getCmdUser()->getUserMask(), param));
+		}
+		case JOINED_CHANNEL:
+		{
+			std::vector<unsigned char> channel = param;
+			add_to_vector(channel, static_cast<std::string>("\r\n"));
+			return (JOINED_CHANNELmsg(cmd.getCmdUser()->getClient(), channel));
 		}
 	}
 

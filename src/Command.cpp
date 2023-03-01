@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 18:58:34 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 23:03:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,6 +186,7 @@ int Command::_fun_JOIN(Server &my_server)
 	(void)my_server;
 	std::vector<std::vector<unsigned char> > channels;
 	std::vector<std::vector<unsigned char> > keys;
+	std::vector<unsigned char> param;
 
 	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
@@ -202,10 +203,19 @@ int Command::_fun_JOIN(Server &my_server)
 		else if (my_server.channelExists(channels[it]) == false)
 		{
 			Channel new_channel(channels[it]);
-			new_channel.addUser(&(*_cmd_user));
+			new_channel.addUser(_cmd_user);
 			my_server.addNewChannel(new_channel);
-			push_to_buf(JOINED_CHANNEL, _channels[it]); ////////////////////////////////////////////////////////////////////////////////////////////////////////// HERE
-			// send messages to accept user RPL
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			if (my_server.findChan(channels[it]) == NULL)
+				return (0);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			//////////////////////////////////////////////////////////// here
+			// do RPL end of names
+			
+			return (1);
 		}
 		else
 		{
@@ -265,6 +275,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	Channel*								chan;
 	bool									is_op = false;
 
+	chan = NULL;
 	if (dest[0] != '#')
 	{
 		for (it = it + 1; it != dest.end(); it++)
