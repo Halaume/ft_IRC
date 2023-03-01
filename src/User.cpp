@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 19:39:32 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 16:06:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,21 @@
 # define PASS_CONNECTION_ERROR 4
 
 User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
-	_client.push_back('*');
 	_nick.push_back('*');
 }
 
 User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
-	_client.push_back('*');
 	_nick.push_back('*');
 }
 
 User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
-_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), \
+_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
 _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user), _allCmd(copy._allCmd)
 {
 }
@@ -60,7 +58,6 @@ User& User::operator=(const User & src)
     _passwd = src._passwd;
     _user_name = src._user_name;
     _real_name = src._real_name;
-    _client = src._client;
     _channels = src._channels;
 	_user_mask = src._user_mask;
 	_currCmd = src._currCmd;
@@ -219,11 +216,6 @@ std::vector<Channel *> User::getChannels(void) const
 	return (_channels);
 }
 
-std::vector<unsigned char> User::getClient(void) const
-{
-	return (_client);
-}
-
 std::vector<unsigned char> User::getNick(void) const
 {
 	return (_nick);	
@@ -248,11 +240,6 @@ std::vector<unsigned char> User::getUserNickNameMask(void) const
 	for (it = 0; it < _user_mask.size(); ++it)
 		ret.push_back(_user_mask[it]);
 	return (ret);
-}
-
-void User::setClient(std::vector<unsigned char>& client)
-{
-	_client = client;
 }
 
 void User::setNick(std::vector<unsigned char> nick)
@@ -308,8 +295,6 @@ int User::createNewNick(Server &my_server)
 	int it = 1;
 	std::vector<unsigned char>::size_type numit;
 	int lastnum = 1;
-	(void)pos;
-	(void)numit;
 
 	num = _nick;
 	if (_nick.size() == 9)
@@ -320,13 +305,13 @@ int User::createNewNick(Server &my_server)
 		return (0);
 	_nick = num;
 	nick_mem = _nick;
-	while (my_server.nbConnectionsWithSameNick(*this) > 1 && lastnum < 9999)
+	while (my_server.nbConnectionsWithSameNick(*this) > 1 && lastnum < 5)
 	{
 		_nick = nick_mem;
 		num.clear();
 		num = numToVec(it++);
 		if (_nick.size() + num.size() > 9)
-			pos = _nick.size() - num.size();
+			pos = _nick.size() - num.size() + 1;
 		else
 			pos = _nick.size();
 		numit = 0;
@@ -339,7 +324,7 @@ int User::createNewNick(Server &my_server)
 		}
 		lastnum++;
 	}
-	if (lastnum == 9999)
+	if (lastnum == 5)
 		return (1);
 	return (0);
 }
@@ -358,9 +343,6 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
 	
-	o << "Clt: ";
-	for (m = 0; m < i.getClient().size(); m++)
-		o << i.getClient()[m];
 	o << " Usrn: ";
 	for (m = 0; m < i.getUserName().size(); m++)
 		o << i.getUserName()[m];

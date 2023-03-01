@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 20:02:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 18:58:34 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,23 @@ void	Command::setUser(User* usr)
 	_cmd_user = usr;
 }
 
+void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
+{
+	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			my_server.getEv().data.fd = (*itc)->getfd();
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
+}
+
 /*''''''''''''''''''''''''''''''''''''
-				Register
+				Register TODO: error msg and disconnect
 ''''''''''''''''''''''''''''''''''''''*/
 int Command::register_user(Server &my_server)
 {
-	(void)my_server;
 	std::vector<unsigned char> v;
 	
 	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
@@ -76,7 +87,7 @@ int Command::register_user(Server &my_server)
 	if (my_server.nbConnectionsWithSameNick(*_cmd_user) > 1)
 	{
 		if (_cmd_user->createNewNick(my_server) == 1)
-			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
+			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1); // ERROR msg and disconnect
 	}
 	_cmd_user->setRegistered(true);
 	push_to_buf(RPL_WELCOME, *this, no_param);
@@ -86,25 +97,11 @@ int Command::register_user(Server &my_server)
 	return (1);
 }
 
-void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
-{
-	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
-		{
-			(*itc)->setRet(msg);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = (*itc)->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
-		}
-}
-
 /*''''''''''''''''''''''''''''''''''''
-				PASS TODO:exit and close connection when password mismatches on registration?
+				PASS TP
 ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_PASS(Server &my_server)
+int Command::_fun_PASS(void)
 {
-	std::cout << ">>>>>>>> PASS OK\n";
-	(void)my_server;
 	std::vector<unsigned char> v;
 	
 	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false)
@@ -135,10 +132,10 @@ int Command::_fun_NICK(Server &my_server)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
 	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
-		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1);
+		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1); 
 	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
 			&& my_compare(_cmd_user->getNick(), _parsedCmd[1]))
-		return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
+		return (push_to_buf(ERR_NICKNAMEINUSE, *this, _parsedCmd[1]), 1);
 	if (_cmd_user->getRegistered() == true)
 	{
 		push_to_buf(OWN_NICK_RPL, *this, _parsedCmd[1]);
@@ -198,15 +195,16 @@ int Command::_fun_JOIN(Server &my_server)
 	std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
 	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
 	{
-		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
+		if (channels[it].empty() == false && ((channels[it][0] != '#' && channels[it][0] != '&') || contains_ctrl_g(channels[it]) == true))
 			return (push_to_buf(ERR_BADCHANMASK, *this, channels[it]), 1);
-		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // verifier si on quitte un channel si on arrive a rerentrer
 			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
 			Channel new_channel(channels[it]);
 			new_channel.addUser(&(*_cmd_user));
 			my_server.addNewChannel(new_channel);
+			push_to_buf(JOINED_CHANNEL, _channels[it]); ////////////////////////////////////////////////////////////////////////////////////////////////////////// HERE
 			// send messages to accept user RPL
 		}
 		else
@@ -630,7 +628,8 @@ int Command::answer(Server &my_server)
 {
     std::cout << "___Command\n";
     print_vector2("Answer", _parsedCmd);
-    if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR || _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+    if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR
+		|| _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
         return (0);
     std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
     int i = 0;
@@ -641,7 +640,7 @@ int Command::answer(Server &my_server)
     switch (i)
     {
         case 0:
-            return (_fun_PASS(my_server));
+            return (_fun_PASS());
             break;
         case 1:
             return (_fun_NICK(my_server));

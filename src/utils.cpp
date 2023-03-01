@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 18:35:41 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 16:48:05 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -407,4 +407,14 @@ std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, 
 	ret.push_back('\r');
 	ret.push_back('\n');
 	return (ret);		
+}
+
+bool contains_ctrl_g(std::vector<unsigned char> v)
+{
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (v[it] == 7)
+			return (true);
+	}
+	return (false);
 }

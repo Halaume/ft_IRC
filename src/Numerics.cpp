@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 17:32:36 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:15:31 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_NICKNAMEINUSE:
 		{
-			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, cmd.getCmdUser()->getClient(), param));
+			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{

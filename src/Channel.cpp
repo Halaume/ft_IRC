@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 11:51:40 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 18:55:57 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 #include "../inc/utils.hpp"
 
 
-Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_users_limit()
+Channel::Channel(void): _chan_name(), _chan_password(), _op_list(), _user_list(), _ban_list(), _nb_users_limit(), \
+_invite_list(), _topic()
 {
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
@@ -33,16 +34,17 @@ Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_u
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::Channel(const Channel & copy): _chan_name(copy._chan_name), _chan_password(copy._chan_password), \
-_modes(copy._modes), _user_connected(copy._user_connected), _op_list(copy._op_list), \
-_user_list(copy._user_list), _ban_list(copy._ban_list), _nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list)
+_modes(copy._modes), _op_list(copy._op_list), _user_list(copy._user_list), _ban_list(copy._ban_list), \
+_nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list), _topic(copy._topic)
 {
 }
 
-Channel::Channel(std::vector<unsigned char> name): _chan_name(name), _chan_password(), _user_connected(), \
-_nb_users_limit()
+Channel::Channel(std::vector<unsigned char> name): _chan_name(name), _chan_password(), _op_list(), _user_list(), \
+_ban_list(), _nb_users_limit(), _invite_list(), _topic()
 {
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
@@ -58,7 +60,7 @@ _nb_users_limit()
 }
 
 Channel::Channel(std::vector<unsigned char> name, std::vector<unsigned char> password): _chan_name(name), \
-_chan_password(password), _user_connected(), _nb_users_limit()
+_chan_password(password), _op_list(), _user_list(), _nb_users_limit(), _invite_list(), _topic()
 {
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
@@ -82,6 +84,7 @@ Channel::~Channel(void)
 	_user_list.erase(_user_list.begin(), _user_list.end());
 	_ban_list.erase(_ban_list.begin(), _ban_list.end());
 	_invite_list.erase(_invite_list.begin(), _invite_list.end());
+	_topic.erase(_topic.begin(), _topic.end());
 }
 
 Channel &	Channel::operator=(const Channel & src)

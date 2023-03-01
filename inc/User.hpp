@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 19:03:59 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:06:14 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ class User
 		bool									getRegistered(void) const;
 		std::vector<unsigned char>				getUserName(void) const;
 		std::vector<unsigned char>				getPasswd(void) const;
-		std::vector<unsigned char>				getClient(void) const;
 		std::vector<unsigned char>				getNick(void) const;
 		int										getNbChan(void);
 		std::vector<unsigned char>				getUserMask(void) const;
@@ -76,9 +75,6 @@ class User
 		void									insertAllCmd(std::vector<unsigned char> &);
 		void									clearCurrCmd(void);
 		void									clearRet(void);
-					
-		void									setClient(std::vector<unsigned char>&);
-					
 		void 									setfd(int);
 		void									setNick(std::vector<unsigned char>);
 		void									setUserMask(std::vector<unsigned char>&);
@@ -95,7 +91,6 @@ class User
 		std::vector<unsigned char>	_currCmd;
 		std::vector<unsigned char>	_user_name;
 		std::vector<unsigned char>	_real_name;
-		std::vector<unsigned char>	_client;
 		std::vector<unsigned char>	_nick;
 		std::vector<unsigned char>	_ret;
 		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User

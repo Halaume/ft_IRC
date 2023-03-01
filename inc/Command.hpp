@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 19:47:52 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:24:27 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ class Command
 		std::vector<std::vector<unsigned char> > _ret;
 
 		
-		int										_fun_PASS(Server &);
+		int										_fun_PASS(void);
 		int										_fun_NICK(Server &);
 		int										_fun_USER(Server &);
 		int										_fun_JOIN(Server &);

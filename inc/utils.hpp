@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 18:06:16 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/01 16:39:38 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,11 @@ std::vector<unsigned char>                  concat_vectors(std::vector<unsigned 
 void                                        add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str);
 
 
-std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> msg);
-std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg);
-std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg);
+std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 
-std::vector<unsigned char>                  concat_nick_rpl(std::vector<unsigned char> nick_old, std::vector<unsigned char> user_name, std::vector<unsigned char> mask, std::vector<unsigned char> nick_new);
+std::vector<unsigned char>                  concat_nick_rpl(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 bool                                        isValidCharacter(unsigned char);
 
 std::vector<unsigned char>                  concat_real_name(std::vector<unsigned char>);
@@ -50,9 +50,12 @@ void                                        print_vector(std::string s, std::vec
 void                                        print_vector2(std::string s, std::vector<std::vector<unsigned char> > v);
 
 // Responses
-std::vector<unsigned char>                  server_response(std::string client, std::string code, std::string command, std::string to_insert);
+std::vector<unsigned char>                  server_response(std::string, std::string, std::string, std::string);
 
-int                                        reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
+int                                         reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
+    
+std::vector<unsigned char>                  numToVec(int);
+    
+bool                                        contains_ctrl_g(std::vector<unsigned char> v);
 
-std::vector<unsigned char>                 numToVec(int);
 #endif
