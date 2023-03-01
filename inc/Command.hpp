@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:30:37 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 11:19:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,19 +82,19 @@ class Command
 		int										_fun_PASS(Server &, User &);
 		int										_fun_NICK(Server &, User &);
 		int										_fun_USER(Server &, User &);
-		void									_fun_JOIN(Server &);
-		void									_fun_PRIVMSG(Server &);
-		void									_fun_OPER(Server &);
-		void									_fun_QUIT(Server &);
-		void									_fun_ERROR(Server &);
-		void									_fun_MODE(Server &);
-		void									_fun_TOPIC(Server &);
-		void									_fun_KICK(Server &);
-		void									_fun_INVITE(Server &);
-		void									_fun_KILL(Server &);
-		void									_fun_RESTART(Server &);
-		void									_fun_PONG(void);
-		void									_fun_NOTICE(Server &);
+		int										_fun_JOIN(Server &);
+		int										_fun_PRIVMSG(Server &);
+		int										_fun_OPER(Server &);
+		int										_fun_QUIT(Server &);
+		int										_fun_ERROR(Server &);
+		int										_fun_MODE(Server &);
+		int										_fun_TOPIC(Server &);
+		int										_fun_KICK(Server &);
+		int										_fun_INVITE(Server &);
+		int										_fun_KILL(Server &);
+		int										_fun_RESTART(Server &);
+		int										_fun_PONG(void);
+		int										_fun_NOTICE(Server &);
 
 		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 

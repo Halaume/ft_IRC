@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 16:10:34 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 17:33:56 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,16 +75,16 @@ std::vector<unsigned char>	Server::getPassword(void) const
 
 std::vector<Channel>::iterator    Server::findExistingChan(std::vector<unsigned char> channel)
 {
-    std::vector<Channel>::iterator    it = _channels.begin();
-    while (it != _channels.end() && it->getChanName() != channel)
-        it++;
-    return (it);
+	std::vector<Channel>::iterator    it = _channels.begin();
+	while (it != _channels.end() && it->getChanName() != channel)
+		it++;
+	return (it);
 }
 
 Channel*	Server::findChan(std::vector<unsigned char> channel)
 {
 	std::vector<Channel>::iterator it;
-	
+
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		if (!my_compare(it->getChanName(), channel))
@@ -181,12 +181,10 @@ void Server::run(void)
 		check_kill(*this);
 		if (wait_ret == -1)
 		{
-			std::cout << "wait ret down...\n";
 			return ;
 		}
 		for (int k = 0; k < wait_ret; ++k)
 		{
-			std::cout << "\n_________MAIN_________\nk:" << k << "Fd: " << _events[k].data.fd << " and event :" << _events[k].events <<"\n";
 			if (_events[k].data.fd == _sct)
 			{
 				accepted = accept(_sct, (sockaddr *)(&_server), &server_length);
@@ -208,13 +206,11 @@ void Server::run(void)
 					switch (_events[k].events)
 					{
 						case EPOLLOUT:
-							std::cout << "OOOOOOO EVENT EPOLLOUT" << std::endl;
-							// print_vector("1.1", Usr->getCurrCmd());
+							std::cerr << "Sending data" << std::endl;
 							sendto(Usr->getfd(), Usr->getRet());
 							cmd.getRet().clear();
 
-							
-							// print_vector("1.2", Usr->getCurrCmd());
+
 							Usr = findUser(_events[k].data.fd);
 							if (Usr == _users.end())
 							{
@@ -224,7 +220,7 @@ void Server::run(void)
 								{
 									close(_events[k].data.fd);
 									if (Usr != _users.end())
-									_users.erase(Usr);
+										_users.erase(Usr);
 									break;
 								}
 							}
@@ -233,7 +229,6 @@ void Server::run(void)
 							cmd._globalCmd.clear();
 							CmdIt.clear();
 							shift = 0;
-							print_vector("POLOUT CURRCMD:", Usr->getCurrCmd());
 							if (Usr->getCurrCmd().size() > 0)
 							{
 								for (std::vector<unsigned char>::size_type it = 0; it < Usr->getCurrCmd().size(); it++)
@@ -241,7 +236,6 @@ void Server::run(void)
 									cmd._globalCmd.push_back(Usr->getCurrCmd()[it]);
 									if (it > 0 && Usr->getCurrCmd()[it -1] == '\r' && Usr->getCurrCmd()[it] == '\n')
 									{
-										print_vector("GlobCmd", cmd._globalCmd);
 										iv.clear();
 										for (std::vector<unsigned char>::size_type j = 0; j < cmd._globalCmd.size(); j++)
 										{
@@ -262,7 +256,6 @@ void Server::run(void)
 											if ((j == cmd._globalCmd.size() - 2) || cmd._globalCmd[j] == ' ')
 											{
 												ParsedCommand.push_back(iv);
-												print_vector("PC", iv);
 												iv.clear();
 											}
 										}
@@ -289,17 +282,17 @@ void Server::run(void)
 							_ev.events = EPOLLIN | EPOLLET;
 							_ev.data.fd = Usr->getfd();
 							Usr = findUser(_events[k].data.fd);
-							// if (Usr == _users.end())
-							// {
-							// 	if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
-							// 	{
-							// 		close(_events[k].data.fd);
-							// 		if (Usr != _users.end())
-							// 		_users.erase(Usr);
-							// 		break;
-							// 	}
-							// }
-							
+							if (Usr == _users.end())
+							{
+								if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
+								{
+									close(_events[k].data.fd);
+									if (Usr != _users.end())
+										_users.erase(Usr);
+									break;
+								}
+							}
+
 							if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &(_ev)) == - 1)
 							{
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
@@ -309,7 +302,7 @@ void Server::run(void)
 							Usr->clearCurrCmd();
 							break;							
 						case EPOLLIN:
-							std::cerr << "OOOOOOOOO EVENT EPOLLIN" << std::endl;
+							std::cerr << "Receiving data" << std::endl;
 							if (isUserInList(_events[k].data.fd) == false)
 							{
 								User new_user(_events[k].data.fd);
@@ -334,7 +327,7 @@ void Server::run(void)
 								Usr->insertcmd(v);
 								v.clear();
 							}
-							else if (retrec > 2 && retrec < BUFFER_SIZE) // > 2 because of \r\n
+							else if (retrec < BUFFER_SIZE)
 							{
 								for (int i = 0; i < retrec; i++)
 									v.push_back(buf[i]);
@@ -346,7 +339,6 @@ void Server::run(void)
 								cmd._globalCmd.clear();
 								CmdIt.clear();
 								shift = 0;
-								print_vector("POLIN CURRCMD:", Usr->getCurrCmd());
 								iter = Usr->getCurrCmdbg();
 								for (std::vector<unsigned char>::size_type it = 0; it < Usr->getCurrCmd().size(); it++)
 								{
@@ -354,9 +346,8 @@ void Server::run(void)
 									iter++;
 									if (it > 0 && Usr->getCurrCmd()[it -1] == '\r' && Usr->getCurrCmd()[it] == '\n')
 									{
-										print_vector("GlobCmd", cmd._globalCmd);
 										iv.clear();
-										
+
 										for (std::vector<unsigned char>::size_type j = 0; j < cmd._globalCmd.size(); j++)
 										{
 											if (j == 0 && cmd._globalCmd[j] == ' ')
@@ -376,20 +367,15 @@ void Server::run(void)
 											if ((j == cmd._globalCmd.size() -2) || cmd._globalCmd[j] == ' ')
 											{
 												ParsedCommand.push_back(iv);
-												print_vector("PC", iv);
 												iv.clear();
 											}
-											
 										}
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
-										std::cout << "----------------------\n---   IN FDuser " << Usr->getfd() << "cmd:    ------\n";
-										print_vector2("2.2", cmd.getParsedCmd());
 										cmd.getRet().clear();
 										if (cmd.answer(*this, *Usr) == 1)
 										{
 											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), iter);
-											std::cout << "--------> GO TO POLLOUT\n";
 											_ev.events = EPOLLOUT | EPOLLET;
 											_ev.data.fd = Usr->getfd();
 											if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
@@ -408,21 +394,16 @@ void Server::run(void)
 								}
 								if (_ev.events != (EPOLLOUT | EPOLLET))
 									Usr->clearCurrCmd();
-								printUsersList();
 							}
 							else if (retrec == 0)
 							{
-								std::cout << "^^^^^^CLOSING CONNECTION^^^^^^\n";
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 								close(_events[k].data.fd);
 								if (Usr != _users.end())
 									_users.erase(Usr);	
 							}
-							std::cout << "________END OF SWITCH______\n\n";
 							break;
 					}
-					std::cout << "________OUT OF SWITCH______\n\n";
-					std::cout << "events state:" << _events[k].events << "\n";
 				}
 				catch (std::exception & e)
 				{
@@ -439,20 +420,22 @@ void Server::run(void)
 void Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
-    ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
-    if (ret < 0)
-    {
-        std::list<User>::iterator Usr = findUser(fd);
-        epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
-        _users.erase(Usr);
-        close(fd);
-    }
+	buf.push_back('\0');
+	std::cerr << "Sending : " << buf.data() << "To fd : " << fd << std::endl;
+	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
+	if (ret < 0)
+	{
+		std::list<User>::iterator Usr = findUser(fd);
+		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
+		_users.erase(Usr);
+		close(fd);
+	}
 }
 
 std::list<User>::iterator Server::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User>::iterator it;
-	
+
 	for (it = _users.begin(); it != _users.end(); ++it)
 	{
 		if (it->getUserName() == nick)
@@ -464,7 +447,7 @@ std::list<User>::iterator Server::findUser(std::vector<unsigned char> nick)
 std::list<User>::iterator Server::findUserNick(std::vector<unsigned char> nick)
 {
 	std::list<User>::iterator it;
-	
+
 	for (it = _users.begin(); it != _users.end(); ++it)
 	{
 		if (it->getNick() == nick)
@@ -481,7 +464,7 @@ std::list<User>::iterator Server::findUser(int fd)
 		if (it->getfd() == fd)
 			return (it);
 	}	
-	return (it); // _users.end()?
+	return (it);
 }
 
 User* Server::findUserPtrNick(std::vector<unsigned char> nick)
@@ -560,7 +543,7 @@ std::list<User>::iterator	Server::getUsersend(void)
 bool Server::channelExists(std::vector<unsigned char>& channel_name)
 {
 	std::vector<Channel>::iterator it;
-	
+
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		if (!my_compare(it->getChanName(), channel_name))
@@ -572,7 +555,7 @@ bool Server::channelExists(std::vector<unsigned char>& channel_name)
 int Server::nbConnections(User &user)
 {
 	int nb = 0;
-	
+
 	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
 	{
 		if (it->getUserMask() == user.getUserMask())
@@ -624,7 +607,7 @@ std::ostream & operator<<( std::ostream & o, Server & i)
 		o << std::endl;
 	}
 	o << "____Channels end____\n";
-	
+
 	return o;
 }
 epoll_event &	Server::getEv(void)

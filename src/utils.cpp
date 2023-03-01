@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:33 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:48:14 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -392,5 +392,5 @@ std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, 
 		ret.push_back(nick_new[it]);
 	ret.push_back('\r');
 	ret.push_back('\n');
-	return (ret);		
+	return (ret);
 }

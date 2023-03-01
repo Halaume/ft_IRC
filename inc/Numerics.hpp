@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:41 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 17:33:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define RPL_YOURHOSTmsg(code, client, server_name)         concat_resp(code, client,           to_vector(" :Your host is " + server_name + ", running version 1.0\r\n"))
 # define RPL_CREATEDmsg(code, client, date_and_time)        concat_resp(code, client,           to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))
 # define RPL_MYINFOmsg(code, client, server_name)           concat_resp(code, client,           to_vector(" :" + server_name + " 1.0\r\n")) // add user modes and channel modes
-    
+# define RPL_AWAYmsg(code, client, nick, message)			concat_resp(code, client, nick, message)
+
 # define ERR_NOSUCHCHANNELmsg(code, client, channel)        concat_resp(code, client, channel,  to_vector(" :No such channel\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, client, channel)      concat_resp(code, client, channel,  to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code, client)               concat_resp(code, client,           to_vector(" :No nickname given\r\n"))
@@ -37,7 +38,7 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define ERR_NEEDMOREPARAMSmsg(code, client, cmd)           concat_resp(code, client, cmd,      to_vector(" :Not enough parameters\r\n"))
 # define ERR_ALREADYREGISTEREDmsg(code, client)             concat_resp(code, client,           to_vector(" :You may not reregister\r\n"))
 # define ERR_PASSWDMISMATCHmsg(code, client)                concat_resp(code, client,           to_vector(" :Password incorrect\r\n"))
-    
+
 # define ERR_CHANNELISFULLmsg(code, client, channel)        concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+l)\r\n"))
 # define ERR_INVITEONLYCHANmsg(code, client, channel)       concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+i)\r\n"))
 # define ERR_BANNEDFROMCHANmsg(code, client, channel)       concat_resp(code, client, channel,  to_vector(" :Cannot join channel (+b)\r\n"))
@@ -51,27 +52,28 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 // class Command;
 
 enum numerics {
-    RPL_WELCOME             = 1,
-    RPL_YOURHOST            = 2,
-    RPL_CREATED             = 3,
-    RPL_MYINFO              = 4,
-    
-    ERR_NOSUCHCHANNEL       = 403,
-    ERR_TOOMANYCHANNELS     = 405,
-    ERR_NONICKNAMEGIVEN     = 431,
-    ERR_ERRONEUSNICKNAME    = 432,
-    ERR_NICKNAMEINUSE       = 433,
-	ERR_NEEDMOREPARAMS      = 461,
-    ERR_ALREADYREGISTERED   = 462,
-    ERR_PASSWDMISMATCH      = 464,
-    
-    ERR_CHANNELISFULL       = 471,
-    ERR_INVITEONLYCHAN      = 473,
-    ERR_BANNEDFROMCHAN      = 474,
-    ERR_BADCHANNELKEY       = 475,
-    ERR_BADCHANMASK         = 476,
+	RPL_WELCOME             = 1,
+	RPL_YOURHOST            = 2,
+	RPL_CREATED             = 3,
+	RPL_MYINFO              = 4,
+	RPL_AWAY				= 301,
 
-    OWN_NICK_RPL            = 1000
+	ERR_NOSUCHCHANNEL       = 403,
+	ERR_TOOMANYCHANNELS     = 405,
+	ERR_NONICKNAMEGIVEN     = 431,
+	ERR_ERRONEUSNICKNAME    = 432,
+	ERR_NICKNAMEINUSE       = 433,
+	ERR_NEEDMOREPARAMS      = 461,
+	ERR_ALREADYREGISTERED   = 462,
+	ERR_PASSWDMISMATCH      = 464,
+
+	ERR_CHANNELISFULL       = 471,
+	ERR_INVITEONLYCHAN      = 473,
+	ERR_BANNEDFROMCHAN      = 474,
+	ERR_BADCHANNELKEY       = 475,
+	ERR_BADCHANMASK         = 476,
+
+	OWN_NICK_RPL            = 1000
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);

@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:59:26 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 17:32:03 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,6 @@ class Server
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;
 		void							setBot(void);
-
 		int								nbConnections(User &);
 
 
