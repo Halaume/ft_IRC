@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 15:25:56 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 11:00:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,8 @@ class Command
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
 		void										register_user(Server &);	
-		
+		void										fun_ERROR(std::string);
+
 	private:
 		User*									_cmd_user;
 		std::vector<unsigned char>				_cmd_buf;
@@ -80,7 +81,6 @@ class Command
 		void									_fun_PRIVMSG(Server &);
 		void									_fun_OPER(Server &);
 		void									_fun_QUIT(Server &);
-		void									_fun_ERROR(Server &);
 		void									_fun_MODE(Server &);
 		void									_fun_TOPIC(Server &);
 		void									_fun_KICK(Server &);

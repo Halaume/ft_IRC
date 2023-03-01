@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 11:38:42 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 10:58:47 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "../inc/Command.hpp"
 
 
-std::vector<unsigned char> push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
+void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 
 // pimp intro message
 # define RPL_WELCOMEmsg(code, client)                   concat_resp(code, client,           to_vector(" :Welcome to gim irc\r\n"))
@@ -64,7 +64,9 @@ enum numerics {
     ERR_INVITEONLYCHAN      = 473,
     ERR_BANNEDFROMCHAN      = 474,
     ERR_BADCHANNELKEY       = 475,
-    ERR_BADCHANMASK         = 476
+    ERR_BADCHANMASK         = 476,
+
+	OWN_NICK_RPL            = 1000
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);

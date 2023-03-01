@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 14:57:15 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 11:00:01 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,34 +23,19 @@
 #include "../inc/utils.hpp"
 
 // TODO : if no client name, put nick name
-std::vector<unsigned char> push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param)
+void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 {
-	std::vector<unsigned char> buf, generic_nickname;
+	(void)param;
+	std::vector<unsigned char> buf;
 	std::string server_name = "mig.42.fr";
+	std::string ddots = ":";
 	
-	generic_nickname.push_back('*');
-	// if (my_compare(generic_nickname, _cmd_user->getClient()))
-	// {
-		add_to_vector(buf, ":" + server_name);
-	// }
-	// else // to verify
-	// {
-		// add_to_vector(_cmd_buf, ":");
-		// add_to_vector(_cmd_buf, _cmd_user->getClient());
-		// add_to_vector(_cmd_buf, "!");
-		// add_to_vector(_cmd_buf, _cmd_user->getUserName());
-		// add_to_vector(_cmd_buf, "@" + server_name);
-	// }
-	add_to_vector(buf, numeric_response(error, cmd, server_name, param));
-
-	//std::vector<unsigned char>::size_type m;
-	std::cout << "2:\n";
-	// for (m = 0; m < buf.size(); m++)
-	// 	std::cout << buf[m];
-	std::cout << "\n";
-	cmd.getCmdUser()->setRet(buf);
-
-	return (buf);
+	if (code == OWN_NICK_RPL)
+		add_to_vector(buf, ddots);
+	else
+		add_to_vector(buf, ddots + server_name);
+	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
+	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 
 std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)

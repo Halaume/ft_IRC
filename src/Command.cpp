@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:07:20 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 11:00:01 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void	Command::setCommand(std::vector<std::vector<unsigned char> > cmd)
 {
 	this->_parsedCmd = cmd;
 }
+
 void	Command::setUser(User* usr)
 {
 	this->_cmd_user = usr;
@@ -312,14 +313,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	}
 	else
 		return;
-/*	else
-	{
-		dest.clear();
-		dest = this->_parsedCmd[0];
-		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
-		this->_cmd_user->setRet(ret);
-		return ;
-	}*/
 	if (chan != &(*my_server.getChannel().end()) && is_op)
 	{
 		for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
@@ -414,9 +407,10 @@ void	Command::_fun_OPER(Server &my_server)
 	return ;
 }
 
-void	Command::_fun_ERROR(Server &my_server)
+void	Command::fun_ERROR(std::string msg)
 {
-	(void)my_server;	
+	(void)msg;
+
 }
 
 void	Command::_fun_MODE(Server &my_server)
@@ -699,7 +693,7 @@ void	Command::answer(Server &my_server)
 		case 6:
 			if (!this->_cmd_user->getRegistered())
 				break;
-			this->_fun_ERROR(my_server);
+			this->fun_ERROR("Some message\r\n");
 			break;
 		case 7:
 			if (!this->_cmd_user->getRegistered())
