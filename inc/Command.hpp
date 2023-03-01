@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 18:29:13 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 16:49:11 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,35 +56,46 @@ class Command
 			void										setUser(User*);
 			void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
-			void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
-			std::vector<std::vector<unsigned char> >	_globalCmd;
-			std::vector<std::vector<unsigned char> >	_parsedCmd;
-			void										answer(Server &);
-			int											register_user(Server &);
+		// Getters
+
+		
+		std::vector<std::vector<unsigned char> >&	getRet();
+		
+
+		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
+		std::vector<unsigned char>					_globalCmd;
+		std::vector<std::vector<unsigned char> >	_parsedCmd;
+
+		int											register_user(Server &);	
+		
+		int											answer(Server &);
+
+
 		
 	private:
 	
-			User*						_cmd_user;
-			std::vector<unsigned char>	_cmd_buf;
-			int							_error;
-			int							_pass_before_nick_user;
-		
-			void	_fun_NICK(Server &);
-			void	_fun_USER(Server &);
-			void	_fun_PASS(Server &);
-			void	_fun_JOIN(Server &);
-			void	_fun_PRIVMSG(Server &);
-			void	_fun_OPER(Server &);
-			void	_fun_QUIT(Server &);
-			void	_fun_ERROR(Server &);
-			void	_fun_MODE(Server &);
-			void	_fun_TOPIC(Server &);
-			void	_fun_KICK(Server &);
-			void	_fun_INVITE(Server &);
-			void	_fun_KILL(Server &);
-			void	_fun_RESTART(Server &);
-			void	_fun_PONG(void);
-			void	_fun_NOTICE(Server &);
+			User*									_cmd_user;
+			std::vector<unsigned char>				_cmd_buf;
+			int										_error;
+			std::vector<std::vector<unsigned char> > _ret;
+
+			int	_fun_PASS(Server &);	
+			int	_fun_NICK(Server &);
+			int	_fun_USER(Server &);
+			int	_fun_JOIN(Server &);
+			int	_fun_PRIVMSG(Server &);
+			int	_fun_OPER(Server &);
+			int	_fun_QUIT(Server &);
+			int	_fun_ERROR(Server &);
+			int	_fun_MODE(Server &);
+			int	_fun_TOPIC(Server &);
+			int	_fun_KICK(Server &);
+			int	_fun_INVITE(Server &);
+			int	_fun_KILL(Server &);
+			int	_fun_RESTART(Server &);
+			int	_fun_PONG(void);
+			int	_fun_NOTICE(Server &);
+
 			void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 
 };

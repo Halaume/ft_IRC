@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 18:36:58 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/01 14:41:48 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,13 @@ class Server
 			Server(const Server &copy);
 			~Server(void);
 			Server &	operator=(const Server & src);
+		
+		
 	
 			int								getSct(void) const;
 			int								getEpollfd(void) const;
 			std::vector<unsigned char>		getPasswd(void) const;
-			std::vector<unsigned char>		getPassword(void) const;
+			
 			void							getGobalCmd(Command*, std::vector<unsigned char>, int);
 			void 							getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
 			void 							getParsedCmd();
@@ -62,7 +64,6 @@ class Server
 			std::list<User>					getUsers(void) const;
 			// User*						getUser(int fd);
 			
-			void							setBot(void);
 			
 			void 							printGlobalCommand(Command cmd);
 			void 							printParsedCommand(Command cmd);
@@ -85,7 +86,19 @@ class Server
 			User*							findUserPtrNick(std::vector<unsigned char> nick);
 			Channel*						findChan(std::vector<unsigned char>);
 			std::list<User>::iterator		findUser(int fd);
-			// Channel*						findChanPtr(std::vector<unsigned char>);
+			
+		
+		
+		
+		
+		
+
+
+		void							setBot(void);
+
+		int								nbConnections(User &);
+		int								nbConnectionsWithSameNick(User &);
+
 
 	private:
 	
