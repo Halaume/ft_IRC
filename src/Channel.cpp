@@ -6,59 +6,82 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 17:29:25 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 17:50:24 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <utility>
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
+#include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-Channel::Channel(void): _chanName(), _chanPassword(), _userConnected()
+
+Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_users_limit()
 {
-	this->_modes.insert(std::make_pair('o', false));
-	this->_modes.insert(std::make_pair('p', false));
-	this->_modes.insert(std::make_pair('s', false));
-	this->_modes.insert(std::make_pair('i', false));
-	this->_modes.insert(std::make_pair('t', false));
-	this->_modes.insert(std::make_pair('n', false));
-	this->_modes.insert(std::make_pair('m', false));
-	this->_modes.insert(std::make_pair('l', false));
-	this->_modes.insert(std::make_pair('b', false));
-	this->_modes.insert(std::make_pair('v', false));
-	this->_modes.insert(std::make_pair('k', false));
+	_modes.insert(std::make_pair('o', false));
+	_modes.insert(std::make_pair('p', false));
+	_modes.insert(std::make_pair('s', false));
+	_modes.insert(std::make_pair('i', false));
+	_modes.insert(std::make_pair('t', false));
+	_modes.insert(std::make_pair('n', false));
+	_modes.insert(std::make_pair('m', false));
+	_modes.insert(std::make_pair('l', false));
+	_modes.insert(std::make_pair('b', false));
+	_modes.insert(std::make_pair('v', false));
+	_modes.insert(std::make_pair('k', false));
 }
 
-Channel::Channel(const Channel & copy): _chanName(copy._chanName), _chanPassword(copy._chanPassword), _modes(copy._modes), _userConnected(copy._userConnected)
+Channel::Channel(const Channel & copy): _chan_name(copy._chan_name), _chan_password(copy._chan_password), \
+_modes(copy._modes), _user_connected(copy._user_connected), _op_list(copy._op_list), \
+_user_list(copy._user_list), _ban_list(copy._ban_list), _nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list)
 {
 }
 
-Channel::Channel(std::vector<unsigned char> name): _chanName(name), _chanPassword(), _userConnected()
+Channel::Channel(std::vector<unsigned char> name): _chan_name(name), _chan_password(), _user_connected(), \
+_nb_users_limit()
 {
-	this->_modes.insert(std::make_pair('o', false));
-	this->_modes.insert(std::make_pair('p', false));
-	this->_modes.insert(std::make_pair('s', false));
-	this->_modes.insert(std::make_pair('i', false));
-	this->_modes.insert(std::make_pair('t', false));
-	this->_modes.insert(std::make_pair('n', false));
-	this->_modes.insert(std::make_pair('m', false));
-	this->_modes.insert(std::make_pair('l', false));
-	this->_modes.insert(std::make_pair('b', false));
-	this->_modes.insert(std::make_pair('v', false));
-	this->_modes.insert(std::make_pair('k', false));
+	_modes.insert(std::make_pair('o', false));
+	_modes.insert(std::make_pair('p', false));
+	_modes.insert(std::make_pair('s', false));
+	_modes.insert(std::make_pair('i', false));
+	_modes.insert(std::make_pair('t', false));
+	_modes.insert(std::make_pair('n', false));
+	_modes.insert(std::make_pair('m', false));
+	_modes.insert(std::make_pair('l', false));
+	_modes.insert(std::make_pair('b', false));
+	_modes.insert(std::make_pair('v', false));
+	_modes.insert(std::make_pair('k', false));
+}
+
+Channel::Channel(std::vector<unsigned char> name, std::vector<unsigned char> password): _chan_name(name), \
+_chan_password(password), _user_connected(), _nb_users_limit()
+{
+	_modes.insert(std::make_pair('o', false));
+	_modes.insert(std::make_pair('p', false));
+	_modes.insert(std::make_pair('s', false));
+	_modes.insert(std::make_pair('i', false));
+	_modes.insert(std::make_pair('t', false));
+	_modes.insert(std::make_pair('n', false));
+	_modes.insert(std::make_pair('m', false));
+	_modes.insert(std::make_pair('l', false));
+	_modes.insert(std::make_pair('b', false));
+	_modes.insert(std::make_pair('v', false));
+	_modes.insert(std::make_pair('k', false));
 }
 
 Channel::~Channel(void)
 {
-	this->_chanName.erase(this->_chanName.begin(), this->_chanName.end());
-	this->_chanPassword.erase(this->_chanPassword.begin(), this->_chanPassword.end());
-	this->_modes.erase(this->_modes.begin(), this->_modes.end());
-	this->_opList.erase(this->_opList.begin(), this->_opList.end());
-	this->_userLst.erase(this->_userLst.begin(), this->_userLst.end());
-	this->_banLst.erase(this->_banLst.begin(), this->_banLst.end());
+	_chan_name.erase(_chan_name.begin(), _chan_name.end());
+	_chan_password.erase(_chan_password.begin(), _chan_password.end());
+	_modes.erase(_modes.begin(), _modes.end());
+	_op_list.erase(_op_list.begin(), _op_list.end());
+	_user_list.erase(_user_list.begin(), _user_list.end());
+	_ban_list.erase(_ban_list.begin(), _ban_list.end());
+	_invite_list.erase(_invite_list.begin(), _invite_list.end());
 }
 
 Channel &	Channel::operator=(const Channel & src)
@@ -66,134 +89,6 @@ Channel &	Channel::operator=(const Channel & src)
 	if (&src == this)
 		return (*this);
 	return (*this);
-}
-
-
-void Channel::addUser(User * newUser, Server &my_server)
-{
-	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
-	bool	connected = false;
-	std::vector<unsigned char>	sendtoer;
-	std::list<User *>::iterator	it = this->_userLst.begin();
-
-	while (it != this->_userLst.end() && *it != newUser)
-		it++;
-	if (*it == newUser)
-		connected = true;
-	if (!connected && newUser->getNbChan() == 10)
-	{
-		insert_all(sendtoer, "ERR_TOMANYCHANNELS\r\n");
-		my_server.sendto(newUser->getfd(), sendtoer);
-		return ;
-	}
-	if (!connected)
-		this->_userLst.insert(this->_userLst.end(), newUser);
-	sendtoer.clear();
-	insert_all(sendtoer, "RPL_TOPIC\r\n");
-	my_server.sendto(newUser->getfd(), sendtoer);
-	it = this->_userLst.begin();
-	sendtoer.clear();
-	insert_all(sendtoer, "RPL_NAMREPLY\r\n");
-	while (it != this->_userLst.end())
-		my_server.sendto(newUser->getfd(), sendtoer);
-}
-
-void Channel::addUser(User *newUser, Server &my_server, std::vector<unsigned char> passwd)
-{
-	//Check if ban (idk if it is with nick/realname/username or with the fd), i'll do it after handling NICK and propably KICK
-	bool	connected = false;
-	std::list<User *>::iterator	it = this->_userLst.begin();
-	std::vector<unsigned char>	sender;
-
-	while (it != this->_userLst.end() && *it != newUser)
-		it++;
-	if (*it == newUser)
-		connected = true;
-	if (!connected && newUser->getNbChan() == 10)
-	{
-		insert_all(sender, "ERR_TOOMANYCHANNELS\r\n");
-		my_server.sendto(newUser->getfd(), sender);
-		return ;
-	}
-	if (!connected)
-	{
-		if (this->_chanPassword.size() != 0 && passwd == this->_chanPassword)
-			this->_userLst.insert(this->_userLst.end(), newUser);
-		else
-		{
-			sender.clear();
-			insert_all(sender, "ERR_BADCHANNELKEY\r\n");
-			my_server.sendto(newUser->getfd(), sender);
-			return ;
-		}
-	}
-	sender.clear();
-	insert_all(sender, "RPL_TOPIC\r\n");
-	my_server.sendto(newUser->getfd(), sender);
-	it = this->_userLst.begin();
-	sender.clear();
-	insert_all(sender, "RPL_NAMREPLY\r\n");
-	while (it != this->_userLst.end())
-		my_server.sendto((*it)->getfd(), sender);
-}
-void	Channel::delUser(int fd)
-{
-	for (std::list<User *>::iterator it = this->_userLst.begin(); it != this->_userLst.end(); it++)
-	{
-		if ((*it)->getfd() == fd)
-			this->_userLst.erase(it);
-	}
-	for (std::list<User *>::iterator it = this->_opList.begin(); it != this->_opList.end(); it++)
-	{
-		if ((*it)->getfd() == fd)
-			this->_opList.erase(it);
-	}
-}
-
-// Getters
-
-std::vector<unsigned char>	Channel::getChanName(void) const
-{
-	return (this->_chanName);
-}
-
-std::list<User *>::iterator	Channel::getOpListbg(void)
-{
-	return (this->_opList.begin());
-}
-
-std::list<User *>::iterator	Channel::getOpListend(void)
-{
-	return (this->_opList.end());
-}
-
-std::list<User *>::iterator	Channel::getUsrListbg(void)
-{
-	return (this->_userLst.begin());
-}
-
-std::list<User *>::iterator	Channel::getUsrListend(void)
-{
-	return (this->_userLst.end());
-}
-
-std::list<User *>	Channel::getUsrList(void)
-{
-	return (this->_userLst);
-}
-std::list<User *> Channel::getUsers(void) const
-{
-	return (_userLst);
-}
-
-bool	Channel::operator!=(const Channel & lhs) const
-{
-	return (this->_chanName != lhs._chanName);
-}
-
-std::vector<unsigned char>	 Channel::getTopic(void) const
-{
-	return (this->_topic);	
 }
 
 std::map<char, bool>		 Channel::getModes(void) const
@@ -206,18 +101,9 @@ void        Channel::setTopic(std::vector<unsigned char> topic)
 	this->_topic = topic;
 }
 
-
-bool	Channel::isOp(User *usr) const
-{
-	for (std::list<User *>::const_iterator it = this->_opList.begin(); it != this->_opList.end(); it++)
-		if (*it == usr)
-			return (true);
-	return (false);
-}
-
 bool    Channel::isOp(User usr) const
 {
-    for (std::list<User *>::const_iterator it = _opList.begin(); it != _opList.end(); it++)
+    for (std::list<User *>::const_iterator it = _op_list.begin(); it != _op_list.end(); it++)
     {
 		if (**it == usr)
             return (true);
@@ -225,13 +111,216 @@ bool    Channel::isOp(User usr) const
     return (false);
 }
 
+void Channel::addUser(User * new_user)
+{
+	_user_list.push_back(new_user);
+	new_user->addChannel(this);
+}
+
+void	Channel::delUser(int fd)
+{
+	for (std::list<User *>::iterator it = this->_user_list.begin(); it != this->_user_list.end(); it++)
+	{
+		if ((*it)->getfd() == fd)
+			this->_user_list.erase(it);
+	}
+	for (std::list<User *>::iterator it = this->_op_list.begin(); it != this->_op_list.end(); it++)
+	{
+		if ((*it)->getfd() == fd)
+			this->_op_list.erase(it);
+	}
+}
+
+// Getters
+
+std::vector<unsigned char>	Channel::getChanName(void) const
+{
+	return (_chan_name);
+}
+
+void Channel::addUserToBan(User *new_user)
+{
+	// verify if user not already in list..
+	// check list limit etc...
+	_ban_list.push_back(new_user);
+}
+
+void Channel::addUserToInvite(User *new_user)
+{
+	// verify if user not already in list..
+	// check list limit etc...
+	_invite_list.push_back(new_user);
+}
+
+std::list<User *>::iterator	Channel::getOpListbg(void)
+{
+	return (this->_op_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getOpListend(void)
+{
+	return (this->_op_list.end());
+}
+
+std::list<User *>::iterator	Channel::getUserListbg(void)
+{
+	return (this->_user_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListend(void)
+{
+	return (this->_user_list.end());
+}
+
+std::list<User *>	Channel::getUserList(void)
+{
+	return (this->_user_list);
+}
+
+std::vector<unsigned char>	Channel::getChanPassword(void) const
+{
+	return (_chan_password);
+}
+
+std::list<User *>::iterator	Channel::getUserListBanbg(void)
+{
+	return (_ban_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListBanend(void)
+{
+	return (_ban_list.end());
+}
+
+std::list<User *>::iterator	Channel::getUserListInvitebg(void)
+{
+	return (_invite_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListInviteend(void)
+{
+	return (_invite_list.end());
+}
+
+std::list<User *> Channel::getUsers(void) const
+{
+	return (_user_list);
+}
+
+int Channel::getNbUsers(void)
+{
+	return (static_cast<int>(_user_list.size()));
+}
+
+int Channel::getNbUsersLimit(void)
+{
+	return (_nb_users_limit);
+}
+
+bool	Channel::operator!=(const Channel & lhs) const
+{
+	return (this->_chan_name != lhs._chan_name);
+}
+
+std::vector<unsigned char>	 Channel::getTopic(void) const
+{
+	return (this->_topic);	
+}
+
+bool	Channel::isOp(User *usr) const
+{
+	for (std::list<User *>::const_iterator it = this->_op_list.begin(); it != this->_op_list.end(); it++)
+		if (*it == usr)
+			return (true);
+	return (false);
+}
+
+
+bool Channel::getMode(char c)
+{
+	return (_modes[c]);
+}
+
+std::map<char, bool>::iterator Channel::getModesbg(void)
+{
+	return (_modes.begin());
+}
+
+std::map<char, bool>::iterator Channel::getModesend(void)
+{
+	return (_modes.end());
+}
+
+// SETTERS
+void Channel::setChanName(std::vector<unsigned char> chan_name)
+{
+	_chan_name = chan_name;
+}
+
+void Channel::setChanPassword(std::vector<unsigned char>& chan_password)
+{
+	_chan_password = chan_password;
+}
+
+void Channel::setNbUsersLimit(int nb_users_limit)
+{
+	_nb_users_limit = nb_users_limit;
+}
+
+void Channel::setMode(char c, bool mode)
+{
+	std::map<char, bool>::iterator it;
+
+	for (it = _modes.begin(); it != _modes.end(); ++it)
+	{
+		if (it->first == c)
+			it->second = mode;
+	}
+}
+
+bool Channel::isUserInChannel(User *user)
+{
+	std::list<User *>::iterator it;
+
+	for (it = _user_list.begin(); it != _user_list.end(); ++it)
+	{
+		if (*it == user)
+			return (true);
+	}
+	return (false);
+}
+
+bool Channel::isUserBanned(User *user)
+{
+	std::list<User *>::iterator it;
+
+	for (it = _ban_list.begin(); it != _ban_list.end(); ++it)
+	{
+		if (*it == user)
+			return (true);
+	}
+	return (false);
+}
+
+bool Channel::isUserInvited(User *user)
+{
+	std::list<User *>::iterator it;
+
+	for (it = _invite_list.begin(); it != _invite_list.end(); ++it)
+	{
+		if (*it == user)
+			return (true);
+	}
+	return (false);
+}
+
 std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User *>::iterator it;
 	
-	for (it = this->_userLst.begin(); it != this->_userLst.end(); it++)
+	for (it = this->_user_list.begin(); it != this->_user_list.end(); it++)
 	{
-		if ((*it)->getNickName() == nick)
+		if ((*it)->getNick() == nick)
 			return (it);
 	}
 	return (it);

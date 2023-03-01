@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/16 11:48:04 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/02/22 12:45:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,11 @@
 #include <csignal>
 #include <vector>
 
+#include <ctime> 
+
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "../inc/utils.hpp"
-
-// Server	g_serv;
 
 int is_kill = 0;
 

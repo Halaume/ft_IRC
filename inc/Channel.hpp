@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 17:29:45 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 18:45:04 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,46 +22,72 @@
 class User;
 
 class Server;
+class Command;
 
 class Channel
 {
 	public:
+	
 			Channel(void);
 			Channel(const Channel &copy);
 			Channel(std::vector<unsigned char> chanName);
+			Channel(std::vector<unsigned char> chanName, std::vector<unsigned char> chan_password);
 			~Channel(void);
 		
 			Channel &	operator=(const Channel & src);
 			bool		operator!=(const Channel &) const;
-		
+
 			std::vector<unsigned char>		getChanName(void) const;
-			std::vector<unsigned char>		getTopic(void) const;
-			std::map<char, bool>			getModes(void) const;
+			std::vector<unsigned char>		getChanPassword(void) const;
+			std::vector<unsigned char>	 	getTopic(void) const;
 			std::list<User *>::iterator		getOpListbg(void);
 			std::list<User *>::iterator		getOpListend(void);
-			std::list<User *>::iterator		getUsrListbg(void);
-			std::list<User *>::iterator		getUsrListend(void);
-			std::list<User *>				getUsrList(void);
+			std::list<User *>::iterator		getUserListbg(void);
+			std::list<User *>::iterator		getUserListend(void);
+			std::list<User *>				getUserList(void);
 			std::list<User *>				getUsers(void) const;
+			std::list<User *>::iterator		getUserListBanbg(void);
+			std::list<User *>::iterator		getUserListBanend(void);
+			std::list<User *>::iterator		getUserListInvitebg(void);
+			std::list<User *>::iterator		getUserListInviteend(void);
+			std::map<char, bool>::iterator	getModesbg(void);
+			std::map<char, bool>::iterator	getModesend(void);
+			std::map<char, bool>		 	getModes(void) const;
+			int								getNbUsers(void);
+			int								getNbUsersLimit(void);
+			bool							getMode(char c);
 
-			void   setTopic(std::vector<unsigned char>);
+			void							setTopic(std::vector<unsigned char>);
+			void							setChanName(std::vector<unsigned char>);
+			void							setChanPassword(std::vector<unsigned char>&);
+			void							setNbUsersLimit(int nb_users_limit);
+			void 							setMode(char, bool);
+	
+			void							addUser(User *);
+			void 							addUserToBan(User*);
+			void 							addUserToInvite(User*);
+			void							delUser(int);
+			bool							isOp(User *) const;
+			bool							isUserInChannel(User*);
+			bool							isUserBanned(User*);
+			bool							isUserInvited(User*);
+			bool							isOp(User usr) const;
+			std::list<User *>::iterator		findUser(std::vector<unsigned char> nick);
+			// void						addUser(User *, Server&, std::vector<unsigned char>);
+	
 			
-			void						addUser(User *, Server&);
-			void						addUser(User *, Server&, std::vector<unsigned char>);
-			bool						isOp(User *) const;
-			bool      					isOp(User usr) const;
-			void						delUser(int);
-			std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
-
 	private:
-			std::vector<unsigned char>	_chanName;
-			std::vector<unsigned char>	_chanPassword;
-			std::vector<unsigned char>  _topic;
-			std::map<char, bool>		_modes;	//A voir pour le string, trouver une facon de normaliser nos modes (Same pour Users) maybe un tableau toujours dans le meme ordre
-			int							_userConnected;
-			std::list<User *>			_opList;
-			std::list<User *>			_userLst;
-			std::vector<User *>			_banLst;
+		
+			std::vector<unsigned char>		_chan_name;
+			std::vector<unsigned char>		_chan_password;
+			std::map<char, bool>			_modes;
+			int								_user_connected;
+			std::list<User *>				_op_list;
+			std::list<User *>				_user_list;
+			std::list<User *>				_ban_list;
+			int								_nb_users_limit;
+			std::list<User *>				_invite_list;
+			std::vector<unsigned char>		_topic;
 };
 
 #endif

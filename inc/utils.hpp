@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:35:25 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 18:47:55 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,31 @@
 #include <string>
 
 std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> str);
-std::vector<unsigned char>                  to_vector(std::string str);
-std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
-std::vector<unsigned char>                  server_response(std::string client, std::string code, std::string command, std::string to_insert);
-std::string                                 itos(int n);
 std::string                                 v_to_str(std::vector<unsigned char> vector);
-void	                                    insert_all(std::vector<unsigned char> &my_vec, std::string to_insert);
+
+std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
+std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> msg);
+std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> msg);
+std::vector<unsigned char>                  concat_resp(int code, std::vector<unsigned char> client, std::vector<unsigned char> cmd, std::vector<unsigned char> msg);
+std::vector<unsigned char>                  to_vector(std::string str);
+std::vector<unsigned char>                  concat_real_name(std::vector<std::vector<unsigned char> > parsedCmd, int start);
+
+bool                                        isValidCharacter(unsigned char);
+int	                                        my_compare(std::vector<unsigned char> my_vec, std::string str);
+int                                         my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 void	                                    free_fun(Server &my_server);
-void                                        add_to_vector(std::vector<unsigned char> v, char *str);
-void                                        add_to_vector(std::vector<unsigned char>* v, std::string str);
-void                                        add_to_vector(std::vector<unsigned char>*, std::vector<unsigned char>);
+void                                        add_to_vector(std::vector<unsigned char> &v, char *str);
+void                                        add_to_vector(std::vector<unsigned char>& v, std::string str);
+void                                        add_to_vector(std::vector<unsigned char>&, std::vector<unsigned char>);
 void                                        print_vector(std::vector<unsigned char> v);
-int		                                    my_compare(std::vector<unsigned char> my_vec, std::string str);
+void                                        print_vector2(std::vector<std::vector<unsigned char> > v);
+
+// Responses
+std::vector<unsigned char>                  server_response(std::string client, std::string code, std::string command, std::string to_insert);
+
+int                                        reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
+
+void                                       insert_all(std::vector<unsigned char> &my_vec, std::string to_insert);
+
 
 #endif

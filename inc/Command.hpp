@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/20 16:38:40 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/02/28 18:29:13 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,17 @@
 // #define server_name "mig.42.fr"
 // std::string server_name = "mig.42.fr";
 
+# define MAX_NB_CHAN 10
+
+# define WAITING_FOR_PASS 0
+# define PASS_ORDER_OK 1
+# define PASS_ORDER_ERROR -1
+# define PASS_NICK_OK 2
+# define PASS_USER_OK 3
+# define PASS_CONNECTION_ERROR 4
+
+
+
 class Server;
 
 class User;
@@ -29,54 +40,52 @@ class User;
 class Command
 {
 	public:
+	
 			Command(void);
 			Command(const Command &copy);
 			~Command(void);
 			Command &	operator=(const Command & src);
+		
+			std::vector<std::vector<unsigned char> >	getCommand(void) const;
+			std::vector<std::vector<unsigned char> >	getGobalCmd();
+			std::vector<std::vector<unsigned char> >	getParsedCmd();
+			User*										getCmdUser(void) const;
+			unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
+		
+			void										setCommand(std::vector<std::vector<unsigned char> >);
+			void										setUser(User*);
+			void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
+			void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
 			std::vector<std::vector<unsigned char> >	_globalCmd;
 			std::vector<std::vector<unsigned char> >	_parsedCmd;
-	
-			std::vector<std::vector<unsigned char> >	getParsedCmd();
-			std::vector<std::vector<unsigned char> >	getCommand(void) const;
-			unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
-
-			void	setCmdFdUser(int);
-			void	setCmdUser(Server &);
-			void	setCommand(std::vector<std::vector<unsigned char> >);
-			void	setUser(User*);
-	
-			void	_answer(Server &);
-			void	answer(Server &);
-			void	push_to_buf(int error, std::vector<unsigned char> vector);
+			void										answer(Server &);
+			int											register_user(Server &);
 		
 	private:
-			User *									_cmdUser;
+	
+			User*						_cmd_user;
+			std::vector<unsigned char>	_cmd_buf;
+			int							_error;
+			int							_pass_before_nick_user;
 		
-			int										_cmd_fd_user;
-			std::vector<unsigned char>				_cmd_buf;
-			std::vector<unsigned char>::size_type	_cmd_size;
-			int										_error;
-			std::list<User>::iterator				_cmd_user;
-		
-			void	_fun_CAP(Server &my_server);
-			void	_fun_NICK(Server &my_server);
-			void	_fun_USER(Server &my_server);
-			void	_fun_PASS(Server &my_server);
-			void	_fun_JOIN(Server &my_server);
-			void	_fun_PRIVMSG(Server &my_server);
-			void	_fun_OPER(Server &my_server);
-			void	_fun_QUIT(Server &my_server);
-			void	_fun_ERROR(Server &my_server);
-			void	_fun_MODE(Server &my_server);
-			void	_fun_TOPIC(Server &my_server);
-			void	_fun_KICK(Server &my_server);
-			void	_fun_INVITE(Server &my_server);
-			void	_fun_KILL(Server &my_server);
-			void	_fun_RESTART(Server &my_server);
-			void	_fun_PONG(Server &my_server);
-			void	_fun_NOTICE(Server &my_server);
-			void	do_chan(std::vector<unsigned char>, Server &my_server, std::vector<unsigned char>);
+			void	_fun_NICK(Server &);
+			void	_fun_USER(Server &);
+			void	_fun_PASS(Server &);
+			void	_fun_JOIN(Server &);
+			void	_fun_PRIVMSG(Server &);
+			void	_fun_OPER(Server &);
+			void	_fun_QUIT(Server &);
+			void	_fun_ERROR(Server &);
+			void	_fun_MODE(Server &);
+			void	_fun_TOPIC(Server &);
+			void	_fun_KICK(Server &);
+			void	_fun_INVITE(Server &);
+			void	_fun_KILL(Server &);
+			void	_fun_RESTART(Server &);
+			void	_fun_PONG(void);
+			void	_fun_NOTICE(Server &);
+			void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 
 };
 
