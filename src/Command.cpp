@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:01:56 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:45:31 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = (*itc)->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-			return ;
+			my_server.delUser(**itc);
 	}
 }
 
