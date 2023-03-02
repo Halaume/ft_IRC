@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 14:41:48 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 12:51:25 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,18 +86,11 @@ class Server
 			User*							findUserPtrNick(std::vector<unsigned char> nick);
 			Channel*						findChan(std::vector<unsigned char>);
 			std::list<User>::iterator		findUser(int fd);
-			
-		
-		
-		
-		
-		
 
+			void							setBot(void);
 
-		void							setBot(void);
-
-		int								nbConnections(User &);
-		int								nbConnectionsWithSameNick(User &);
+			int								nbConnections(User &);
+			int								nbConnectionsWithSameNick(User &);
 
 
 	private:

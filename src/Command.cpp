@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 19:00:07 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:12:05 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -420,7 +420,6 @@ int	Command::_fun_NOTICE(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_OPER(Server &my_server)
 {
-
 	std::vector<unsigned char> adminop = to_vector("admin");
 	
 	if (_parsedCmd.size() < 3)
@@ -486,37 +485,28 @@ int	Command::_fun_MODE(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_INVITE(Server &my_server)
 {
-	std::vector<unsigned char>	ret;
+	//std::vector<unsigned char>	ret;
 
 	if (_parsedCmd.size() < 3)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
-	
-	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[2]);
-	if (itc == my_server.getChannel().end())
+
+	std::vector<Channel>::iterator it =  my_server.findExistingChan(_parsedCmd[2]);
+	if (it == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[2]), 1);
 	
-	std::list<User *>::iterator	itu = itc->findUser(_cmd_user->getUserName());
-	if (itu == itc->getUserListend())
+	std::list<User *>::iterator	itu = it->findUser(_cmd_user->getUserName());
+	if (itu == it->getUserListend())
 		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[2]), 1);
 	
-	itu = itc->findUser(_parsedCmd[1]);
-	if (itu != itc->getUserListend())
-	{
-		insert_all(ret, " ERR_USERONCHANNEL\r\n");
-		this->_cmd_user->setRet(ret);
-		return (1);
-	}
+	itu = it->findUser(_parsedCmd[1]);
+	if (itu != it->getUserListend())
+		return (push_to_buf(ERR_USERONCHANNEL, *this, _parsedCmd[1]), 1);
 	
-	if (itc->getModes().find('i')->second && !itc->isOp(_cmd_user))
-	{
-		insert_all(ret, " ERR_CHANOPRIVSNEEDED\r\n");
-		this->_cmd_user->setRet(ret);
-		return (1);
-	}
+	if (it->getModes().find('i')->second && !it->isOp(_cmd_user))
+		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[2]), 1);
 	
-	insert_all(ret, " RPL_INVITING\r\n");
-	this->_cmd_user->setRet(ret);
-	return (1);
+	
+	return (push_to_buf(RPL_INVITING, *this, _parsedCmd[2]), 1);
 }
 
 // /*''''''''''''''''''''''''''''''''''''

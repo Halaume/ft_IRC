@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 18:59:48 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:12:20 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case RPL_UMODEIS:
 		{
 			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_INVITING:
+		{
+			return (RPL_INVITINGmsg(RPL_INVITING, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
 		}
 		case RPL_YOUREOPER:
 		{
@@ -132,6 +136,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_BADCHANMASK:
 		{
 			return (ERR_BADCHANMASKmsg(ERR_BADCHANMASK, param));
+		}
+		case  ERR_CHANOPRIVSNEEDED:
+		{
+			return (ERR_CHANOPRIVSNEEDEDmsg(ERR_CHANOPRIVSNEEDED, cmd.getCmdUser()->getNick(), param));	
 		}
 		case  ERR_NOOPERHOST:
 		{
