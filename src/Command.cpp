@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 15:28:42 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:06:58 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,77 +182,65 @@ int Command::_fun_USER(Server &my_server, User &user)
 
 int Command::_fun_JOIN(Server &my_server)
 {
-	(void)my_server;
 	std::vector<std::vector<unsigned char> > channels;
 	std::vector<std::vector<unsigned char> > keys;
-	// std::vector<std::vector<unsigned char> > keys;
-
-	//RFC 2813/4.2.1
-	/*Numeric Replies:
-	  ERR_NEEDMOREPARAMS		OK
-	  ERR_BANNEDFROMCHAN		OK
-	  ERR_INVITEONLYCHAN		OK
-	  ERR_BADCHANNELKEY		OK
-	  ERR_CHANNELISFULL		OK
-	  ERR_BADCHANMASK			OK
-	  ERR_NOSUCHCHANNEL		OK	
-	  ERR_TOOMANYCHANNELS		OK
-	  RPL_TOPIC*/
-	//RPL_TOPIC pour le new User et RPL_NAMREPLY Pour tout les users du chan (Nouvel utilisateur inclut)
-
+	std::vector<unsigned char> param;
 
 	if (_parsedCmd.size() < 2)
-	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param); // sendto
-		return (1);
-	}
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
 	if (_parsedCmd.size() > 2)
 		reparseChannelsKeys(_parsedCmd[2], &keys);
 	std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
 	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
 	{
-
-		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
-			push_to_buf(ERR_BADCHANMASK, *this, channels[it]);
-		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-			push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
+		if (channels[it].empty() == false && ((channels[it][0] != '#' && channels[it][0] != '&') || contains_ctrl_g(channels[it]) == true))
+			return (push_to_buf(ERR_BADCHANMASK, *this, channels[it]), 1);
+		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // verifier si on quitte un channel si on arrive a rerentrer
+			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
-
 			Channel new_channel(channels[it]);
-			new_channel.addUser(&(*_cmd_user));
+			new_channel.addUser(_cmd_user);
 			my_server.addNewChannel(new_channel);
-			// send messages to accept user RPL
+			if (my_server.findChan(channels[it]) == NULL)
+				return (0);
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 		else
 		{
-			// protect findchan
 			if (my_server.findChan(channels[it]) == NULL)
-				push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]); // sendto
-			else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
-			{
-				// user is already in channel -> not sure about this one -> del?
-			}
-			else if (my_server.findChan(channels[it])->getMode('k') == true // check if channel mode k
-					&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
-				push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]); // sendto
-			else if (my_server.findChan(channels[it])->getMode('l') == true // check if channel mode l
-					&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
-				push_to_buf(ERR_CHANNELISFULL, *this, channels[it]);
-			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
-				push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]);
-			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
-					&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
-				push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]);
-			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
-					&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
-				push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]);
-			else
+				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
+			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
+				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
+				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
+			else if (my_server.findChan(channels[it])->getMode('l') == true // to verify in irssi
+				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
+				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
+			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // to verify in irssi
+				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
+			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user // to verify in irssi
+				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
+				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
+			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
+				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
+				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
+			if (my_server.findChan(channels[it])->isUserInChannel(_cmd_user))
 				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 	}
-	return (1);
+	return (0);
 }
 
 int	Command::_fun_QUIT(Server &my_server)
@@ -352,10 +340,9 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		insert_all(this->_cmd_user->getRet(), ":No text to send\r\n");
 		return (1);
 	}
-	//PAS SUR DE CELLE CI
 	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
 	{
-		this->_cmd_user->setRet(this->_parsedCmd[0]);// RET SHOULD BE <TARGET>
+		this->_cmd_user->setRet(this->_parsedCmd[1]);
 		insert_all(this->_cmd_user->getRet(), " :Duplicate recipients. No message delivered\r\n");
 		return (1);
 	}

@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 15:48:14 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:06:54 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -392,5 +392,55 @@ std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, 
 		ret.push_back(nick_new[it]);
 	ret.push_back('\r');
 	ret.push_back('\n');
+	return (ret);
+}
+
+bool contains_ctrl_g(std::vector<unsigned char> v)
+{
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (v[it] == 7)
+			return (true);
+	}
+	return (false);
+}
+
+std::vector<unsigned char> rpl_topic(std::vector<unsigned char> channel, std::vector<unsigned char> topic)
+{
+	std::vector<unsigned char> ret;
+	
+	add_to_vector(ret, static_cast<std::string>(" "));
+	add_to_v(ret, channel);
+	add_to_vector(ret, static_cast<std::string>(" :"));
+	add_to_v(ret, topic);
+	add_to_vector(ret, static_cast<std::string>("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> rpl_name(Channel *channel)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char> v;
+	
+	ret.push_back(' ');
+	if (channel->getMode('s') == true)
+		ret.push_back('@');
+	else
+		ret.push_back('=');
+	ret.push_back(' ');
+	v = channel->getChanName();
+	add_to_v(ret, v);
+	add_to_vector(ret, static_cast<std::string>(" :"));	
+	for (std::list<User *>::iterator it = channel->getUserListbg(); it != channel->getUserListend();)
+	{
+		v.clear();
+		v = (*it)->getNick();
+		if (channel->isOp(*it) == true)
+			ret.push_back('@');
+		add_to_v(ret, v);
+		if (++it != channel->getUserListend())
+			ret.push_back(' ');
+	}
+	add_to_vector(ret, static_cast<std::string>("\r\n"));
 	return (ret);
 }

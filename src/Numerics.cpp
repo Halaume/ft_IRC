@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:00:14 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:57:25 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,17 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (RPL_MYINFOmsg(RPL_MYINFO, cmd.getCmdUser()->getNick(), server_name));
 		}
-		case RPL_AWAY:
+		case RPL_TOPIC:
 		{
-			return (RPL_AWAYmsg(RPL_AWAY, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
+			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_NAMREPLY:
+		{
+			return (RPL_NAMREPLYmsg(RPL_NAMREPLY, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_ENDOFNAMES:
+		{
+			return (RPL_ENDOFNAMESmsg(RPL_ENDOFNAMES, cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NOSUCHNICK:
 		{
@@ -88,7 +96,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_NICKNAMEINUSE:
 		{
-			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, cmd.getCmdUser()->getClient(), cmd.getParsedCmd()[1]));
+			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{
@@ -126,8 +134,13 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (OWN_NICK_RPLmsg(cmd.getCmdUser()->getNick(), cmd.getCmdUser()->getUserName(),cmd.getCmdUser()->getUserMask(), param));
 		}
+		case JOINED_CHANNEL:
+		{
+			std::vector<unsigned char> channel = param;
+			add_to_vector(channel, static_cast<std::string>("\r\n"));
+			return (JOINED_CHANNELmsg(cmd.getCmdUser()->getClient(), channel));
+		}
 	}
-
 	// to clean
 	return (ERR_NEEDMOREPARAMSmsg(ERR_NEEDMOREPARAMS, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[0]));
 }

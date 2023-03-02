@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:55 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:06:55 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,10 @@ void                                        print_vector2(std::string s, std::ve
 std::vector<unsigned char>                  server_response(std::string client, std::string code, std::string command, std::string to_insert);
 
 int                                        reparseChannelsKeys(std::vector<unsigned char>, std::vector<std::vector<unsigned char> >*);
+std::vector<unsigned char>                  rpl_topic(std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  rpl_name(Channel *);
+
+    
+bool                                        contains_ctrl_g(std::vector<unsigned char> v);
 
 #endif
