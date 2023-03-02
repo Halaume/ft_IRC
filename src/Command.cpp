@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 15:49:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:33:57 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,12 +216,8 @@ int Command::_fun_JOIN(Server &my_server)
 		}
 		else
 		{
-			if (my_server.findChan(channels[it]) == NULL) // protect findchan
+			if (my_server.findChan(channels[it]) == NULL)
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			// else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
-			// {
-			// 	// user is already in channel do nothing
-			// }
 			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
 				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
@@ -236,7 +232,8 @@ int Command::_fun_JOIN(Server &my_server)
 			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
-			my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			if (my_server.findChan(channels[it])->isUserInChannel(_cmd_user))
+				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
 			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:56:58 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:56:38 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-// TODO : if no client name, put nick name
 void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 {
 	(void)param;
