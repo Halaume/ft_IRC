@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 23:03:06 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:49:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,42 +205,44 @@ int Command::_fun_JOIN(Server &my_server)
 			Channel new_channel(channels[it]);
 			new_channel.addUser(_cmd_user);
 			my_server.addNewChannel(new_channel);
-			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			if (my_server.findChan(channels[it]) == NULL)
 				return (0);
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);
 			param = rpl_name(my_server.findChan(channels[it]));
 			push_to_buf(RPL_NAMREPLY, *this, param);
-			//////////////////////////////////////////////////////////// here
-			// do RPL end of names
-			
-			return (1);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 		else
 		{
 			if (my_server.findChan(channels[it]) == NULL) // protect findchan
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
-			{
-				// user is already in channel do nothing
-			}
-			else if (my_server.findChan(channels[it])->getMode('k') == true
+			// else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
+			// {
+			// 	// user is already in channel do nothing
+			// }
+			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
 				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('l') == true
+			else if (my_server.findChan(channels[it])->getMode('l') == true // to verify in irssi
 				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
 				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
-			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // to verify in irssi
 				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
+			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
 				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
+			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
-			else
-				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 	}
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 22:22:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:56:58 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case RPL_NAMREPLY:
 		{
 			return (RPL_NAMREPLYmsg(RPL_NAMREPLY, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_ENDOFNAMES:
+		{
+			return (RPL_ENDOFNAMESmsg(RPL_ENDOFNAMES, cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NOSUCHCHANNEL:
 		{
