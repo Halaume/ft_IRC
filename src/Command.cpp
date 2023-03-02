@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:33:57 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:38:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -641,7 +641,7 @@ int Command::answer(Server &my_server)
     if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR
 		|| _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
         return (0);
-    std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
+    std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MDE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
     int i = 0;
     if (_parsedCmd.size() == 0)
         return (0);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 12:45:53 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:36:03 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,10 @@ void	check_kill(Server& server)
 	}
 }
 
+/* TODO
+		tester les nc et CTRL+D
+		
+*/
 int main(int argc, char **argv)
 {
 	Server g_serv;
