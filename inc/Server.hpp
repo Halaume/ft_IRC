@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:24:16 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:27:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,8 @@ class Server
 		std::vector<Channel>::iterator	getChannelsend(void);
 		std::vector<Channel>			getChannel(void) const;
 		epoll_event &					getEv(void);
-		
-		
+
+
 		void 							printGlobalCommand(Command cmd);
 		void 							printParsedCommand(Command cmd);
 		// GETTERS
@@ -75,11 +75,11 @@ class Server
 		void							sendto(int, std::vector <unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		bool							isUserInList(int);
-		
+
 		// Channels
 		bool							channelExists(std::vector<unsigned char>&);
 		void							addNewChannel(Channel&);
-	
+
 		// Channel*						findChanPtr(std::vector<unsigned char>);
 		void							send_to_client(int, std::vector<unsigned char>);
 			

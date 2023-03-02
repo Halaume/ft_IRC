@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:24:18 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:28:42 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,7 +278,7 @@ int	Command::_fun_RESTART(Server &my_server)
 void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::vector<unsigned char> msg)
 {
 	std::vector<unsigned char>::iterator	it = dest.begin();
-	Channel*								chan;
+	std::vector<Channel>::iterator								chan;
 	bool									is_op = false;
 
 	if (dest[0] != '#')
@@ -286,39 +286,42 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		for (it = it + 1; it != dest.end(); it++)
 		{
 			if (*it == '#')
-				chan = my_server.findChan(std::vector<unsigned char>(it, dest.end()));
+				chan = my_server.findExistingChan(std::vector<unsigned char>(it, dest.end()));
 			else if (*it == '@' || *it == '+')
 				is_op = true;
 			else if (*it != '@' || *it != '+')
-				return ;//MAYBE le commentaire en dessous, a voir
+				return ;
 		}
 	}
 	else
 		return;
+	if (chan == my_server.getChannelsend())
+	{
+		push_to_buf(ERR_NOSUCHNICK, *this, this->_parsedCmd[1]);
+		return ;
+	}
 	std::vector<unsigned char> ret;
 	std::vector<std::vector<unsigned char> >::size_type i;
 	unsigned char text[] = " PRIVMSG ";
 	int j = 0;
-	
-	
-	if (chan != &(*my_server.getChannel().end()) && is_op)
-	{
-		ret = this->_cmd_user->getNick();
-		ret.insert(ret.begin(), ':');
-		ret.push_back('!');
-		for (i = 0; i < chan->getChanName().size(); i++)
-			ret.insert(ret.end(), this->_cmd_user->getUserNamebg(), this->_cmd_user->getUserNameend());
-		ret.push_back('@');
-		for (i = 0; i < this->_cmd_user->getUserMask().size(); i++)
+
+	ret = this->_cmd_user->getNick();
+	ret.insert(ret.begin(), ':');
+	ret.push_back('!');
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.insert(ret.end(), this->_cmd_user->getUserNamebg(), this->_cmd_user->getUserNameend());
+	ret.push_back('@');
+	for (i = 0; i < this->_cmd_user->getUserMask().size(); i++)
 			ret.push_back(this->_cmd_user->getUserMask()[i]);
-		while (text[j])
-			ret.push_back(text[j++]);
-		for (i = 0; i < chan->getChanName().size(); i++)
-			ret.push_back(chan->getChanName()[i]);
-		msg.insert(msg.begin(), ret.begin(), ret.end());
-		msg.push_back('\r');
-		msg.push_back('\n');
-		for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
+	while (text[j])
+		ret.push_back(text[j++]);
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.push_back(chan->getChanName()[i]);
+	msg.insert(msg.begin(), ret.begin(), ret.end());
+	print_vector("MESSAGE FINALE = ", msg);
+	if (is_op)
+	{
+				for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
 		{
 			(*itc)->setRet(msg);
 			my_server.getEv().events = EPOLLOUT | EPOLLET;
@@ -371,7 +374,6 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		msg = this->_parsedCmd[2];
 	msg.push_back('\r');
 	msg.push_back('\n');
-	print_vector("MESSAGE = ", msg);
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
 		do_chan(receiver, my_server, msg);
 	else
