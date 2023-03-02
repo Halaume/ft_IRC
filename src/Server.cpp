@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 14:45:35 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:56:38 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,6 +223,14 @@ void Server::run(void) // checker le nombre de connexions max?
 							Usr->clearRet();
 							cmd._globalCmd.clear();
 							CmdIt.clear();
+							if (Usr->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+							{
+								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
+								close(_events[k].data.fd);
+								if (Usr != _users.end())
+									_users.erase(Usr);
+								break;
+							}
 							shift = 0;
 							if (Usr->getCurrCmd().size() > 0)
 							{
@@ -324,11 +332,11 @@ void Server::run(void) // checker le nombre de connexions max?
 								Usr->insertcmd(v);
 								v.clear();
 							}
-							else if (retrec > 2 && retrec < BUFFER_SIZE) // > 2 because of \r\n
+							else if (retrec > 2 && retrec < BUFFER_SIZE)
 							{
 								for (int i = 0; i < retrec; i++)
 									v.push_back(buf[i]);
-								Usr->insertcmd(v); // currCmd setter
+								Usr->insertcmd(v);
 								v.clear();
 								ParsedCommand.clear();
 								Usr->clearRet();
@@ -399,8 +407,9 @@ void Server::run(void) // checker le nombre de connexions max?
 								if (_ev.events != (EPOLLOUT | EPOLLET))
 									Usr->clearCurrCmd();
 								printUsersList();
+								std::cout << *this;
 							}
-							else if (retrec == 0)
+							else if (retrec == 0 || Usr->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
 							{
 								std::cout << "^^^^^^CLOSING CONNECTION^^^^^^\n";
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);

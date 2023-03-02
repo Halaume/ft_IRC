@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 16:49:11 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 17:18:36 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ class Command
 			int										_error;
 			std::vector<std::vector<unsigned char> > _ret;
 
-			int	_fun_PASS(Server &);	
+			int	_fun_PASS();	
 			int	_fun_NICK(Server &);
 			int	_fun_USER(Server &);
 			int	_fun_JOIN(Server &);

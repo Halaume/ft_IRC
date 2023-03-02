@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:12:05 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 17:19:20 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,23 @@ void	Command::setUser(User* usr)
 	_cmd_user = usr;
 }
 
+void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
+{
+	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			my_server.getEv().data.fd = (*itc)->getfd();
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
+}
+
 /*''''''''''''''''''''''''''''''''''''
-				Register
+				Register TODO: error msg and disconnect
 ''''''''''''''''''''''''''''''''''''''*/
 int Command::register_user(Server &my_server)
 {
-	(void)my_server;
 	std::vector<unsigned char> v;
 	
 	if (_cmd_user->getPasswd() != my_server.getPasswd())
@@ -76,7 +87,7 @@ int Command::register_user(Server &my_server)
 	if (my_server.nbConnectionsWithSameNick(*_cmd_user) > 1)
 	{
 		if (_cmd_user->createNewNick(my_server) == 1)
-			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
+			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1); // ERROR msg and disconnect
 	}
 	_cmd_user->setRegistered(true);
 	push_to_buf(RPL_WELCOME, *this, no_param);
@@ -86,75 +97,11 @@ int Command::register_user(Server &my_server)
 	return (1);
 }
 
-void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
-{
-	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
-		{
-			(*itc)->setRet(msg);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = (*itc)->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
-		}
-}
-
-void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::vector<unsigned char> msg)
-{
-	std::vector<unsigned char>::iterator	it = dest.begin();
-	Channel*								chan;
-	bool									is_op = false;
-
-	if (dest[0] != '#')
-	{
-		for (it = it + 1; it != dest.end(); it++)
-		{
-			if (*it == '#')
-				chan = my_server.findChan(std::vector<unsigned char>(it, dest.end()));
-			else if (*it == '@' || *it == '+')
-				is_op = true;
-			else if (*it != '@' || *it != '+')
-				return ;//MAYBE le commentaire en dessous, a voir
-		}
-	}
-	else
-		return;
-/*	else
-	{
-		dest.clear();
-		dest = this->_parsedCmd[0];
-		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
-		this->_cmd_user->setRet(ret);
-		return ;
-	}*/
-	if (chan != &(*my_server.getChannel().end()) && is_op)
-	{
-		for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
-		{
-			(*itc)->setRet(msg);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
-		}
-	}
-	else
-	{
-		for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
-		{
-			(*itc)->setRet(msg);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
-		}
-	}
-}
-
 /*''''''''''''''''''''''''''''''''''''
-				PASS TODO:exit and close connection when password mismatches on registration?
+				PASS TP
 ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_PASS(Server &my_server)
+int Command::_fun_PASS(void)
 {
-	std::cout << ">>>>>>>> PASS OK\n";
-	(void)my_server;
 	std::vector<unsigned char> v;
 	
 	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false)
@@ -185,10 +132,10 @@ int Command::_fun_NICK(Server &my_server)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
 	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
 	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
-		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1);
+		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1); 
 	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
-			&& (_cmd_user->getNick() != _parsedCmd[1]))
-		return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
+			&& my_compare(_cmd_user->getNick(), _parsedCmd[1]))
+		return (push_to_buf(ERR_NICKNAMEINUSE, *this, _parsedCmd[1]), 1);
 	if (_cmd_user->getRegistered() == true)
 	{
 		push_to_buf(OWN_NICK_RPL, *this, _parsedCmd[1]);
@@ -234,15 +181,13 @@ int Command::_fun_USER(Server &my_server)
 	return (0);
 }
 
-
-// /*''''''''''''''''''''''''''''''''''''
-// 				JOIN
-// ''''''''''''''''''''''''''''''''''''''*/
 int Command::_fun_JOIN(Server &my_server)
 {
 	(void)my_server;
 	std::vector<std::vector<unsigned char> > channels;
 	std::vector<std::vector<unsigned char> > keys;
+	std::vector<unsigned char> param;
+
 	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
@@ -251,46 +196,109 @@ int Command::_fun_JOIN(Server &my_server)
 	std::vector<std::vector<unsigned char> >::size_type keys_size = keys.size();
 	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it < channels.size(); ++it)
 	{
-		if (channels[it].empty() == false && channels[it][0] != '#' && channels[it][0] != '&') // ajouter fonciton qui checke s il y a pas le char 07 ^G
+		if (channels[it].empty() == false && ((channels[it][0] != '#' && channels[it][0] != '&') || contains_ctrl_g(channels[it]) == true))
 			return (push_to_buf(ERR_BADCHANMASK, *this, channels[it]), 1);
-		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // verifier si on quitte un channel si on arrive a rerentrer
 			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
 			Channel new_channel(channels[it]);
-			new_channel.addUser(&(*_cmd_user));
+			new_channel.addUser(_cmd_user);
 			my_server.addNewChannel(new_channel);
-			// send messages to accept user RPL
+			if (my_server.findChan(channels[it]) == NULL)
+				return (0);
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 		else
 		{
 			if (my_server.findChan(channels[it]) == NULL) // protect findchan
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
-			{
-				// user is already in channel do nothing
-			}
-			else if (my_server.findChan(channels[it])->getMode('k') == true
-				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it
-				&& (keys[it] != my_server.findChan(channels[it])->getChanPassword()))))
+			// else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
+			// {
+			// 	// user is already in channel do nothing
+			// }
+			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
+				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('l') == true
+			else if (my_server.findChan(channels[it])->getMode('l') == true // to verify in irssi
 				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
 				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
-			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
+			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // to verify in irssi
 				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user
+			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
 				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator
+			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
-			else
-				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
+			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			push_to_buf(RPL_TOPIC, *this, param);
+			param = rpl_name(my_server.findChan(channels[it]));
+			push_to_buf(RPL_NAMREPLY, *this, param);
+			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
 	}
 	return (0);
 }
+
+void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char>::iterator	it = dest.begin();
+	Channel*								chan;
+	bool									is_op = false;
+
+	chan = NULL;
+	if (dest[0] != '#')
+	{
+		for (it = it + 1; it != dest.end(); it++)
+		{
+			if (*it == '#')
+				chan = my_server.findChan(std::vector<unsigned char>(it, dest.end()));
+			else if (*it == '@' || *it == '+')
+				is_op = true;
+			else if (*it != '@' || *it != '+')
+				return ;//MAYBE le commentaire en dessous, a voir
+		}
+	}
+	else
+		return;
+/*	else
+	{
+		dest.clear();
+		dest = this->_parsedCmd[0];
+		insert_all(dest, "ERRCANNOTSENDTOCHAN\r\n");
+		this->_cmd_user->setRet(ret);
+		return ;
+	}*/
+	if (chan != &(*my_server.getChannel().end()) && is_op)
+	{
+		for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
+	}
+	else
+	{
+		for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
+		{
+			(*itc)->setRet(msg);
+			my_server.getEv().events = EPOLLOUT | EPOLLET;
+			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+				return ;
+		}
+	}
+}
+
 
 // /*''''''''''''''''''''''''''''''''''''
 // 				QUIT
@@ -690,7 +698,8 @@ int Command::answer(Server &my_server)
 {
     std::cout << "___Command\n";
     print_vector2("Answer", _parsedCmd);
-    if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR || _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+    if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR
+		|| _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
         return (0);
     std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
     int i = 0;
@@ -701,7 +710,7 @@ int Command::answer(Server &my_server)
     switch (i)
     {
         case 0:
-            return (_fun_PASS(my_server));
+            return (_fun_PASS());
             break;
         case 1:
             return (_fun_NICK(my_server));

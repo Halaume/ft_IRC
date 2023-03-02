@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:12:59 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 17:30:06 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,15 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define RPL_YOUREOPERmsg(code, client)                     concat_resp(code, client,                   to_vector(" :You are now an IRC operator\r\n"))
 
 
+
+# define RPL_TOPICmsg(code, nick, channel_and_topic)        concat_resp(code, nick, channel_and_topic)
+# define RPL_NAMREPLYmsg(code, nick, all_the_rest)          concat_resp(code, nick, all_the_rest)
+# define RPL_ENDOFNAMESmsg(code, nick, channel)             concat_resp(code, nick, channel,            to_vector(" :End of /NAMES list\r\n"))
 # define ERR_NOSUCHCHANNELmsg(code, client, channel)        concat_resp(code, client, channel,          to_vector(" :No such channel\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, client, channel)      concat_resp(code, client, channel,          to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code)                       concat_resp(code,                           to_vector(" :No nickname given\r\n"))
 # define ERR_ERRONEUSNICKNAMEmsg(code, client, nick)        concat_resp(code, client, nick,             to_vector(" :Erroneus nickname\r\n"))
-# define ERR_NICKNAMEINUSEmsg(code, client, nick)           concat_resp(code, client, nick,             to_vector(" :Nickname is already in use\r\n"))
+# define ERR_NICKNAMEINUSEmsg(code, nick)                   concat_resp(code, nick, nick,             to_vector(" :Nickname is already in use\r\n"))
 # define ERR_NOTONCHANNELmsg(code, client, channel)         concat_resp(code, client, channel,          to_vector(" :You're not on that channel\r\n"))
 # define ERR_USERONCHANNELmsg(code, client, nick, channel)  concat_resp(code, client, nick, channel,    to_vector(" :is already on channel\r\n"))
 # define ERR_NEEDMOREPARAMSmsg(code, client, cmd)           concat_resp(code, client, cmd,              to_vector(" :Not enough parameters\r\n"))
@@ -55,8 +59,9 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define ERR_NOOPERHOSTmsg(code, nick)                      concat_resp(code, nick,                     to_vector(" :No O-lines for your host\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, client)                concat_resp(code, client,                   to_vector(" :Cant change mode for other users\r\n"))
 # define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)    concat_nick_rpl(nick, user_name, mask, nickold)
+# define JOINED_CHANNELmsg(client, channel)                 concat_resp(client, to_vector("JOIN"), channel)
 
-
+// # define JOINED_CHANNELmsg(client, channel)               concat_resp(client, to_vector("JOIN"), add_to_vector(channel, static_cast<std::string>("\r\n")))
 // class Command;
 
 enum numerics {
@@ -68,8 +73,11 @@ enum numerics {
     RPL_UMODEIS             = 221,
     RPL_INVITING            = 341,
     RPL_YOUREOPER           = 381,
-
-    ERR_NOSUCHNICK          = 401,
+    
+    RPL_TOPIC               = 332,
+    RPL_NAMREPLY            = 353,
+    RPL_ENDOFNAMES          = 366,
+    ERR_NOSUCHNICK          = 401, 
     ERR_NOSUCHCHANNEL       = 403,
     ERR_TOOMANYCHANNELS     = 405,
     ERR_NONICKNAMEGIVEN     = 431,
@@ -79,18 +87,17 @@ enum numerics {
     ERR_USERONCHANNEL       = 443,
 	ERR_NEEDMOREPARAMS      = 461,
     ERR_ALREADYREGISTERED   = 462,
-    ERR_PASSWDMISMATCH      = 464,
-    
+    ERR_PASSWDMISMATCH      = 464, 
     ERR_CHANNELISFULL       = 471,
     ERR_INVITEONLYCHAN      = 473,
     ERR_BANNEDFROMCHAN      = 474,
     ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476,
-
     ERR_CHANOPRIVSNEEDED    = 482,
     ERR_NOOPERHOST          = 491,
     ERR_USERSDONTMATCH      = 502,
-    OWN_NICK_RPL            = 1000
+    OWN_NICK_RPL            = 1000,
+    JOINED_CHANNEL          = 1001
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);
