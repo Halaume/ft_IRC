@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 15:56:38 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:45:20 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,14 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), param));
 		}
+		case RPL_INVITING:
+		{
+			std::vector<unsigned char> v;
+			v.push_back(' ');
+			add_to_v(v, param);
+			add_to_vector(v, static_cast<std::string>("\r\n"));
+			return (RPL_INVITINGmsg(RPL_INVITING, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], v));
+		}
 		case RPL_NAMREPLY:
 		{
 			return (RPL_NAMREPLYmsg(RPL_NAMREPLY, cmd.getCmdUser()->getNick(), param));
@@ -91,6 +99,14 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_NICKNAMEINUSE:
 		{
 			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
+		}
+		case ERR_NOTONCHANNEL:
+		{
+			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, cmd.getCmdUser()->getNick(), param));
+		}
+		case ERR_USERONCHANNEL:
+		{
+			return (ERR_USERONCHANNELmsg(ERR_USERONCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param ));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{
@@ -123,6 +139,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_BADCHANMASK:
 		{
 			return (ERR_BADCHANMASKmsg(ERR_BADCHANMASK, param));
+		}
+		case  ERR_CHANOPRIVSNEEDED:
+		{
+			return (ERR_CHANOPRIVSNEEDEDmsg(ERR_CHANOPRIVSNEEDED, cmd.getCmdUser()->getNick(), param));	
 		}
 		case OWN_NICK_RPL:
 		{

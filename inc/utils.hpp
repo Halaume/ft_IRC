@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 23:02:04 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:15:07 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,8 @@ void                                        add_to_v(std::vector<unsigned char> 
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
-std::vector<unsigned char>                  concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3);
+std::vector<unsigned char>                  concat_resp(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 
 
 std::vector<unsigned char>                  concat_nick_rpl(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);

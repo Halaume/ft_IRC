@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 23:02:41 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 19:27:03 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,7 @@ void Channel::addUserToInvite(User *new_user)
 {
 	// verify if user not already in list..
 	// check list limit etc...
+	print_vector("nick in chan", new_user->getNick());
 	_invite_list.push_back(new_user);
 }
 
@@ -333,7 +334,7 @@ std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 	
 	for (it = this->_user_list.begin(); it != this->_user_list.end(); it++)
 	{
-		if ((*it)->getUserName() == nick)
+		if ((*it)->getNick() == nick)
 			return (it);
 	}
 	return (it);

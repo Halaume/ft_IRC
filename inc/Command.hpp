@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 15:24:27 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:03:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ class Command
 		void									_fun_MODE(Server &);
 		void									_fun_TOPIC(Server &);
 		void									_fun_KICK(Server &);
-		void									_fun_INVITE(Server &);
+		int										_fun_INVITE(Server &);
 		void									_fun_KILL(Server &);
 		void									_fun_RESTART(Server &);
 		void									_fun_PONG(void);

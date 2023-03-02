@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:54:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 19:03:28 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,7 +495,7 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 
 	for (itu = _users.begin(); itu != _users.end(); ++itu)
 	{
-		if (!my_compare(itu->getNick(), nick))
+		if (itu->getNick() == nick)
 			return (&(*itu));
 		i++;
 	}
