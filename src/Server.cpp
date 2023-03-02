@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:06:56 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:57:54 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ void Server::addNewChannel(Channel& new_channel)
 	_channels.push_back(new_channel);
 }
 
-void Server::run(void)
+void Server::run(void) // checker le nombre de connexions max?
 {
 	int accepted = 0;
 	int yes = 1;//	For SO_KEEPALIVE
@@ -209,8 +209,6 @@ void Server::run(void)
 							std::cerr << "Sending data" << std::endl;
 							sendto(Usr->getfd(), Usr->getRet());
 							cmd.getRet().clear();
-
-
 							Usr = findUser(_events[k].data.fd);
 							if (Usr == _users.end())
 							{
@@ -228,6 +226,14 @@ void Server::run(void)
 							Usr->clearRet();
 							cmd._globalCmd.clear();
 							CmdIt.clear();
+							if (Usr->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+							{
+								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
+								close(_events[k].data.fd);
+								if (Usr != _users.end())
+									_users.erase(Usr);
+								break;
+							}
 							shift = 0;
 							if (Usr->getCurrCmd().size() > 0)
 							{
@@ -262,7 +268,7 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.getRet().clear();
-										if (cmd.answer(*this, *Usr) == 1)
+										if (cmd.answer(*this) == 1)
 											break;
 										Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), (Usr->getCurrCmdbg() + it + 1));
 										_ev.events = EPOLLIN | EPOLLET;
@@ -276,7 +282,6 @@ void Server::run(void)
 										}
 									}
 								}
-								// break;
 							}
 
 							_ev.events = EPOLLIN | EPOLLET;
@@ -332,7 +337,7 @@ void Server::run(void)
 							{
 								for (int i = 0; i < retrec; i++)
 									v.push_back(buf[i]);
-								Usr->insertcmd(v); // currCmd setter
+								Usr->insertcmd(v);
 								v.clear();
 								ParsedCommand.clear();
 								Usr->clearRet();
@@ -373,7 +378,10 @@ void Server::run(void)
 										cmd.setParsedCmd(ParsedCommand);
 										cmd.setUser(&(*Usr));
 										cmd.getRet().clear();
-										if (cmd.answer(*this, *Usr) == 1)
+										int ans = cmd.answer(*this);
+										if (ans == 2)
+											break;
+										if (ans == 1)
 										{
 											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), iter);
 											_ev.events = EPOLLOUT | EPOLLET;
@@ -396,7 +404,7 @@ void Server::run(void)
 								if (_ev.events != (EPOLLOUT | EPOLLET))
 									Usr->clearCurrCmd();
 							}
-							else if (retrec == 0)
+							else if (retrec == 0 || Usr->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
 							{
 								_ev.data.fd = _events[k].data.fd;
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
@@ -477,11 +485,10 @@ void	Server::delUser(User & Usr)
 {
 	for (std::vector<Channel *>::iterator it = Usr.getChannelsbg(); it != Usr.getChannelsend(); it++)
 		(*it)->delUser(Usr.getfd());
+	int fd = Usr.getfd();
 	_ev.data.fd = Usr.getfd();
 	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr.getfd(), &_ev);
-	if (findUser(Usr.getfd()) != _users.end())
-		_users.erase(findUser(Usr.getfd()));
-	close(Usr.getfd());
+	close(fd);
 }
 
 void Server::printUsersList(void)
@@ -562,6 +569,18 @@ int Server::nbConnections(User &user)
 	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
 	{
 		if (it->getUserMask() == user.getUserMask())
+			nb++;
+	}
+	return (nb);
+}
+
+int Server::nbConnectionsWithSameNick(User &user)
+{
+	int nb = 0;
+	
+	for (std::list<User>::iterator it = _users.begin(); it != _users.end(); it++)
+	{
+		if (it->getUserMask() == user.getUserMask() && it->getNick() == user.getNick())
 			nb++;
 	}
 	return (nb);

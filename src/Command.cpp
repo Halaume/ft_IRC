@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:06:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:57:55 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,33 +57,6 @@ void	Command::setUser(User* usr)
 	_cmd_user = usr;
 }
 
-int Command::register_user(Server &my_server, User &user)
-{
-	(void)my_server;
-	std::vector<unsigned char> v;
-	// std::vector<unsigned char> new_nick;
-
-	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
-	{
-		user.setPassBeforeNickUser(PASS_CONNECTION_ERROR);
-		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
-	}
-
-	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
-	if (itu != my_server.getUsersend())
-		std::cout << "SAAAAAAAAMMMEEE NAME OKKKKKKKK\n";
-	// 	return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
-
-	std::cout << "number of conenctions from user:" << my_server.nbConnections(user) << std::endl;// change to ip check?
-
-	_cmd_user->setRegistered(true);
-	push_to_buf(RPL_WELCOME, *this, no_param);
-	push_to_buf(RPL_YOURHOST, *this, no_param);
-	push_to_buf(RPL_CREATED, *this, no_param);
-	push_to_buf(RPL_MYINFO, *this, no_param);
-	return (1);
-}
-
 void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
 {
 	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
@@ -97,11 +70,39 @@ void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan
 }
 
 /*''''''''''''''''''''''''''''''''''''
-  PASS TODO:exit and close connection when password mismatches on registration?
-  ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_PASS(Server &my_server, User &user)
+				Register TODO: error msg and disconnect
+''''''''''''''''''''''''''''''''''''''*/
+int Command::register_user(Server &my_server)
 {
-	(void)my_server;
+	std::vector<unsigned char> v;
+	
+	if (my_compare(_cmd_user->getPasswd(), my_server.getPasswd()))
+	{
+		_cmd_user->setPassBeforeNickUser(PASS_CONNECTION_ERROR);
+		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
+	}
+	v = _cmd_user->getNick();
+	std::list<User>::iterator itu = my_server.findUser(_cmd_user->getNick());
+	if (itu->getUserMask() != _cmd_user->getUserMask())
+		return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
+	if (my_server.nbConnectionsWithSameNick(*_cmd_user) > 1)
+	{
+		if (_cmd_user->createNewNick(my_server) == 1)
+			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1); // ERROR msg and disconnect
+	}
+	_cmd_user->setRegistered(true);
+	push_to_buf(RPL_WELCOME, *this, no_param);
+	push_to_buf(RPL_YOURHOST, *this, no_param);
+	push_to_buf(RPL_CREATED, *this, no_param);
+	push_to_buf(RPL_MYINFO, *this, no_param);
+	return (1);
+}
+
+/*''''''''''''''''''''''''''''''''''''
+				PASS TP
+''''''''''''''''''''''''''''''''''''''*/
+int Command::_fun_PASS(void)
+{
 	std::vector<unsigned char> v;
 
 	if ((_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true) && _cmd_user->getRegistered() == false)
@@ -110,55 +111,55 @@ int Command::_fun_PASS(Server &my_server, User &user)
 		return (push_to_buf(ERR_ALREADYREGISTERED, *this, no_param), 1);
 	_cmd_user->setPasswd(_parsedCmd[1]);
 	_cmd_user->setPassStatus(PASSWORD_SET);
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
-		user.setPassBeforeNickUser(PASS_ORDER_OK);
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_OK);
 	return (0);
 }
 
 /*''''''''''''''''''''''''''''''''''''
-  NICK
-  ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_NICK(Server &my_server, User &user)
+				NICK
+''''''''''''''''''''''''''''''''''''''*/
+int Command::_fun_NICK(Server &my_server)
 {
 	std::vector<unsigned char> ret;
 	int to_send = 0;
-
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
+	
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
 	{
-		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
-	if (_parsedCmd.size() < 2)
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
 	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
-	if (_cmd_user->isNickValid(_parsedCmd[1]) == false) // add ctrl+G to invalid chars
-		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param), 1);
+	if (_cmd_user->isNickValid(_parsedCmd[1]) == false)
+		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, _parsedCmd[1]), 1); 
 	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
 			&& my_compare(_cmd_user->getNick(), _parsedCmd[1]))
-		return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
+		return (push_to_buf(ERR_NICKNAMEINUSE, *this, _parsedCmd[1]), 1);
 	if (_cmd_user->getRegistered() == true)
 	{
 		push_to_buf(OWN_NICK_RPL, *this, _parsedCmd[1]);
 		to_send = 1;
 	}
 	_cmd_user->setNick(_parsedCmd[1]);
-	if (user.getPassBeforeNickUser() == PASS_USER_OK)
-		return (register_user(my_server, user)); // si pas encore enregistré ajouter _ 1 2 etc pour permettre
+	if (_cmd_user->getPassBeforeNickUser() == PASS_USER_OK)
+		return (register_user(my_server));
 	else
-		user.setPassBeforeNickUser(PASS_NICK_OK);
+		_cmd_user->setPassBeforeNickUser(PASS_NICK_OK);
 	return (to_send);
 }
 
 // /*''''''''''''''''''''''''''''''''''''
 // 				USER
 // ''''''''''''''''''''''''''''''''''''''*/
-int Command::_fun_USER(Server &my_server, User &user)
+int Command::_fun_USER(Server &my_server)
 {
 	std::vector<unsigned char> ret;
-
-	if (user.getPassBeforeNickUser() == WAITING_FOR_PASS)
+	
+	if (_cmd_user->getPassBeforeNickUser() == WAITING_FOR_PASS)
 	{
-		user.setPassBeforeNickUser(PASS_ORDER_ERROR);
+		_cmd_user->setPassBeforeNickUser(PASS_ORDER_ERROR);
 		return (0);
 	}
 	if (_parsedCmd.size() < 5 || _parsedCmd[4].empty() == true)
@@ -173,10 +174,10 @@ int Command::_fun_USER(Server &my_server, User &user)
 		_cmd_user->setUserName(_parsedCmd[1]);
 		_cmd_user->setRealName(real_name);
 		_cmd_user->setUserMask(_parsedCmd[3]);
-		if (user.getPassBeforeNickUser() == PASS_NICK_OK)
-			return (register_user(my_server, user)); // to finish -> same user name/mask and nick -> iterate nick -> set a limit of connections?
+		if (_cmd_user->getPassBeforeNickUser() == PASS_NICK_OK)
+			return (register_user(my_server));
 		else
-			user.setPassBeforeNickUser(PASS_USER_OK);
+			_cmd_user->setPassBeforeNickUser(PASS_USER_OK);
 	}
 	return (0);
 }
@@ -247,7 +248,7 @@ int Command::_fun_JOIN(Server &my_server)
 int	Command::_fun_QUIT(Server &my_server)
 {
 	my_server.delUser(*(this->_cmd_user));
-	return (0);
+	return (2);
 }
 
 int	Command::_fun_RESTART(Server &my_server)
@@ -375,8 +376,9 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		std::vector<unsigned char>	tmp;
 		tmp.push_back(':');
 		tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
-		tmp.push_back(' ');
-		tmp.push_back(' ');
+		unsigned char text[] = " PRIVMSG ";
+		for (int j = 0; text[j]; j++)
+			tmp.push_back(text[j]);
 		tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
 		tmp.push_back(' ');
 		tmp.push_back(':');
@@ -665,11 +667,11 @@ int	Command::_fun_NOTICE(Server &my_server)
 }
 
 
-int Command::answer(Server &my_server, User &user)
+int Command::answer(Server &my_server)
 {
 	std::cout << "___Command\n";
 	print_vector2("Answer", _parsedCmd);
-	if (user.getPassBeforeNickUser() == PASS_ORDER_ERROR || user.getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
+	if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR || _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
 		return (0);
 	std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
 	int i = 0;
@@ -680,13 +682,13 @@ int Command::answer(Server &my_server, User &user)
 	switch (i)
 	{
 		case 0:
-			return (_fun_PASS(my_server, user));
+			return (_fun_PASS());
 			break;
 		case 1:
-			return (_fun_NICK(my_server, user));
+			return (_fun_NICK(my_server));
 			break;
 		case 2:
-			return (_fun_USER(my_server, user));
+			return (_fun_USER(my_server));
 			break;
 		case 3:
 			if (!this->_cmd_user->getRegistered())

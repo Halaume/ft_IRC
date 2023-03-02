@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 15:25:54 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 22:54:04 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class Channel
 		int								getNbUsers(void);
 		int								getNbUsersLimit(void);
 		bool							getMode(char c);
+		void							makeOp(User *);
 
 		// SETTERS
 		void							setChanName(std::vector<unsigned char>);
@@ -77,11 +78,11 @@ class Channel
 		// Getters	
 		std::list<User *>				getUsers(void) const;
 
-		std::vector<unsigned char>	 getTopic(void) const;
-		std::map<char, bool>		 getModes(void) const;
+		std::vector<unsigned char>&	 	getTopic(void);
+		std::map<char, bool>		 	getModes(void) const;
 
-		void        setTopic(std::vector<unsigned char>);
-		bool        isOp(User usr) const;
+		void        					setTopic(std::vector<unsigned char>);
+		bool        					isOp(User usr) const;
 
 		std::list<User *>::iterator	findUser(std::vector<unsigned char> nick);
 			
@@ -89,7 +90,6 @@ class Channel
 		std::vector<unsigned char>		_chan_name;
 		std::vector<unsigned char>		_chan_password;
 		std::map<char, bool>			_modes;
-		int								_user_connected;
 		std::list<User *>				_op_list;
 		std::list<User *>				_user_list;
 		std::list<User *>				_ban_list;

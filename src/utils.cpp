@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
 /*   Updated: 2023/03/02 16:06:54 by ghanquer         ###   ########.fr       */
@@ -16,6 +16,8 @@
 #include <string.h>
 #include <unistd.h>
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
+#include "../inc/User.hpp"
 
 void print_vector(std::string s, std::vector<unsigned char> v)
 {
@@ -94,14 +96,10 @@ std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
 	return (ret);
 }
 
-std::vector<unsigned char> add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+void add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2)
 {
-	std::vector<unsigned char> ret;
-	
-	ret = v1;
 	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
 		v1.push_back(v2[i]);
-	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
@@ -204,7 +202,21 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
-
+std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v3.size(); i++)
+		ret.push_back(v3[i]);
+	return (ret);
+}
 
 void print_vector2(std::string s, std::vector<std::vector<unsigned char> > v)
 {
@@ -294,6 +306,20 @@ bool isValidCharacter(unsigned char c)
 		(c == '|'))
 		return (true);
 	return (false);
+}
+
+std::vector<unsigned char> numToVec(int num)
+{
+	std::vector<unsigned char> v;
+	
+	while (num > 0)
+	{
+		v.push_back('0' + num % 10);
+		num /= 10;
+	}
+	for (std::vector<unsigned char>::size_type i = 0; i < v.size() / 2; i++)
+        std::swap(v[i], v[v.size() - i - 1]);
+	return (v);
 }
 
 std::vector<unsigned char> concat_real_name(std::vector<unsigned char> cmd)

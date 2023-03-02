@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 15:57:25 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 16:39:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-// TODO : if no client name, put nick name
 void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 {
 	(void)param;
@@ -30,7 +29,7 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 	std::string server_name = "mig.42.fr";
 	std::string ddots = ":";
 	
-	if (code == OWN_NICK_RPL)
+	if (code == OWN_NICK_RPL || code == JOINED_CHANNEL)
 		add_to_vector(buf, ddots);
 	else
 		add_to_vector(buf, ddots + server_name);
