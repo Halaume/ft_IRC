@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 13:40:34 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:24:18 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,14 +255,9 @@ int Command::_fun_JOIN(Server &my_server)
 	return (1);
 }
 
-int	Command::_fun_QUIT(Server &my_server)//TODO a revoir
+int	Command::_fun_QUIT(Server &my_server)
 {
-	(void)my_server;
-	for (std::vector<Channel *>::iterator itc = _cmd_user->getChannelsbg(); itc != _cmd_user->getChannelsend(); itc++)
-	{
-		for (std::list<User *>::const_iterator itu = (*itc)->getUserListbg(); itu != (*itc)->getUserListend(); itu++)
-			this->_cmd_user->getChannels().erase(itc);
-	}
+	my_server.delUser(*(this->_cmd_user));
 	return (0);
 }
 
@@ -312,7 +307,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		ret.insert(ret.begin(), ':');
 		ret.push_back('!');
 		for (i = 0; i < chan->getChanName().size(); i++)
-			ret.insert(ret.end(), this->_cmd_user->getUserName().begin(), this->_cmd_user->getUserName().end());
+			ret.insert(ret.end(), this->_cmd_user->getUserNamebg(), this->_cmd_user->getUserNameend());
 		ret.push_back('@');
 		for (i = 0; i < this->_cmd_user->getUserMask().size(); i++)
 			ret.push_back(this->_cmd_user->getUserMask()[i]);
@@ -329,7 +324,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			my_server.getEv().events = EPOLLOUT | EPOLLET;
 			my_server.getEv().data.fd = (*itc)->getfd();
 			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
+				my_server.delUser(**itc);
 		}
 	}
 	else
@@ -340,7 +335,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			my_server.getEv().events = EPOLLOUT | EPOLLET;
 			my_server.getEv().data.fd = (*itc)->getfd();
 			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;//TODO delUser into pas return
+				my_server.delUser(**itc);
 		}
 	}
 }
@@ -384,26 +379,23 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		itu = my_server.findUser(this->_parsedCmd[1]);
 		if (itu == my_server.getUsersend())
 		{
-			this->_cmd_user->setRet(this->_parsedCmd[0]);
-			insert_all(this->_cmd_user->getRet(), " ERR_NOSUCHNICK\r\n");
+			push_to_buf(ERR_NOSUCHNICK, *this, this->_parsedCmd[1]);
 			return (1);
 		}
 		std::vector<unsigned char>	tmp;
 		tmp.push_back(':');
 		tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
 		tmp.push_back(' ');
-		insert_all(tmp, "PRIVMSG");
 		tmp.push_back(' ');
 		tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
 		tmp.push_back(' ');
 		tmp.push_back(':');
 		msg.insert(msg.begin(), tmp.begin(), tmp.end());
 		itu->setRet(msg);
-		print_vector("MESSAGE FINAL = ", msg);
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = itu->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
-			return (0);//TODO delUser into pas return
+			my_server.delUser(*itu);
 	}
 	return (0);
 }
@@ -446,8 +438,7 @@ int	Command::_fun_MODE(Server &my_server)
 	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
 	if (itu == my_server.getUsers().end())
 	{
-		insert_all(ret, "ERR_NOSUCHNICK\r\n");
-		this->_cmd_user->setRet(ret);
+		push_to_buf(ERR_NOSUCHNICK, *this, this->_parsedCmd[1]);
 		return (1);
 	}
 	return (0);

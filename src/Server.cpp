@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 11:28:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:24:14 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,7 @@ void Server::run(void)
 
 							if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &(_ev)) == - 1)
 							{
+								_ev.data.fd = Usr->getfd();
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
 								close(_events[k].data.fd);
 								_users.erase(Usr);
@@ -347,7 +348,6 @@ void Server::run(void)
 									if (it > 0 && Usr->getCurrCmd()[it -1] == '\r' && Usr->getCurrCmd()[it] == '\n')
 									{
 										iv.clear();
-
 										for (std::vector<unsigned char>::size_type j = 0; j < cmd._globalCmd.size(); j++)
 										{
 											if (j == 0 && cmd._globalCmd[j] == ' ')
@@ -380,6 +380,7 @@ void Server::run(void)
 											_ev.data.fd = Usr->getfd();
 											if (epoll_ctl(_epollfd, EPOLL_CTL_MOD, Usr->getfd(), &_ev) == - 1)
 											{
+												_ev.data.fd = Usr->getfd();
 												epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
 												close(_events[k].data.fd);
 												if (Usr != _users.end())
@@ -397,6 +398,7 @@ void Server::run(void)
 							}
 							else if (retrec == 0)
 							{
+								_ev.data.fd = _events[k].data.fd;
 								epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 								close(_events[k].data.fd);
 								if (Usr != _users.end())
@@ -407,6 +409,7 @@ void Server::run(void)
 				}
 				catch (std::exception & e)
 				{
+					_ev.data.fd = _events[k].data.fd;
 					epoll_ctl(_epollfd, EPOLL_CTL_DEL, _events[k].data.fd, &_ev);
 					if (findUser(_events[k].data.fd) != _users.end())
 						_users.erase(findUser(_events[k].data.fd));
@@ -426,6 +429,7 @@ void Server::sendto(int fd, std::vector<unsigned char> buf)
 	if (ret < 0)
 	{
 		std::list<User>::iterator Usr = findUser(fd);
+		_ev.data.fd = fd;
 		epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
 		_users.erase(Usr);
 		close(fd);
@@ -467,6 +471,17 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 		i++;
 	}
 	return (NULL);
+}
+
+void	Server::delUser(User & Usr)
+{
+	for (std::vector<Channel *>::iterator it = Usr.getChannelsbg(); it != Usr.getChannelsend(); it++)
+		(*it)->delUser(Usr.getfd());
+	_ev.data.fd = Usr.getfd();
+	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr.getfd(), &_ev);
+	if (findUser(Usr.getfd()) != _users.end())
+		_users.erase(findUser(Usr.getfd()));
+	close(Usr.getfd());
 }
 
 void Server::printUsersList(void)

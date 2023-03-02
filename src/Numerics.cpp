@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:33:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:00:14 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case RPL_AWAY:
 		{
 			return (RPL_AWAYmsg(RPL_AWAY, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
+		}
+		case ERR_NOSUCHNICK:
+		{
+			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, cmd.getCmdUser()->getClient(), param));
 		}
 		case ERR_NOSUCHCHANNEL:
 		{

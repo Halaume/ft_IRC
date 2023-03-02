@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 13:30:50 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:24:17 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,16 @@ std::vector<unsigned char>::iterator	User::getAllCmdbg(void)
 std::vector<unsigned char>::iterator	User::getAllCmdend(void)
 {
 	return (_allCmd.end());
+}
+
+std::vector<unsigned char>::const_iterator	User::getUserNamebg(void) const
+{
+	return (this->_user_name.begin());
+}
+
+std::vector<unsigned char>::const_iterator	User::getUserNameend(void) const
+{
+	return (this->_user_name.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const

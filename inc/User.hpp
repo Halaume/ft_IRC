@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 11:53:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:24:16 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class User
 		int										getPassStatus(void) const;
 		bool									getRegistered(void) const;
 		std::vector<unsigned char>				getUserName(void) const;
+		std::vector<unsigned char>::const_iterator	getUserNamebg(void) const;
+		std::vector<unsigned char>::const_iterator	getUserNameend(void) const;
 		std::vector<unsigned char>				getPasswd(void) const;
 		std::vector<unsigned char>				getClient(void) const;
 		std::vector<unsigned char>				getNick(void) const;

@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:33:58 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:00:15 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define RPL_MYINFOmsg(code, client, server_name)           concat_resp(code, client,           to_vector(" :" + server_name + " 1.0\r\n")) // add user modes and channel modes
 # define RPL_AWAYmsg(code, client, nick, message)			concat_resp(code, client, nick, message)
 
+# define ERR_NOSUCHNICKmsg(code, client, nick)				concat_resp(code, client, nick,     to_vector(" :No such nick/channel\r\n"))
 # define ERR_NOSUCHCHANNELmsg(code, client, channel)        concat_resp(code, client, channel,  to_vector(" :No such channel\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, client, channel)      concat_resp(code, client, channel,  to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code, client)               concat_resp(code, client,           to_vector(" :No nickname given\r\n"))
@@ -58,6 +59,7 @@ enum numerics {
 	RPL_MYINFO              = 4,
 	RPL_AWAY				= 301,
 
+	ERR_NOSUCHNICK			= 401,
 	ERR_NOSUCHCHANNEL       = 403,
 	ERR_TOOMANYCHANNELS     = 405,
 	ERR_NONICKNAMEGIVEN     = 431,
