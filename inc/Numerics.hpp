@@ -82,8 +82,19 @@ enum numerics {
     ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476,
 
+<<<<<<< HEAD
     OWN_NICK_RPL            = 1000,
     JOINED_CHANNEL          = 1001
+=======
+	ERR_CHANNELISFULL       = 471,
+	ERR_INVITEONLYCHAN      = 473,
+	ERR_BANNEDFROMCHAN      = 474,
+	ERR_BADCHANNELKEY       = 475,
+	ERR_BADCHANMASK         = 476,
+
+
+	OWN_NICK_RPL            = 1000
+>>>>>>> 8198ef0a5726c30d2ec9f1b994887b3bb8c0cc0b
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);

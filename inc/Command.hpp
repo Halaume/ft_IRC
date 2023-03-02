@@ -78,7 +78,6 @@ class Command
 		// std::list<User>::iterator				_cmd_user;
 		std::vector<std::vector<unsigned char> > _ret;
 
-		
 		int										_fun_PASS(Server &, User &);
 		int										_fun_NICK(Server &, User &);
 		int										_fun_USER(Server &, User &);
@@ -97,6 +96,7 @@ class Command
 		int										_fun_NOTICE(Server &);
 
 		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
+
 
 };
 
