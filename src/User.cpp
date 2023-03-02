@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 11:54:36 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 14:24:17 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,15 @@
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
 
+# define WAITING_FOR_PASS 0
+# define PASS_ORDER_OK 1
+# define PASS_ORDER_ERROR -1
+# define PASS_NICK_OK 2
+# define PASS_USER_OK 3
+# define PASS_CONNECTION_ERROR 4
+
 User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
@@ -25,15 +32,16 @@ _user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
 }
 
 User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask()
+_user_name(), _real_name(), _client(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_client.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), _passwd(copy._passwd), \
-_user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask)
+User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
+_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), _client(copy._client), \
+_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user), _allCmd(copy._allCmd)
 {
 }
 
@@ -45,15 +53,19 @@ User& User::operator=(const User & src)
 {
 	if (&src == this)
 		return (*this);
-	_fd = src._fd;
-    _pass_status = src._pass_status;
-    _registered = src._registered;
-    _passwd = src._passwd;
-    _user_name = src._user_name;
-    _real_name = src._real_name;
-    _client = src._client;
-    _channels = src._channels;
-	_user_mask = src._user_mask;
+	this->_fd = src._fd;
+	this->_pass_status = src._pass_status;
+	this->_registered = src._registered;
+	this->_passwd = src._passwd;
+	this->_user_name = src._user_name;
+	this->_real_name = src._real_name;
+	this->_client = src._client;
+	this->_channels = src._channels;
+	this->_user_mask = src._user_mask;
+	this->_currCmd = src._currCmd;
+	this->_allCmd = src._allCmd;
+	this->_nick = src._nick;
+	this->_pass_before_nick_user = src._pass_before_nick_user;
 	return (*this);
 }
 
@@ -76,7 +88,7 @@ bool User::isNickValid(std::vector<unsigned char> nick)
 {
 	int j = 0;
 	std::vector<unsigned char>::size_type it;
-	
+
 	for (it = 0; it < nick.size(); ++it)
 	{
 		if (isValidCharacter(nick[it]) == false)
@@ -118,6 +130,16 @@ std::vector<unsigned char>&	User::getCurrCmd(void)
 	return (_currCmd);
 }
 
+std::vector<unsigned char>&	User::getAllCmd(void)
+{
+	return (_allCmd);
+}
+
+int User::getPassBeforeNickUser(void) const
+{
+	return (_pass_before_nick_user);
+}
+
 std::vector<Channel *>::iterator	User::getChannelsbg(void)
 {
 	return (_channels.begin());
@@ -136,6 +158,26 @@ std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
 std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
 {
 	return (_currCmd.end());
+}
+
+std::vector<unsigned char>::iterator	User::getAllCmdbg(void)
+{
+	return (_allCmd.begin());
+}
+
+std::vector<unsigned char>::iterator	User::getAllCmdend(void)
+{
+	return (_allCmd.end());
+}
+
+std::vector<unsigned char>::const_iterator	User::getUserNamebg(void) const
+{
+	return (this->_user_name.begin());
+}
+
+std::vector<unsigned char>::const_iterator	User::getUserNameend(void) const
+{
+	return (this->_user_name.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const
@@ -160,7 +202,7 @@ void	User::setPasswd(std::vector<unsigned char> passwd)
 
 void	User::setRet(std::vector<unsigned char> ret)
 {
-	_ret = ret;
+	_ret = std::vector<unsigned char>(ret);
 }
 
 void User::setUserName(std::vector<unsigned char> userName)
@@ -171,6 +213,11 @@ void User::setUserName(std::vector<unsigned char> userName)
 void	User::setRealName(std::vector<unsigned char> realname)
 {
 	_real_name = realname;
+}
+
+void User::setPassBeforeNickUser(int value)
+{
+	_pass_before_nick_user = value;
 }
 
 int	User::getNbChan(void)
@@ -186,6 +233,16 @@ std::vector<Channel *> User::getChannels(void) const
 std::vector<unsigned char> User::getClient(void) const
 {
 	return (_client);
+}
+
+std::vector<unsigned char>::const_iterator User::getNickbg(void) const
+{
+	return (_nick.begin());	
+}
+
+std::vector<unsigned char>::const_iterator User::getNickend(void) const
+{
+	return (_nick.end());	
 }
 
 std::vector<unsigned char> User::getNick(void) const
@@ -269,10 +326,15 @@ void	User::insertcmd(std::vector<unsigned char> & vec)
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
 }
 
+void	User::insertAllCmd(std::vector<unsigned char> & vec)
+{
+	_allCmd.insert(_allCmd.end(), vec.begin(), vec.end());
+}
+
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
-	
+
 	o << "Clt: ";
 	for (m = 0; m < i.getClient().size(); m++)
 		o << i.getClient()[m];
@@ -285,10 +347,10 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << " Nick: ";
 	for (m = 0; m < i.getNick().size(); m++)
 		o << i.getNick()[m];
-	o << " fd: " << i.getfd() << " user registered:" << i.getRegistered() << " passwd:";
+	o << " fd: " << i.getfd() << " usr reg:" << i.getRegistered() << " passwd:";
 	for (m = 0; m < i.getPasswd().size(); m++)
 		o << i.getPasswd()[m];
-	o << " Ad: " << &i;
+	// o << " Ad: " << &i;
 	o << std::endl;
 
 	return o;

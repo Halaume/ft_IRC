@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 11:00:02 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 11:19:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Command
 
 		void										setCommand(std::vector<std::vector<unsigned char> >);
 		void										setUser(User*);
-		void										answer(Server &);
+		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
 		// Getters
 		std::vector<std::vector<unsigned char> >	getCommand(void) const;
@@ -58,39 +58,45 @@ class Command
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
-		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
+		std::vector<std::vector<unsigned char> >&	getRet();
+		
 
 		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
-		std::vector<std::vector<unsigned char> >	_globalCmd;
+		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		void										register_user(Server &);	
-		void										fun_ERROR(std::string);
+		int											register_user(Server &, User &);	
+		
+		int											answer(Server &, User &);
 
+
+		
 	private:
 		User*									_cmd_user;
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
 		// std::list<User>::iterator				_cmd_user;
-		int										_pass_before_nick_user;
-		
-		void									_fun_NICK(Server &);
-		void									_fun_USER(Server &);
-		void									_fun_PASS(Server &);
-		void									_fun_JOIN(Server &);
-		void									_fun_PRIVMSG(Server &);
-		void									_fun_OPER(Server &);
-		void									_fun_QUIT(Server &);
-		void									_fun_MODE(Server &);
-		void									_fun_TOPIC(Server &);
-		void									_fun_KICK(Server &);
-		void									_fun_INVITE(Server &);
-		void									_fun_KILL(Server &);
-		void									_fun_RESTART(Server &);
-		void									_fun_PONG(void);
-		void									_fun_NOTICE(Server &);
+		std::vector<std::vector<unsigned char> > _ret;
 
-		void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
+		int										_fun_PASS(Server &, User &);
+		int										_fun_NICK(Server &, User &);
+		int										_fun_USER(Server &, User &);
+		int										_fun_JOIN(Server &);
+		int										_fun_PRIVMSG(Server &);
+		int										_fun_OPER(Server &);
+		int										_fun_QUIT(Server &);
+		int										_fun_ERROR(Server &);
+		int										_fun_MODE(Server &);
+		int										_fun_TOPIC(Server &);
+		int										_fun_KICK(Server &);
+		int										_fun_INVITE(Server &);
+		int										_fun_KILL(Server &);
+		int										_fun_RESTART(Server &);
+		int										_fun_PONG(void);
+		int										_fun_NOTICE(Server &);
+
+		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
+
 
 };
 

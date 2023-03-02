@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 15:17:05 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:27:11 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,16 +59,12 @@ class Server
 		std::vector<unsigned char>		getPasswd(void) const;
 		// User*							getUser(int fd);
 		void							getGobalCmd(Command*, std::vector<unsigned char>, int);
-		void 							getParsedCmd(Command*, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >::size_type);
-		void 							getParsedCmd();
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
-		std::list<User>::iterator		getUsersbg(void);
-		std::list<User>::iterator		getUsersend(void);
 		std::vector<Channel>			getChannel(void) const;
 		epoll_event &					getEv(void);
-		
-		
+
+
 		void 							printGlobalCommand(Command cmd);
 		void 							printParsedCommand(Command cmd);
 		// GETTERS
@@ -76,25 +72,28 @@ class Server
 
 		char **							getArgv(void) const;
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
-		void							sendto(int, std::vector<unsigned char>);
+		void							sendto(int, std::vector <unsigned char>);
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		bool							isUserInList(int);
-		
+
 		// Channels
 		bool							channelExists(std::vector<unsigned char>&);
 		void							addNewChannel(Channel&);
-	
+
 		// Channel*						findChanPtr(std::vector<unsigned char>);
 		void							send_to_client(int, std::vector<unsigned char>);
 			
 		std::list<User>::iterator		findUser(std::string nick);
-		std::list<User>::iterator		findUserNick(std::vector<unsigned char> nick);
 		User*							findUserPtrNick(std::vector<unsigned char> nick);
 		std::list<User>					getUsers(void) const;
+		std::list<User>::iterator		getUsersbg(void);
+		std::list<User>::iterator		getUsersend(void);
 		Channel*						findChan(std::vector<unsigned char>);
 		std::list<User>::iterator		findUser(int fd);
 		std::vector<unsigned char>		getPassword(void) const;
 		void							setBot(void);
+		int								nbConnections(User &);
+		void							delUser(User &);
 
 
 	private:

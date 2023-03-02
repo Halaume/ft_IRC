@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/27 16:12:48 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:48:14 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,16 @@
 #include <string.h>
 #include <unistd.h>
 #include "../inc/Server.hpp"
+
+void print_vector(std::string s, std::vector<unsigned char> v)
+{
+	std::vector<unsigned char>::size_type m;
+	
+	std::cout << s + " VP:\n";
+	for (m = 0; m < v.size(); m++)
+		std::cout << v[m];
+	std::cout << "|\n";
+}
 
 void	free_fun(Server &my_server)
 {
@@ -53,6 +63,45 @@ void add_to_vector(std::vector<unsigned char>& v, std::string str)
 {
 	for (size_t i = 0; i < str.size(); i++)
 		v.push_back(static_cast<unsigned char>(str[i]));
+}
+
+void add_to_vector(std::vector<unsigned char>& v, std::string& str)
+{
+	for (size_t i = 0; i < str.size(); i++)
+		v.push_back(static_cast<unsigned char>(str[i]));
+}
+
+void add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str)
+{
+	std::vector<unsigned char> v;
+	
+	for (size_t i = 0; i < str.size(); i++)
+		v.push_back(static_cast<unsigned char>(str[i]));
+	vv.push_back(v);
+}
+
+std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
+{
+	std::vector<unsigned char> ret;
+	
+	ret = v;
+	int i = 0;
+	while (s[i])
+	{
+		ret.push_back(static_cast<unsigned char>(s[i]));
+		i++;
+	}
+	return (ret);
+}
+
+std::vector<unsigned char> add_to_v(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+	
+	ret = v1;
+	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
+		v1.push_back(v2[i]);
+	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
@@ -155,22 +204,14 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
-void print_vector(std::vector<unsigned char> v)
-{
-	std::vector<unsigned char>::size_type m;
-	
-	std::cout << "Vector print|\n";
-	for (m = 0; m < v.size(); m++)
-		std::cout << v[m];
-	std::cout << "|\n";
-}
 
-void print_vector2(std::vector<std::vector<unsigned char> > v)
+
+void print_vector2(std::string s, std::vector<std::vector<unsigned char> > v)
 {
 	std::vector<std::vector<unsigned char> >::size_type m;
 	std::vector<unsigned char>::size_type n;
 	
-	std::cout << "Vector2 print|\n";
+	std::cout << s + " VVP:\n";
 	for (m = 0; m < v.size(); m++)
 	{
 		for (n = 0; n < v[m].size(); n++)
@@ -255,26 +296,37 @@ bool isValidCharacter(unsigned char c)
 	return (false);
 }
 
-std::vector<unsigned char> concat_real_name(std::vector<std::vector<unsigned char> > parsedCmd, int start)
+std::vector<unsigned char> concat_real_name(std::vector<unsigned char> cmd)
 {
 	std::vector<unsigned char> ret;
-	int count = 0;
+	int args = 0;
+	bool is_last_space = false;
+	bool has_char_other_than_zero = false;
 	
-	for (std::vector<std::vector<unsigned char> >::size_type i = 0; i < parsedCmd.size(); i++)
+	for (std::vector<unsigned char>::size_type i = 0; i < cmd.size(); i++)
 	{
-		if (count >= 4)
+		if (cmd[i] == ' ' && !is_last_space)
 		{
-			if (count > 4)
-				ret.push_back(' ');
-			for (std::vector<unsigned char>::size_type j = 0; j < parsedCmd[i].size(); j++)
-			{
-				ret.push_back(parsedCmd[i][j]);
-			}
+			args++;
+			is_last_space = true;
 		}
-		if (start > 0)
-			start--;
-		count++;
+		else if (cmd[i] != ' ')
+			is_last_space = false;
+				
+		if (args == 4 && cmd[i] == ':')
+		{
+			i++;
+			while (i < cmd.size() -2)
+			{
+				if (cmd[i] != ' ')
+					has_char_other_than_zero = true;
+				ret.push_back(cmd[i]);
+				i++;
+			}
+		}	
 	}
+	if (has_char_other_than_zero == false)
+		ret.clear();
 	return (ret);
 }
 
@@ -320,3 +372,25 @@ int	my_compare_vec(std::vector<unsigned char> vec1, std::vector<unsigned char> v
 	return (0);
 }
 
+std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, std::vector<unsigned char> user_name, std::vector<unsigned char> mask, std::vector<unsigned char> nick_new)
+{
+	std::vector<unsigned char> ret;
+	std::vector<std::vector<unsigned char> >::size_type it;
+	unsigned char text[] = " NICK ";
+	int i = 0;
+	
+	ret = nick_old;
+	ret.push_back('!');
+	for (it = 0; it < user_name.size(); it++)
+		ret.push_back(user_name[it]);
+	ret.push_back('@');
+	for (it = 0; it < mask.size(); it++)
+		ret.push_back(mask[it]);
+	while (text[i])
+		ret.push_back(text[i++]);
+	for (it = 0; it < nick_new.size(); it++)
+		ret.push_back(nick_new[it]);
+	ret.push_back('\r');
+	ret.push_back('\n');
+	return (ret);
+}
