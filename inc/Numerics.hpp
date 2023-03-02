@@ -75,6 +75,7 @@ enum numerics {
 	ERR_BADCHANNELKEY       = 475,
 	ERR_BADCHANMASK         = 476,
 
+
 	OWN_NICK_RPL            = 1000
 };
 

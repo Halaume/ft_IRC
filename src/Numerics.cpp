@@ -35,7 +35,6 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 	else
 		add_to_vector(buf, ddots + server_name);
 	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
-	// print_vector(buf);
 	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 

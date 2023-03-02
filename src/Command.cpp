@@ -51,6 +51,7 @@ void	Command::setCommand(std::vector<std::vector<unsigned char> > cmd)
 {
 	_parsedCmd = cmd;
 }
+
 void	Command::setUser(User* usr)
 {
 	_cmd_user = usr;
