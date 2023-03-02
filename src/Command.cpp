@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:57:55 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:01:56 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ int	Command::_fun_RESTART(Server &my_server)
 	if (!this->_cmd_user->getOperator())
 	{
 		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator");
+		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
 		return (1);
 	}
 	free_fun(my_server);
@@ -284,7 +284,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		}
 	}
 	else
-		return;
+		chan = my_server.findExistingChan(std::vector<unsigned char>(dest.begin(), dest.end()));
 	if (chan == my_server.getChannelsend())
 	{
 		push_to_buf(ERR_NOSUCHNICK, *this, this->_parsedCmd[1]);
@@ -307,6 +307,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		ret.push_back(text[j++]);
 	for (i = 0; i < chan->getChanName().size(); i++)
 		ret.push_back(chan->getChanName()[i]);
+	ret.push_back(' ');
 	msg.insert(msg.begin(), ret.begin(), ret.end());
 	print_vector("MESSAGE FINALE = ", msg);
 	if (is_op)
@@ -364,7 +365,7 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 	msg.push_back('\r');
 	msg.push_back('\n');
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
-		do_chan(receiver, my_server, msg);
+		return (do_chan(receiver, my_server, msg), 1);
 	else
 	{
 		itu = my_server.findUser(this->_parsedCmd[1]);
