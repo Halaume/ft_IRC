@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:33:56 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 11:28:29 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -433,18 +433,6 @@ void Server::sendto(int fd, std::vector<unsigned char> buf)
 }
 
 std::list<User>::iterator Server::findUser(std::vector<unsigned char> nick)
-{
-	std::list<User>::iterator it;
-
-	for (it = _users.begin(); it != _users.end(); ++it)
-	{
-		if (it->getUserName() == nick)
-			return (it);
-	}
-	return (it);
-}
-
-std::list<User>::iterator Server::findUserNick(std::vector<unsigned char> nick)
 {
 	std::list<User>::iterator it;
 

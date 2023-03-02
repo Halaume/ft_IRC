@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/28 15:26:19 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/02 13:30:50 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,17 +53,19 @@ User& User::operator=(const User & src)
 {
 	if (&src == this)
 		return (*this);
-	_fd = src._fd;
-    _pass_status = src._pass_status;
-    _registered = src._registered;
-    _passwd = src._passwd;
-    _user_name = src._user_name;
-    _real_name = src._real_name;
-    _client = src._client;
-    _channels = src._channels;
-	_user_mask = src._user_mask;
-	_currCmd = src._currCmd;
-	_allCmd = src._allCmd;
+	this->_fd = src._fd;
+	this->_pass_status = src._pass_status;
+	this->_registered = src._registered;
+	this->_passwd = src._passwd;
+	this->_user_name = src._user_name;
+	this->_real_name = src._real_name;
+	this->_client = src._client;
+	this->_channels = src._channels;
+	this->_user_mask = src._user_mask;
+	this->_currCmd = src._currCmd;
+	this->_allCmd = src._allCmd;
+	this->_nick = src._nick;
+	this->_pass_before_nick_user = src._pass_before_nick_user;
 	return (*this);
 }
 
@@ -86,7 +88,7 @@ bool User::isNickValid(std::vector<unsigned char> nick)
 {
 	int j = 0;
 	std::vector<unsigned char>::size_type it;
-	
+
 	for (it = 0; it < nick.size(); ++it)
 	{
 		if (isValidCharacter(nick[it]) == false)
@@ -190,7 +192,7 @@ void	User::setPasswd(std::vector<unsigned char> passwd)
 
 void	User::setRet(std::vector<unsigned char> ret)
 {
-	_ret = ret;
+	_ret = std::vector<unsigned char>(ret);
 }
 
 void User::setUserName(std::vector<unsigned char> userName)
@@ -221,6 +223,16 @@ std::vector<Channel *> User::getChannels(void) const
 std::vector<unsigned char> User::getClient(void) const
 {
 	return (_client);
+}
+
+std::vector<unsigned char>::const_iterator User::getNickbg(void) const
+{
+	return (_nick.begin());	
+}
+
+std::vector<unsigned char>::const_iterator User::getNickend(void) const
+{
+	return (_nick.end());	
 }
 
 std::vector<unsigned char> User::getNick(void) const
@@ -312,7 +324,7 @@ void	User::insertAllCmd(std::vector<unsigned char> & vec)
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
-	
+
 	o << "Clt: ";
 	for (m = 0; m < i.getClient().size(); m++)
 		o << i.getClient()[m];

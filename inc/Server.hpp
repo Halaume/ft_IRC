@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:32:03 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 11:26:04 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ class Server
 		void							send_to_client(int, std::vector<unsigned char>);
 			
 		std::list<User>::iterator		findUser(std::string nick);
-		std::list<User>::iterator		findUserNick(std::vector<unsigned char> nick);
 		User*							findUserPtrNick(std::vector<unsigned char> nick);
 		std::list<User>					getUsers(void) const;
 		std::list<User>::iterator		getUsersbg(void);

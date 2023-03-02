@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:32:05 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 11:53:29 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ class User
 		std::vector<unsigned char>				getPasswd(void) const;
 		std::vector<unsigned char>				getClient(void) const;
 		std::vector<unsigned char>				getNick(void) const;
+		std::vector<unsigned char>::const_iterator	getNickbg(void) const;
+		std::vector<unsigned char>::const_iterator	getNickend(void) const;
 		int										getNbChan(void);
 		std::vector<unsigned char>				getUserMask(void) const;
 		std::vector<unsigned char>				getUserNickNameMask(void) const;

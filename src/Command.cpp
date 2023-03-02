@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 17:43:20 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/02 13:40:34 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ int Command::register_user(Server &my_server, User &user)
 		return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
 	}
 
-	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
+	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
 	if (itu != my_server.getUsersend())
 		std::cout << "SAAAAAAAAMMMEEE NAME OKKKKKKKK\n";
 	// 	return (push_to_buf(ERR_NICKNAMEINUSE, *this, no_param), 1);
@@ -129,7 +129,7 @@ int Command::_fun_NICK(Server &my_server, User &user)
 	}
 	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NONICKNAMEGIVEN, *this, no_param), 1);
-	std::list<User>::iterator itu = my_server.findUserNick(_parsedCmd[1]);
+	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
 	if (_cmd_user->isNickValid(_parsedCmd[1]) == false) // add ctrl+G to invalid chars
 		return (push_to_buf(ERR_ERRONEUSNICKNAME, *this, no_param), 1);
 	else if (itu != my_server.getUsersend() && _cmd_user->getRegistered() == true
@@ -364,23 +364,25 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 	std::vector<unsigned char>	receiver = this->_parsedCmd[1];
 
 	if (this->_parsedCmd[2][0] == ':')
+	{
 		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+		for (std::vector<unsigned char>::size_type i = 3;i != this->_parsedCmd.size(); i++)
+		{
+			msg.push_back(' ');
+			msg.insert(msg.end(), this->_parsedCmd[i].begin(), this->_parsedCmd[i].end());
+		}
+	}
 	else
 		msg = this->_parsedCmd[2];
-	std::vector<std::vector<unsigned char> >::iterator	it = this->_parsedCmd.begin() + 3;
-	while (it != this->_parsedCmd.end())
-	{
-		msg.push_back(' ');
-		msg.insert(this->_cmd_user->getRet().end(), it->begin(), it->end());
-	}
 	msg.push_back('\r');
 	msg.push_back('\n');
+	print_vector("MESSAGE = ", msg);
 	if (*(receiver.begin()) == '+' || *(receiver.begin()) == '&' || *(receiver.begin()) == '@' || *(receiver.begin()) == '%' || *(receiver.begin()) == '~' || *(receiver.begin()) == '#')
 		do_chan(receiver, my_server, msg);
 	else
 	{
 		itu = my_server.findUser(this->_parsedCmd[1]);
-		if (itu == my_server.getUsers().end())
+		if (itu == my_server.getUsersend())
 		{
 			this->_cmd_user->setRet(this->_parsedCmd[0]);
 			insert_all(this->_cmd_user->getRet(), " ERR_NOSUCHNICK\r\n");
@@ -388,17 +390,16 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		}
 		std::vector<unsigned char>	tmp;
 		tmp.push_back(':');
-		tmp.insert(tmp.begin() + 1, this->_cmd_user->getNick().begin(), this->_cmd_user->getNick().end());
+		tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
 		tmp.push_back(' ');
 		insert_all(tmp, "PRIVMSG");
 		tmp.push_back(' ');
-		tmp.insert(tmp.end(), itu->getNick().begin(), itu->getNick().end());
+		tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
 		tmp.push_back(' ');
 		tmp.push_back(':');
 		msg.insert(msg.begin(), tmp.begin(), tmp.end());
-		msg.push_back('\r');
-		msg.push_back('\n');
 		itu->setRet(msg);
+		print_vector("MESSAGE FINAL = ", msg);
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = itu->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
@@ -652,7 +653,7 @@ int	Command::_fun_KILL(Server &my_server)
 		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
 		return (1);
 	}
-	std::list<User>::iterator	Usr = my_server.findUserNick(this->_parsedCmd[1]);
+	std::list<User>::iterator	Usr = my_server.findUser(this->_parsedCmd[1]);
 	if (Usr == my_server.getUsersend())
 		return (1);
 	for (unsigned int i = 0; i < Usr->getChannels().size(); i++)
