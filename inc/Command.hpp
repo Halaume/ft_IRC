@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:03:06 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 21:54:31 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ class Command
 		int											register_user(Server &);	
 		
 		int											answer(Server &);
+		void										message_to_user(Server&, User*, std::vector<unsigned char>);
 
 
 		

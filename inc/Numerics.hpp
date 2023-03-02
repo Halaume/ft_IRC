@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:43:03 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 22:10:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ enum numerics {
 
 
     OWN_NICK_RPL            = 1000,
-    JOINED_CHANNEL          = 1001
+    JOINED_CHANNEL          = 1001,
 };
 
 std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);

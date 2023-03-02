@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:15:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 22:05:38 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ void                                        add_to_v(std::vector<unsigned char> 
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
+std::vector<unsigned char>                  concat_resp(std::vector<unsigned char>, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>, std::vector<unsigned char>);
 

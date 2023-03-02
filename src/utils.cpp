@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:14:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 22:05:45 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,6 +199,19 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 		ret.push_back(v2[i]);
 	for (i = 0; i < msg.size(); i++)
 		ret.push_back(msg[i]);
+	return (ret);
+}
+
+std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
 	return (ret);
 }
 

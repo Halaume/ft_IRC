@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:45:20 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 22:10:30 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
 	std::string server_name = "mig.42.fr";
 	std::string ddots = ":";
 	
-	if (code == OWN_NICK_RPL || code == JOINED_CHANNEL)
+	if (code == OWN_NICK_RPL
+		|| code == JOINED_CHANNEL)
 		add_to_vector(buf, ddots);
 	else
 		add_to_vector(buf, ddots + server_name);

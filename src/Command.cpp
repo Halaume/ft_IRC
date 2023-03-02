@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 19:37:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/02 22:27:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,13 +59,13 @@ void	Command::setUser(User* usr)
 void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan, std::vector<unsigned char> msg)
 {
 	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
-		{
-			(*itc)->setRet(msg);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = (*itc)->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				return ;
-		}
+	{
+		(*itc)->setRet(msg);
+		my_server.getEv().events = EPOLLOUT | EPOLLET;
+		my_server.getEv().data.fd = (*itc)->getfd();
+		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+			return ;
+	}
 }
 
 /*''''''''''''''''''''''''''''''''''''
@@ -409,6 +409,15 @@ int Command::_fun_JOIN(Server &my_server)
 // 	}
 // }
 
+void Command::message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
+{
+	user->setRet(msg);
+	my_server.getEv().events = EPOLLOUT | EPOLLET;
+	my_server.getEv().data.fd = user->getfd();
+	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
+		return ;
+}
+
 // /*''''''''''''''''''''''''''''''''''''
 // 				INVITE
 // ''''''''''''''''''''''''''''''''''''''*/
@@ -430,12 +439,24 @@ int	Command::_fun_INVITE(Server &my_server)
 	std::cout << "Is user invited?" << channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) << std::endl;
 	if (my_server.findUserPtrNick(_parsedCmd[1]) != NULL && channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) == false)
 	{
+		std::vector<unsigned char> v;
+		std::vector<unsigned char> param = channel->getChanName();
+		std::vector<unsigned char> invite_msg = to_vector(":");
+		v = concat_resp(_cmd_user->getClient(), to_vector("INVITE"), my_server.findUserPtrNick(_parsedCmd[1])->getNick());
+		add_to_v(invite_msg, v);
+		v = to_vector(" ");
+		add_to_v(v, param);
+		param = to_vector(" \r\n");
+		add_to_v(v, param);
+		add_to_v(invite_msg, v);
 		channel->addUserToInvite(my_server.findUserPtrNick(_parsedCmd[1]));
-		// message to invited user if time permits: ":client INVITE nick_invited channel\r\n"
+		message_to_user(my_server, my_server.findUserPtrNick(_parsedCmd[1]), invite_msg);
 		return (push_to_buf(RPL_INVITING, *this, _parsedCmd[2]), 1);
 	}
 	return (0);
 }
+
+
 
 // void	Command::_fun_TOPIC(Server &my_server)
 // {
