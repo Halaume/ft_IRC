@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:30:06 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/03 16:53:04 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define ERR_BADCHANMASKmsg(code, channel)                  concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n")) // add client?
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
-# define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)       concat_resp(code, nick, channel,          to_vector(" :You're noy channel operator\r\n"))
+# define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)       concat_resp(code, nick, channel,            to_vector(" :You're not channel operator\r\n"))
 # define ERR_NOOPERHOSTmsg(code, nick)                      concat_resp(code, nick,                     to_vector(" :No O-lines for your host\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, client)                concat_resp(code, client,                   to_vector(" :Cant change mode for other users\r\n"))
 # define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)    concat_nick_rpl(nick, user_name, mask, nickold)

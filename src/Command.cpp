@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/03 16:48:36 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/03 17:29:55 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -606,58 +606,53 @@ int	Command::_fun_TOPIC(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_KICK(Server &my_server)
 {
-	std::vector<Channel>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
+	//std::vector<Channel>::iterator	tmp = my_server.findExistingChan(this->_parsedCmd[1]);
+
+	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[1]);
 
 	if (_parsedCmd.size() < 3)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 		
-	if (tmp == my_server.getChannel().end())
-	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " ERR_NOSUCHCHANNEL\r\n");
-		return (1);
-	}
+	if (channel == my_server.getChannel().end())
+		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
+	
 
-	if (!tmp->isOp(this->_cmd_user))
-	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[1].begin(), this->_parsedCmd[1].end());
-		insert_all(this->_cmd_user->getRet(), " :You're not channel operator\r\n");
-		return (1);
-	}
+	if (!channel->isOp(this->_cmd_user))
+		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
+	
 
-	std::list<User *>::iterator		Usrlst = tmp->getUserListbg();
-	while (Usrlst != tmp->getUserListend() && *Usrlst != this->_cmd_user)
-		Usrlst++;
-	if (Usrlst == tmp->getUserListend())
-	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_NOTONCHANNEL\r\n");
-		return (1);
-	}
-	Usrlst = tmp->getUserListbg();
-	while (Usrlst != tmp->getUserListend() && !(**Usrlst == this->_parsedCmd[2]))
-		Usrlst++;
-	if (Usrlst == tmp->getUserListend())
-	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_USERNOTINCHANNEL\r\n");
-		return (1);
-	}
-	if (tmp->isOp(*Usrlst))
-	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
-		insert_all(this->_cmd_user->getRet(), " ERR_CANNOTKICKADMIN\r\n");
-		return (1);
-	}
+	// std::list<User *>::iterator		Usrlst = tmp->getUserListbg();
+	// while (Usrlst != tmp->getUserListend() && *Usrlst != this->_cmd_user)
+	// 	Usrlst++;
+	// if (Usrlst == tmp->getUserListend())
+	// {
+	// 	this->_cmd_user->setRet(this->_cmd_user->getUserName());
+	// 	this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+	// 	insert_all(this->_cmd_user->getRet(), " ERR_NOTONCHANNEL\r\n");
+	// 	return (1);
+	// }
+	// Usrlst = tmp->getUserListbg();
+	// while (Usrlst != tmp->getUserListend() && !(**Usrlst == this->_parsedCmd[2]))
+	// 	Usrlst++;
+	// if (Usrlst == tmp->getUserListend())
+	// {
+	// 	this->_cmd_user->setRet(this->_cmd_user->getUserName());
+	// 	this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+	// 	insert_all(this->_cmd_user->getRet(), " ERR_USERNOTINCHANNEL\r\n");
+	// 	return (1);
+	// }
+	// if (tmp->isOp(*Usrlst))
+	// {
+	// 	this->_cmd_user->setRet(this->_cmd_user->getUserName());
+	// 	this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), this->_parsedCmd[2].begin(), this->_parsedCmd[2].end());
+	// 	insert_all(this->_cmd_user->getRet(), " ERR_CANNOTKICKADMIN\r\n");
+	// 	return (1);
+	// }
 
-	for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
-		this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), it->begin(), it->end());
-	tmp->getUserList().erase(Usrlst);
-	//Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
+	// for (std::vector<std::vector<unsigned char> >::iterator it = this->_parsedCmd.begin() + 3; it != this->_parsedCmd.end(); it++)
+	// 	this->_cmd_user->getRet().insert(this->_cmd_user->getRet().end(), it->begin(), it->end());
+	// tmp->getUserList().erase(Usrlst);
+	// //Aucune idee de quoi envoyer a ce user comme notification qu'il a ete virer
 	return (0);
 
 }
