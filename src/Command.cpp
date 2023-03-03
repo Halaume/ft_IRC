@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:19:20 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/03 16:48:36 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,12 +216,8 @@ int Command::_fun_JOIN(Server &my_server)
 		}
 		else
 		{
-			if (my_server.findChan(channels[it]) == NULL) // protect findchan
+			if (my_server.findChan(channels[it]) == NULL)
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			// else if (my_server.findChan(channels[it])->isUserInChannel(&(*_cmd_user)))
-			// {
-			// 	// user is already in channel do nothing
-			// }
 			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
 				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
@@ -236,7 +232,8 @@ int Command::_fun_JOIN(Server &my_server)
 			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
 				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
-			my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			if (my_server.findChan(channels[it])->isUserInChannel(_cmd_user) == false)
+				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
 			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);
@@ -487,34 +484,56 @@ int	Command::_fun_MODE(Server &my_server)
 	return (0);
 }
 
+void Command::message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
+{
+	user->setRet(msg);
+	my_server.getEv().events = EPOLLOUT | EPOLLET;
+	my_server.getEv().data.fd = user->getfd();
+	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
+		return ;
+}
 
 // /*''''''''''''''''''''''''''''''''''''
 // 				INVITE
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_INVITE(Server &my_server)
 {
-	//std::vector<unsigned char>	ret;
-
 	if (_parsedCmd.size() < 3)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
-
-	std::vector<Channel>::iterator it =  my_server.findExistingChan(_parsedCmd[2]);
-	if (it == my_server.getChannelsend())
+		
+	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[2]);
+	if (channel == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[2]), 1);
-	
-	std::list<User *>::iterator	itu = it->findUser(_cmd_user->getUserName());
-	if (itu == it->getUserListend())
+		
+	std::list<User *>::iterator	user = channel->findUser(_cmd_user->getNick());
+	if (user == channel->getUserListend())
 		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[2]), 1);
-	
-	itu = it->findUser(_parsedCmd[1]);
-	if (itu != it->getUserListend())
+		
+	user = channel->findUser(_parsedCmd[1]);
+	if (user != channel->getUserListend())
 		return (push_to_buf(ERR_USERONCHANNEL, *this, _parsedCmd[1]), 1);
-	
-	if (it->getModes().find('i')->second && !it->isOp(_cmd_user))
+		
+	if (channel->getMode('i') == true && !channel->isOp(_cmd_user))	// a tester / verifier
 		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[2]), 1);
-	
-	
-	return (push_to_buf(RPL_INVITING, *this, _parsedCmd[2]), 1);
+		
+	std::cout << "Is user invited?" << channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) << std::endl;
+	if (my_server.findUserPtrNick(_parsedCmd[1]) != NULL && channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) == false)
+	{
+		std::vector<unsigned char> v;
+		std::vector<unsigned char> param = channel->getChanName();
+		std::vector<unsigned char> invite_msg = to_vector(":");
+		v = concat_resp(_cmd_user->getClient(), to_vector("INVITE"), my_server.findUserPtrNick(_parsedCmd[1])->getNick());
+		add_to_v(invite_msg, v);
+		v = to_vector(" ");
+		add_to_v(v, param);
+		param = to_vector(" \r\n");
+		add_to_v(v, param);
+		add_to_v(invite_msg, v);
+		channel->addUserToInvite(my_server.findUserPtrNick(_parsedCmd[1]));
+		message_to_user(my_server, my_server.findUserPtrNick(_parsedCmd[1]), invite_msg);
+		return (push_to_buf(RPL_INVITING, *this, _parsedCmd[2]), 1);
+	}
+	return (0);
 }
 
 // /*''''''''''''''''''''''''''''''''''''
@@ -522,71 +541,63 @@ int	Command::_fun_INVITE(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_TOPIC(Server &my_server)
 {
-	std::vector<unsigned char> 		ret;
-	std::vector<Channel>::iterator	itc = my_server.findExistingChan(_parsedCmd[1]);
-	std::list<User *>::iterator		Usrlst = itc->getUserListbg();
+	//std::vector<unsigned char> 		ret;
+	//std::list<User *>::iterator		Usrlst = itc->getUserListbg();
 
-	ret = _parsedCmd[0];
-	if (_parsedCmd.size() < 3)
+	//ret = _parsedCmd[0];
+	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	
-	if (itc == my_server.getChannel().end())
+	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[1]);
+	if (channel == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
 	
+	std::list<User *>::iterator	user = channel->findUser(_cmd_user->getNick());
+	if (user == channel->getUserListend())
+		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[1]), 1);
 	
-	while (Usrlst != itc->getUserListend() && *Usrlst != this->_cmd_user)
-        Usrlst++;
-    if (Usrlst == itc->getUserListend())
-    {
-        ret = _cmd_user->getUserName();
-        ret.insert(ret.end(), _parsedCmd[2].begin(), _parsedCmd[2].end());
-        insert_all(ret, " ERR_NOTONCHANNEL\r\n");
-        this->_cmd_user->setRet(ret);
-        return (1);
-    }
-	
-	if (itc->isOp(*Usrlst) == false)
-	{
-		insert_all(ret, " ERR_CHOPRIVSNEEDED\r\n");
-		this->_cmd_user->setRet(ret);
-		return (1);
-	}
-	
-	std::vector<unsigned char>	Topic = itc->getTopic();
+	std::vector<unsigned char>	Topic = channel->getTopic();
 	if (_parsedCmd.size() == 2)
 	{
 		if (Topic.size() > 0)
-			insert_all(ret, " RPL_TOPIC\r\n");
-		else
-			insert_all(ret, " RPL_NOTOPIC\r\n");
-		this->_cmd_user->setRet(ret);
-		return (1) ;
+			return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
+		// else
+		// 	insert_all(ret, " RPL_NOTOPIC\r\n");
+		// this->_cmd_user->setRet(ret);
+		// return (1) ;
 	}
+	
 	else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
 	{
-		Topic.clear();
-		itc->setTopic(Topic);
-		insert_all(ret, " RPL_TOPIC\r\n");
-		this->_cmd_user->setRet(ret);
-		sendToChan(my_server, itc, ret);
+		std::cout << "HEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEE 3" << std::endl;
+		//Topic.clear();
+		channel->setTopic(Topic);
+		return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
+		//insert_all(ret, " RPL_TOPIC\r\n");
+		//this->_cmd_user->setRet(ret);
+		//sendToChan(my_server, itc, ret);
 	}
-	else
-	{
-		Topic.clear();
-		std::vector<std::vector<unsigned char> >::iterator iterator = _parsedCmd.begin();
-		if (*(iterator->begin()) == ':')
-			Topic.insert(Topic.end(), iterator->begin() + 1, iterator->end());
-		iterator++;
-		Topic.push_back(' ');
-		while (iterator != _parsedCmd.end())
-		{
-			iterator++;
-			Topic.insert(Topic.end(), iterator->begin(), iterator->end());
-			Topic.push_back(' ');
-		}
-		itc->setTopic(Topic);
-		sendToChan(my_server, itc, ret);
-	}
+
+	// else if (_parsedCmd.size() == 3)
+
+	
+	// else
+	// {
+	// 	Topic.clear();
+	// 	std::vector<std::vector<unsigned char> >::iterator iterator = _parsedCmd.begin();
+	// 	if (*(iterator->begin()) == ':')
+	// 		Topic.insert(Topic.end(), iterator->begin() + 1, iterator->end());
+	// 	iterator++;
+	// 	Topic.push_back(' ');
+	// 	while (iterator != _parsedCmd.end())
+	// 	{
+	// 		iterator++;
+	// 		Topic.insert(Topic.end(), iterator->begin(), iterator->end());
+	// 		Topic.push_back(' ');
+	// 	}
+	// 	itc->setTopic(Topic);
+	// 	sendToChan(my_server, itc, ret);
+	// }
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:18:36 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/03 12:37:55 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ class Command
 		int											register_user(Server &);	
 		
 		int											answer(Server &);
+		void										message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg);
 
 
 		
