@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:31:16 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 22:42:33 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,10 @@ class Channel
 		bool        					isOp(User usr) const;
 
 		std::list<User *>::iterator		findUser(std::vector<unsigned char> nick);
-			
+		int 							modesMessage(User*, std::vector<std::vector<unsigned char> >, bool);
+		std::vector<unsigned char>		getChannelModes(void);
+
+
 	private:	
 		std::vector<unsigned char>		_chan_name;
 		std::vector<unsigned char>		_chan_password;

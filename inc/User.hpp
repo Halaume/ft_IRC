@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 21:10:30 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:49:31 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,11 @@ class User
 		int										getNbChan(void);
 		std::vector<unsigned char>				getUserMask(void) const;
 		int										getPassBeforeNickUser(void) const;
+		bool 									getMode(char c);
+		std::map<char, bool>::iterator 			getModesbg(void);
+		std::map<char, bool>::iterator 			getModesend(void);
+		std::vector<unsigned char> &			getRet(void);
+		bool									getOperator(void) const;
 		
 		void									setPassStatus(int);
 		std::vector<unsigned char>				getRealName(void) const;
@@ -64,8 +69,6 @@ class User
 		void									setUserName(std::vector<unsigned char>);
 		void									setRealName(std::vector<unsigned char>);
 		void									setRet(std::vector<unsigned char>);
-		std::vector<unsigned char> &			getRet(void);
-		bool									getOperator(void) const;
 		void									setOperator(bool);
 		std::vector<unsigned char>				getClient();
 		void									insertcmd(std::vector<unsigned char> &);
@@ -77,6 +80,10 @@ class User
 		void									setPassBeforeNickUser(int);					
 		void									addChannel(Channel*);
 		int										createNewNick(Server &my_server);
+		
+		std::vector<unsigned char>              getUserModes(void);
+		void									setMode(char c, bool mode);
+		int										modesMessage(std::vector<unsigned char>, bool);
 
 	private:
 		int							_fd;
@@ -92,6 +99,7 @@ class User
 		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 		std::vector<unsigned char>	_user_mask;
 		int							_pass_before_nick_user;
+		std::map<char, bool>		_modes;
 };
 
 std::ostream &		operator<<( std::ostream & o, User const & i);

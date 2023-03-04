@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 19:27:03 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 22:43:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -338,4 +338,109 @@ std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 			return (it);
 	}
 	return (it);
+}
+
+std::vector<unsigned char> Channel::getChannelModes(void)
+{
+	std::vector<unsigned char> ret = to_vector(" ");
+	
+	add_to_v(ret, _chan_name);
+	add_to_v(ret, to_vector(" +"));
+	for (std::map<char, bool>::iterator mode = this->getModesbg(); mode != this->getModesend(); mode++)
+	{
+		if (mode->second == true)
+			ret.push_back(mode->first);
+	}
+	ret.push_back('\r');
+	ret.push_back('\n');
+	return (ret);
+}
+
+int Channel::modesMessage(User *user, std::vector<std::vector<unsigned char> > input, bool isUserCommand)
+{
+	std::vector<unsigned char> ret = to_vector(":");
+	std::vector<unsigned char> modes;
+	std::vector<std::vector<unsigned char> >::size_type i = 2;
+	int add_or_remove = 1; (void) add_or_remove;
+	// int error = 0;
+	// xcstd::vector<unsigned char> error_msg;
+	
+	if (isUserCommand == true)
+	{
+		add_to_v(ret, user->getNick());
+		add_to_v(ret, to_vector(" "));
+	}
+	add_to_v(ret, to_vector("MODE "));
+	add_to_v(ret, input[1]);
+	add_to_v(ret, to_vector(" "));
+
+	for (;i < input.size(); i++)
+	{
+		for (std::vector<unsigned char>::size_type j = 0; j < input[i].size(); j++)
+		{
+			if (i == 2)
+			{
+				if (j == 0 && input[i][j] == '-')
+				{
+					modes.push_back('-');
+					add_or_remove = -1;
+					j++;
+				}
+				else if (j == 0 && input[i][j] == '-')
+				{
+					modes.push_back('+');
+					j++;
+				}
+				else if (j == 0)
+					modes.push_back('+');
+				// if (input)
+			}
+
+
+			
+		}
+	// 	if (isValidUserMode(input[it])
+	// 		&& isCharInVector(modes, input[it]) == false)
+	// 	{
+	// 		if (add_or_remove == 1
+	// 			&& getMode(input[it]) == false
+	// 			&& input[it] != 'o')
+	// 		{
+	// 			setMode(input[it], true);
+	// 			modes.push_back(input[it]);
+	// 		}
+	// 		else if (add_or_remove == -1
+	// 			&& getMode(input[it]) == true)
+	// 		{
+	// 			setMode(input[it], false);
+	// 			modes.push_back(input[it]);
+	// 		}
+	// 	}
+	// 	else if (!isValidUserMode(input[it]))
+	// 		error = 1;
+	}
+
+
+
+
+
+
+
+	
+	// if (modes.size() == 0 && !error)
+	// 	return (0);
+	// if (error == 1)
+	// {
+	// 	add_to_v(error_msg, to_vector(":"));
+	// 	add_to_v(error_msg, getClient());
+	// 	add_to_v(error_msg, ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, _nick));
+	// 	_ret.insert(_ret.end(), error_msg.begin(), error_msg.end());
+	// }
+	// if (modes.size() > 0)
+	// {
+	// 	add_to_v(ret, modes);
+	// 	add_to_v(ret, to_vector("\r\n"));
+	// 	_ret.insert(_ret.end(), ret.begin(), ret.end());
+	// }
+	return (0);
 }

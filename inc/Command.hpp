@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 21:54:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 13:33:59 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ class Command
 		
 		int											answer(Server &);
 		void										message_to_user(Server&, User*, std::vector<unsigned char>);
+		std::vector<unsigned char>					concat_parsedCmd(std::vector<std::vector<unsigned char> >::size_type i);
 
 
 		
@@ -88,7 +89,7 @@ class Command
 		void									_fun_OPER(Server &);
 		void									_fun_QUIT(Server &);
 		void									_fun_ERROR(Server &);
-		void									_fun_MODE(Server &);
+		int										_fun_MODE(Server &);
 		void									_fun_TOPIC(Server &);
 		void									_fun_KICK(Server &);
 		int										_fun_INVITE(Server &);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:36:03 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/03 16:28:48 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ void	check_kill(Server& server)
 
 /* TODO
 		tester les nc et CTRL+D
+		CTRL+C dans telnet crashe le serveur
 		
 */
 int main(int argc, char **argv)

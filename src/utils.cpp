@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 22:05:45 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:10:39 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
 	return (ret);
 }
 
-void add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2)
+void add_to_v(std::vector<unsigned char> &v1, const std::vector<unsigned char> &v2)
 {
 	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
 		v1.push_back(v2[i]);
@@ -514,4 +514,26 @@ std::vector<unsigned char> rpl_name(Channel *channel)
 	}
 	add_to_vector(ret, static_cast<std::string>("\r\n"));
 	return (ret);
+}
+
+bool isValidUserMode(const char c)
+{
+	std::vector<unsigned char> valid_char = to_vector("aiwroOs");
+	
+	for (std::vector<unsigned char>::size_type it = 0; it < valid_char.size(); it++)
+	{
+		if (c == valid_char[it])
+			return (true);
+	}
+	return (false);
+}
+
+bool isCharInVector(std::vector<unsigned char> v, char c)
+{
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (v[it] == c)
+			return (true);
+	}
+	return (false);
 }

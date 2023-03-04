@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 22:27:50 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 22:43:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,9 @@ int Command::_fun_USER(Server &my_server)
 	return (0);
 }
 
+// /*''''''''''''''''''''''''''''''''''''
+// 				JOIN
+// ''''''''''''''''''''''''''''''''''''''*/
 int Command::_fun_JOIN(Server &my_server)
 {
 	(void)my_server;
@@ -396,18 +399,66 @@ int Command::_fun_JOIN(Server &my_server)
 // 	(void)my_server;	
 // }
 
-// void	Command::_fun_MODE(Server &my_server)
-// {
-// 	std::vector<unsigned char> ret;
+std::vector<unsigned char> Command::concat_parsedCmd(std::vector<std::vector<unsigned char> >::size_type i)
+{
+	std::vector<unsigned char> ret;
+	
+	for (;i < _parsedCmd.size(); i++)
+	{
+		for (std::vector<unsigned char>::size_type j = 0; j < _parsedCmd[i].size(); j++)
+			ret.push_back(_parsedCmd[i][j]);
+	}
+	return (ret);
+}
 
-// 	std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
-// 	if (itu == my_server.getUsers().end())
-// 	{
-// 		insert_all(ret, "ERR_NOSUCHNICK\r\n");
-// 		this->_cmd_user->setRet(ret);
-// 		return ;
-// 	}
-// }
+// /*''''''''''''''''''''''''''''''''''''
+// 				MODE
+// ''''''''''''''''''''''''''''''''''''''*/
+int Command::_fun_MODE(Server &my_server)
+{
+	(void)my_server;
+
+	std::vector<unsigned char> all_modes;
+	Channel *channel;
+
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty())
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
+	if (_parsedCmd[1][0] != '#' && _parsedCmd[1][0] != '&'
+		&& _cmd_user->isNickValid(_parsedCmd[1]) == true)
+	{
+		if (my_server.findUserPtrNick(_parsedCmd[1]) == NULL)
+			return (push_to_buf(ERR_NOSUCHNICK, *this, _parsedCmd[1]), 1);
+		else if (_cmd_user->getNick() != _parsedCmd[1])
+			return (push_to_buf(ERR_USERSDONTMATCH, *this, no_param), 1);
+		if (_parsedCmd.size() < 3 || _parsedCmd[2].empty())
+			return (push_to_buf(RPL_UMODEIS, *this, _cmd_user->getUserModes()), 1);
+		all_modes = concat_parsedCmd(2);
+		return (_cmd_user->modesMessage(all_modes, true));
+	}
+	else if (_parsedCmd[1][0] == '#' || _parsedCmd[1][0] == '&')
+	{
+		channel = my_server.findChan(_parsedCmd[1]);
+		if (my_server.findChan(_parsedCmd[1]) == NULL)
+			return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
+		if (_parsedCmd.size() < 3 || _parsedCmd[2].empty())
+			return (push_to_buf(RPL_CHANNELMODEIS, *this, my_server.findChan(_parsedCmd[1])->getChannelModes()), 1);
+		if (_parsedCmd.size() > 3 && !channel->isOp(_cmd_user))
+			return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
+		// return (channel->modesMessage(_parsedCmd, true));
+	}
+		
+	
+	// std::vector<unsigned char> ret;
+
+	// std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
+	// if (itu == my_server.getUsers().end())
+	// {
+	// 	insert_all(ret, "ERR_NOSUCHNICK\r\n");
+	// 	this->_cmd_user->setRet(ret);
+	// 	return ;
+	// }
+	return (0);
+}
 
 void Command::message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
 {
@@ -642,7 +693,7 @@ int Command::answer(Server &my_server)
     if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR
 		|| _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
         return (0);
-    std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MDE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
+    std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
     int i = 0;
     if (_parsedCmd.size() == 0)
         return (0);
@@ -661,6 +712,9 @@ int Command::answer(Server &my_server)
             break;
 		case 3:
             return (_fun_JOIN(my_server));
+            break;
+		case 8:
+            return (_fun_MODE(my_server));
             break;
 		case 11:
             return (_fun_INVITE(my_server));

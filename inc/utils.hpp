@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 22:05:38 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:07:48 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void                                        add_to_vector(std::vector<unsigned c
 std::vector<unsigned char>                  add_to_v(std::vector<unsigned char> v, std::string str);
 std::vector<unsigned char>                  concat_vectors(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
 void                                        add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str);
-void                                        add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2);
+void                                        add_to_v(std::vector<unsigned char> &v1, const std::vector<unsigned char> &v2);
 
 
 std::vector<unsigned char>                  concat_resp(int, std::vector<unsigned char>);
@@ -67,5 +67,7 @@ std::vector<unsigned char>                  rpl_name(Channel *);
 
     
 bool                                        contains_ctrl_g(std::vector<unsigned char> v);
+bool                                        isValidUserMode(const char c);
+bool                                        isCharInVector(std::vector<unsigned char> v, char c);
 
 #endif
