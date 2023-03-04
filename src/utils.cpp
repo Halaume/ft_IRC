@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:06:54 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 17:21:33 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,10 @@ void print_vector(std::string s, std::vector<unsigned char> v)
 void	free_fun(Server &my_server)
 {
 	for (std::list<User>::iterator it = my_server.getUsersbg(); it != my_server.getUsersend(); it++)
+	{
+		epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_DEL, it->getfd(), &(my_server.getEv()));
 		close(it->getfd());
+	}
 	close(my_server.getEpollfd());
 	close(my_server.getSct());
 }

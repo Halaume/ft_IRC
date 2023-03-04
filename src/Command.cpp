@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 14:48:59 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 16:43:45 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,14 +253,13 @@ int	Command::_fun_QUIT(Server &my_server)
 
 int	Command::_fun_RESTART(Server &my_server)
 {
-	gf (!this->_cmd_user->getOperator())
+	if (!this->_cmd_user->getOperator())
 	{
 		this->_cmd_user->setRet(this->_cmd_user->getUserName());
 		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
 		return (1);
 	}
 	free_fun(my_server);
-	this->_parsedCmd.erase(this->_parsedCmd.begin(), this->_parsedCmd.end());
 	my_server.init(my_server.getArgv());
 	return (0);
 }
@@ -354,7 +353,7 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 	if (this->_parsedCmd[2][0] == ':')
 	{
 		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
-		for (std::vector<unsigned char>::size_type i = 3;i != this->_parsedCmd.size(); i++)
+		for (std::vector<unsigned char>::size_type i = 3; i != this->_parsedCmd.size(); i++)
 		{
 			msg.push_back(' ');
 			msg.insert(msg.end(), this->_parsedCmd[i].begin(), this->_parsedCmd[i].end());
