@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:39:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 12:51:44 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "../inc/Command.hpp"
 
 
-void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
+void push_to_buf(int error, Command &cmd, std::vector<unsigned char> param);
 
 // pimp intro message 
 // add nick of user to RPL_WELCOME?
@@ -38,6 +38,8 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define ERR_TOOMANYCHANNELSmsg(code, nick, channel)        concat_resp(code, nick, channel,    to_vector(" :You have joined too many channels\r\n"))
 # define ERR_NONICKNAMEGIVENmsg(code, nick)                 concat_resp(code, nick,             to_vector(" :No nickname given\r\n"))
 # define ERR_ERRONEUSNICKNAMEmsg(code, nick, errnick)       concat_resp(code, nick, errnick,    to_vector(" :Erroneus nickname\r\n"))
+# define ERR_NOTONCHANNELmsg(code, client, channel)         concat_resp(code, client, channel,          to_vector(" :You're not on that channel\r\n"))
+
 # define ERR_NICKNAMEINUSEmsg(code, nick)                   concat_resp(code, nick, nick,       to_vector(" :Nickname is already in use\r\n"))
 # define ERR_NEEDMOREPARAMSmsg(code, nick, cmd)             concat_resp(code, nick, cmd,        to_vector(" :Not enough parameters\r\n"))
 # define ERR_ALREADYREGISTEREDmsg(code, nick)               concat_resp(code, nick,             to_vector(" :You may not reregister\r\n"))
@@ -72,6 +74,7 @@ enum numerics {
     ERR_NONICKNAMEGIVEN     = 431,
     ERR_ERRONEUSNICKNAME    = 432,
     ERR_NICKNAMEINUSE       = 433,
+	ERR_NOTONCHANNEL		= 442,
 	ERR_NEEDMOREPARAMS      = 461,
     ERR_ALREADYREGISTERED   = 462,
     ERR_PASSWDMISMATCH      = 464,

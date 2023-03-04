@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 18:45:31 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:48:59 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan
 {
 	for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
 	{
-		(*itc)->setRet(msg);
+		(*itc)->getRet().insert((*itc)->getRet().end(), msg.begin(), msg.end());
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = (*itc)->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
@@ -253,7 +253,7 @@ int	Command::_fun_QUIT(Server &my_server)
 
 int	Command::_fun_RESTART(Server &my_server)
 {
-	if (!this->_cmd_user->getOperator())
+	gf (!this->_cmd_user->getOperator())
 	{
 		this->_cmd_user->setRet(this->_cmd_user->getUserName());
 		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
@@ -667,6 +667,43 @@ int	Command::_fun_NOTICE(Server &my_server)
 	return (0);
 }
 
+int	Command::_fun_PART(Server &my_server)
+{
+	std::vector<unsigned char>	ret;
+
+	if (this->_parsedCmd.size() < 3)
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
+
+	std::vector<std::vector<unsigned char> >	chans = splitOnComa(this->_parsedCmd[1]);
+	std::vector<Channel>::iterator	itc;
+	std::vector<std::vector<unsigned char> >::size_type	i = 0;
+
+	for (std::vector<std::vector<unsigned char> >::iterator it = chans.begin(); it != chans.end(); it++, i++)
+	{
+		itc = my_server.findExistingChan(chans[i]);
+		if (itc == my_server.getChannel().end())
+			push_to_buf(ERR_NOSUCHCHANNEL, *this, chans[i]);
+
+		std::list<User *>::iterator	itu = itc->findUser(_cmd_user->getUserName());
+		if (itu == itc->getUserListend())
+			push_to_buf(ERR_NOTONCHANNEL, *this, itc->getChanName());
+		else
+		{
+			std::vector<unsigned char> chanName = itc->getChanName();
+			itc->delUser(this->_cmd_user->getfd());
+			this->_cmd_user->del_chan(chanName);
+			std::vector<unsigned char> partMsg;
+			partMsg.push_back(':');
+			std::vector<unsigned char> client = this->_cmd_user->getClient();//TODO Build the message
+			partMsg.insert(partMsg.end(), client.begin(), client.end());
+			insert_all(partMsg, " PART ");
+			partMsg.insert(partMsg.end(), chanName.begin(), chanName.end());
+			sendToChan(my_server, itc, partMsg);
+		}
+	}
+		return (1);
+}
+
 
 int Command::answer(Server &my_server)
 {
@@ -674,11 +711,11 @@ int Command::answer(Server &my_server)
 	print_vector2("Answer", _parsedCmd);
 	if (_cmd_user->getPassBeforeNickUser() == PASS_ORDER_ERROR || _cmd_user->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
 		return (0);
-	std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE"};
+	std::string    options[] = {"PASS", "NICK", "USER", "JOIN", "PRIVMSG", "OPER", "QUIT", "ERROR", "MODE", "TOPIC", "KICK", "INVITE", "KILL", "RESTART", "PING", "NOTICE", "PART"};
 	int i = 0;
 	if (_parsedCmd.size() == 0)
 		return (0);
-	while (i < 16 && my_compare(_parsedCmd[0], options[i]) != 0)
+	while (i < 17 && my_compare(_parsedCmd[0], options[i]) != 0)
 		i++;
 	switch (i)
 	{
@@ -755,6 +792,11 @@ int Command::answer(Server &my_server)
 			if (!this->_cmd_user->getRegistered())
 				break ;
 			return (_fun_NOTICE(my_server));
+			break;
+		case 16:
+			if (!this->_cmd_user->getRegistered())
+				break ;
+			return (_fun_PART(my_server));
 			break;
 		default:
 			return (0);

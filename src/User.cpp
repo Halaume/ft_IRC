@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:39:10 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 14:43:32 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,6 +340,15 @@ void	User::insertcmd(std::vector<unsigned char> & vec)
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
 }
 
+void	User::del_chan(std::vector<unsigned char> chanName)
+{
+	for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	{
+		if ((*it)->getChanName() == chanName)
+			this->_channels.erase(it);
+	}
+}
+
 std::ostream &		operator<<( std::ostream & o, User const & i)
 {
 	std::vector<unsigned char>::size_type m;
@@ -361,3 +370,4 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 
 	return o;
 }
+

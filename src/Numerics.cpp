@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:39:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 12:51:02 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,8 @@
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-void push_to_buf(int code, Command &cmd, std::vector<unsigned char> &param)
+void push_to_buf(int code, Command &cmd, std::vector<unsigned char> param)
 {
-	(void)param;
 	std::vector<unsigned char> buf;
 	std::string server_name = "mig.42.fr";
 	std::string ddots = ":";
@@ -95,6 +94,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_NICKNAMEINUSE:
 		{
 			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
+		}
+		case ERR_NOTONCHANNEL:
+		{
+			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{
