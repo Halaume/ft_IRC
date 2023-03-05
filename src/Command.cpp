@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 16:53:21 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:12:15 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,13 +302,8 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_QUIT(Server &my_server)
 {
-	(void)my_server;
-	for (std::vector<Channel *>::iterator itc = _cmd_user->getChannelsbg(); itc != _cmd_user->getChannelsend(); itc++)
-	{
-		for (std::list<User *>::const_iterator itu = (*itc)->getUserListbg(); itu != (*itc)->getUserListend(); itu++)
-		this->_cmd_user->getChannels().erase(itc);
-	}
-	return (0);
+	my_server.delUser(*(this->_cmd_user));
+	return (2);
 }
 
 
@@ -319,13 +314,11 @@ int	Command::_fun_RESTART(Server &my_server)
 {
 	if (!this->_cmd_user->getOperator())
 	{
-		
 		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator");
+		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
 		return (1);
 	}
 	free_fun(my_server);
-	_parsedCmd.erase(_parsedCmd.begin(), _parsedCmd.end());
 	my_server.init(my_server.getArgv());
 	return (0);
 }
@@ -614,19 +607,14 @@ int	Command::_fun_KICK(Server &my_server)
 	if (channel == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
 	
-	// if (!channel->isOp(this->_cmd_user))
-	// 	return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
+	if (!channel->isOp(this->_cmd_user))
+		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
 	
 	std::list<User *>::iterator	user = channel->findUser(_cmd_user->getNick());
 	if (user == channel->getUserListend())
 		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[1]), 1);
-
-	// user = channel->findUser(_parsedCmd[2]);
-	// if (user == channel->getUserListend())
-	// 	return (push_to_buf(ERR_USERNOTINCHANNEL, *this, _parsedCmd[2]), 1);
 	
 	int verif = 0;
-	//std::list<User *>::iterator Usrlst = channel->getUserListbg();
 	for (std::vector<unsigned char>::size_type i = 2; i < _parsedCmd.size(); i++)
 	{
 		if (channel->isUserInChannel(my_server.findUserPtrNick(_parsedCmd[i])) == false)
@@ -635,10 +623,7 @@ int	Command::_fun_KICK(Server &my_server)
 			verif = 1;
 		}
 		else
-		{
-			std::cout << "heeeeeeeeeeeeere1" << std::endl;
 			channel->delUserLst(my_server.findUserPtrNick(_parsedCmd[i]));
-		}
 	}
 	return (verif);
 }
@@ -650,15 +635,15 @@ int	Command::_fun_KILL(Server &my_server)
 {
 	if (!this->_cmd_user->getOperator())
 	{
-		this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
-		return (1);
+		// this->_cmd_user->setRet(this->_cmd_user->getUserName());
+		// insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
+		// return (1);
+		return (push_to_buf(ERR_NOPRIVILEGES, *this, no_param), 1);
 	}
+	
 	if (this->_parsedCmd.size() < 3)
-	{
-		push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
-		return (1);
-	}
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
+	
 	std::list<User>::iterator	Usr = my_server.findUserNick(this->_parsedCmd[1]);
 	if (Usr == my_server.getUsersend())
 		return (1) ;

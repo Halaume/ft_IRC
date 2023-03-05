@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 15:00:43 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:04:12 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_BADCHANMASK:
 		{
 			return (ERR_BADCHANMASKmsg(ERR_BADCHANMASK, param));
+		}
+		case ERR_NOPRIVILEGES:
+		{
+			return (ERR_NOPRIVILEGESmsg(ERR_NOPRIVILEGES, cmd.getCmdUser()->getNick()));
 		}
 		case  ERR_CHANOPRIVSNEEDED:
 		{

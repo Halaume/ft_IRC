@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 14:59:15 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:12:36 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define ERR_BADCHANMASKmsg(code, channel)                      concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n")) // add client?
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
+# define ERR_NOPRIVILEGESmsg(code, nick)                       concat_resp(code, nick,                     to_vector(" :Permission Denied- You're not an IRC operator\r\n"))
 # define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)          concat_resp(code, nick, channel,            to_vector(" :You're not channel operator\r\n"))
 # define ERR_NOOPERHOSTmsg(code, nick)                         concat_resp(code, nick,                     to_vector(" :No O-lines for your host\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, client)                   concat_resp(code, client,                   to_vector(" :Cant change mode for other users\r\n"))
@@ -95,6 +96,7 @@ enum numerics {
     ERR_BANNEDFROMCHAN      = 474,
     ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476,
+    ERR_NOPRIVILEGES        = 481,
     ERR_CHANOPRIVSNEEDED    = 482,
     ERR_NOOPERHOST          = 491,
     ERR_USERSDONTMATCH      = 502,

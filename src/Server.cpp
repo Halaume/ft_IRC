@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:56:38 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:10:32 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,6 +495,15 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 		i++;
 	}
 	return (NULL);
+}
+
+void	Server::delUser(User & Usr)
+{
+	for (std::vector<Channel *>::iterator it = Usr.getChannelsbg(); it != Usr.getChannelsend(); it++)
+		(*it)->delUser(Usr.getfd());
+	_ev.data.fd = Usr.getfd();
+	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr.getfd(), &_ev);
+	close(Usr.getfd());
 }
 
 void Server::printUsersList(void)
