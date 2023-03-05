@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:12:15 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:32:44 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -549,31 +549,29 @@ int	Command::_fun_TOPIC(Server &my_server)
 	if (user == channel->getUserListend())
 		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[1]), 1);
 	
-	std::vector<unsigned char>	Topic = channel->getTopic();
-	if (_parsedCmd.size() == 2)
-	{
-		if (Topic.size() > 0)
-			return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
-		// else
-		// 	insert_all(ret, " RPL_NOTOPIC\r\n");
-		// this->_cmd_user->setRet(ret);
-		// return (1) ;
-	}
-	
-	else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
-	{
-		std::cout << "HEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEE 3" << std::endl;
-		//Topic.clear();
-		channel->setTopic(Topic);
-		return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
-		//insert_all(ret, " RPL_TOPIC\r\n");
-		//this->_cmd_user->setRet(ret);
-		//sendToChan(my_server, itc, ret);
-	}
 
-	// else if (_parsedCmd.size() == 3)
 
 	
+	// std::vector<unsigned char>	Topic = channel->getTopic();
+	// if (_parsedCmd.size() == 2)
+	// {
+	// 	if (Topic.size() > 0)
+	// 		return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
+	// 	// else
+	// 	// 	insert_all(ret, " RPL_NOTOPIC\r\n");
+	// 	// this->_cmd_user->setRet(ret);
+	// 	// return (1) ;
+	// }
+	
+	// else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
+	// {
+	// 	Topic.clear();
+	// 	channel->setTopic(Topic);
+	// 	return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
+	// 	//insert_all(ret, " RPL_TOPIC\r\n");
+	// 	//this->_cmd_user->setRet(ret);
+	// 	//sendToChan(my_server, itc, ret);
+	// }
 	// else
 	// {
 	// 	Topic.clear();
@@ -633,16 +631,11 @@ int	Command::_fun_KICK(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_KILL(Server &my_server)
 {
-	if (!this->_cmd_user->getOperator())
-	{
-		// this->_cmd_user->setRet(this->_cmd_user->getUserName());
-		// insert_all(this->_cmd_user->getRet(), " :Permission Denied- You're not an IRC operator\r\n");
-		// return (1);
-		return (push_to_buf(ERR_NOPRIVILEGES, *this, no_param), 1);
-	}
-	
 	if (this->_parsedCmd.size() < 3)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
+	
+	if (!this->_cmd_user->getOperator())
+		return (push_to_buf(ERR_NOPRIVILEGES, *this, no_param), 1);
 	
 	std::list<User>::iterator	Usr = my_server.findUserNick(this->_parsedCmd[1]);
 	if (Usr == my_server.getUsersend())
