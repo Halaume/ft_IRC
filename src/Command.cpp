@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:32:44 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:33:39 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -472,7 +472,8 @@ int	Command::_fun_MODE(Server &my_server)
 	if (_parsedCmd[1] != _cmd_user->getNick())
 		return (push_to_buf(ERR_USERSDONTMATCH, *this, no_param), 1);
 
-	//if (itc->getModes().find('i')->second 
+	//if (itc->getModes().find('i')->second
+	
 	(void)my_server;
 	return (0);
 }
