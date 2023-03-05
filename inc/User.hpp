@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 14:49:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:28:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,9 @@ class User
 		void									setPassBeforeNickUser(int);					
 		void									addChannel(Channel*);
 		int										createNewNick(Server &my_server);
-		
+		bool									isInChan(Channel*);
+		void									delChannel(Channel*);
+
 		std::vector<unsigned char>              getUserModes(void);
 		void									setMode(char c, bool mode);
 		int										modesMessage(std::vector<unsigned char>, bool);

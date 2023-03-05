@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 22:42:33 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:59:55 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ class Channel
 		std::list<User *>::iterator		getUserListbg(void);
 		std::list<User *>::iterator		getUserListend(void);
 		std::list<User *>				getUserList(void);
+		std::list<User *>::iterator		getUserListOpbg(void);
+		std::list<User *>::iterator		getUserListOpend(void);
 		std::list<User *>::iterator		getUserListBanbg(void);
 		std::list<User *>::iterator		getUserListBanend(void);
 		std::list<User *>::iterator		getUserListInvitebg(void);
@@ -69,6 +71,9 @@ class Channel
 		
 		// void							addUser(User *, Server&, std::vector<unsigned char>);
 		bool							isOp(User *) const;
+		void							delUserLst(User*);
+		void							delOpLst(User*);
+
 		void							delUser(int);
 	
 		bool							isUserInChannel(User*);
@@ -82,12 +87,14 @@ class Channel
 		std::map<char, bool>		 	getModes(void) const;
 
 		void        					setTopic(std::vector<unsigned char>);
-		bool        					isOp(User usr) const;
+		bool        					isOp(User) const;
 
 		std::list<User *>::iterator		findUser(std::vector<unsigned char> nick);
-		int 							modesMessage(User*, std::vector<std::vector<unsigned char> >, bool);
+		int 							modesMessage(Server&, User*, std::vector<std::vector<unsigned char> >, bool);
 		std::vector<unsigned char>		getChannelModes(void);
 
+		void							operatorModeFct(Server&, User*, std::vector<std::vector<unsigned char> >, int &);
+		void							inviteModeFct(User *user, std::vector<std::vector<unsigned char> >, int &return_value);
 
 	private:	
 		std::vector<unsigned char>		_chan_name;
@@ -99,6 +106,7 @@ class Channel
 		int								_nb_users_limit;
 		std::list<User *>				_invite_list;
 		std::vector<unsigned char>		_topic;
+		// std::list<User *>				_ban_list;
 
 
 };

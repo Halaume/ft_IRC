@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 14:07:48 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:21:37 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 #include "../inc/Channel.hpp"
 #include "../inc/User.hpp"
 #include <string>
+
+const std::string server_name = "mig.42.fr";
+const std::vector<unsigned char> no_param;
 
 std::string                                 itos(int n);
 void	                                    insert_all(std::vector<unsigned char> &my_vec, std::string to_insert);
@@ -69,5 +72,8 @@ std::vector<unsigned char>                  rpl_name(Channel *);
 bool                                        contains_ctrl_g(std::vector<unsigned char> v);
 bool                                        isValidUserMode(const char c);
 bool                                        isCharInVector(std::vector<unsigned char> v, char c);
+
+void										message_to_user(Server&, User*, std::vector<unsigned char>);
+
 
 #endif

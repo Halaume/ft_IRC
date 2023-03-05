@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 22:43:40 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:58:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,7 @@
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-std::string server_name = "mig.42.fr";
 
-std::vector<unsigned char> no_param;
 
 Command::Command(void):  _globalCmd(), _parsedCmd(), _cmd_user(NULL), _cmd_buf(), _error(0)
 {
@@ -369,35 +367,36 @@ int Command::_fun_JOIN(Server &my_server)
 // 	}
 // }
 
-// void	Command::_fun_OPER(Server &my_server)
-// {
-// 	std::vector<unsigned char> ret;
+// /*''''''''''''''''''''''''''''''''''''
+// 				OPER
+// ''''''''''''''''''''''''''''''''''''''*/
+int	Command::_fun_OPER(Server &my_server)
+{
+	std::vector<unsigned char> adminop = to_vector("admin");
+	std::vector<unsigned char> all_modes;
 	
-// 	if (_parsedCmd.size() == 3)
-// 	{
-// 		std::list<User>::iterator itu = my_server.findUser(_parsedCmd[1]);
-// 		if (itu == my_server.getUsers().end())
-// 		{
-// 			push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
-// 			return ;
-// 		}
-// 		else 
-// 		{
-// 			if (_parsedCmd[2] != my_server.getPassword())
-// 			{
-// 				push_to_buf(ERR_PASSWDMISMATCH, *this, no_param);
-// 				return ;
-// 			}
-// 		}
-// 	}
-// 	push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param);
-// 	return ;
-// }
-
-// void	Command::_fun_ERROR(Server &my_server)
-// {
-// 	(void)my_server;	
-// }
+	if (_parsedCmd.size() < 3)
+		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
+	
+	if (_parsedCmd[1] != adminop)
+		return (push_to_buf(ERR_NOOPERHOST, *this, no_param), 1);
+	else 
+	{
+		std::vector<unsigned char> mode = to_vector(" +o\r\n"); 
+		if (_parsedCmd[2] != my_server.getPasswd())
+			return (push_to_buf(ERR_PASSWDMISMATCH, *this, no_param), 1);
+		else
+		{
+			_cmd_user->setOperator(true);
+			push_to_buf(RPL_YOUREOPER, *this, no_param);
+			push_to_buf(RPL_UMODEIS, *this, mode);
+			return (1);
+			// all_modes = concat_parsedCmd(2);
+			// return (_cmd_user->modesMessage(all_modes, true), 1);
+		}
+	}
+	return (0);
+}
 
 std::vector<unsigned char> Command::concat_parsedCmd(std::vector<std::vector<unsigned char> >::size_type i)
 {
@@ -416,8 +415,6 @@ std::vector<unsigned char> Command::concat_parsedCmd(std::vector<std::vector<uns
 // ''''''''''''''''''''''''''''''''''''''*/
 int Command::_fun_MODE(Server &my_server)
 {
-	(void)my_server;
-
 	std::vector<unsigned char> all_modes;
 	Channel *channel;
 
@@ -442,9 +439,10 @@ int Command::_fun_MODE(Server &my_server)
 			return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
 		if (_parsedCmd.size() < 3 || _parsedCmd[2].empty())
 			return (push_to_buf(RPL_CHANNELMODEIS, *this, my_server.findChan(_parsedCmd[1])->getChannelModes()), 1);
-		if (_parsedCmd.size() > 3 && !channel->isOp(_cmd_user))
+		std::cout << "channel is op:" << channel->isOp(_cmd_user) << " user get op:" << _cmd_user->getOperator() << std::endl;
+		if (_parsedCmd.size() >= 3 && !channel->isOp(_cmd_user) && !_cmd_user->getOperator())
 			return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
-		// return (channel->modesMessage(_parsedCmd, true));
+		return (channel->modesMessage(my_server, _cmd_user, _parsedCmd, true));
 	}
 		
 	
@@ -460,14 +458,7 @@ int Command::_fun_MODE(Server &my_server)
 	return (0);
 }
 
-void Command::message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
-{
-	user->setRet(msg);
-	my_server.getEv().events = EPOLLOUT | EPOLLET;
-	my_server.getEv().data.fd = user->getfd();
-	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
-		return ;
-}
+
 
 // /*''''''''''''''''''''''''''''''''''''
 // 				INVITE
@@ -485,9 +476,9 @@ int	Command::_fun_INVITE(Server &my_server)
 	user = channel->findUser(_parsedCmd[1]);
 	if (user != channel->getUserListend())
 		return (push_to_buf(ERR_USERONCHANNEL, *this, _parsedCmd[1]), 1);
-	if (channel->getMode('i') == true && !channel->isOp(_cmd_user))	// a tester / verifier
+	if (channel->getMode('i') == true && !channel->isOp(_cmd_user))	// a tester / verifier // voir si rajouter les OPERATEURS
 		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[2]), 1);
-	std::cout << "Is user invited?" << channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) << std::endl;
+	// std::cout << "Is user invited?" << channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) << std::endl;
 	if (my_server.findUserPtrNick(_parsedCmd[1]) != NULL && channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) == false)
 	{
 		std::vector<unsigned char> v;
@@ -506,8 +497,6 @@ int	Command::_fun_INVITE(Server &my_server)
 	}
 	return (0);
 }
-
-
 
 // void	Command::_fun_TOPIC(Server &my_server)
 // {
@@ -713,6 +702,9 @@ int Command::answer(Server &my_server)
 		case 3:
             return (_fun_JOIN(my_server));
             break;
+		case 5:
+			return (_fun_OPER(my_server));
+			break;
 		case 8:
             return (_fun_MODE(my_server));
             break;

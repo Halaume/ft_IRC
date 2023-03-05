@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 16:38:31 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:50:33 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ void push_to_buf(int code, Command &cmd, const std::vector<unsigned char> &param
 {
 	(void)param;
 	std::vector<unsigned char> buf = to_vector(":");
-	std::string server_name = "mig.42.fr";
 	
 	if (code == RPL_UMODEIS || code == RPL_CHANNELMODEIS)
 		add_to_vector(buf, cmd.getCmdUser()->getClient());
@@ -37,7 +36,7 @@ void push_to_buf(int code, Command &cmd, const std::vector<unsigned char> &param
 	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 
-std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)
+std::vector<unsigned char> numeric_response(int num_code, Command cmd, const std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)
 {
 	switch (num_code)
 	{
@@ -62,8 +61,8 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case RPL_UMODEIS:
 		{
-			// std::vector<unsigned char> modes = getUserModes(cmd.getCmdUser());
-			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), param));
+			std::vector<unsigned char> modes = cmd.getCmdUser()->getUserModes();
+			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), modes));
 		}
 		case RPL_CHANNELMODEIS:
 		{
@@ -88,6 +87,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case RPL_ENDOFNAMES:
 		{
 			return (RPL_ENDOFNAMESmsg(RPL_ENDOFNAMES, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_YOUREOPER:
+		{
+			return (RPL_YOUREOPERmsg(RPL_YOUREOPER, cmd.getCmdUser()->getNick()));
 		}
 		case ERR_NOSUCHNICK:
 		{
@@ -161,6 +164,10 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, cmd.getCmdUser()->getNick()));
 		}
+		case  ERR_NOOPERHOST:
+		{
+			return (ERR_NOOPERHOSTmsg(ERR_NOOPERHOST, cmd.getCmdUser()->getNick()));
+		}
 		case ERR_USERSDONTMATCH:
 		{
 			return (ERR_USERSDONTMATCHmsg(ERR_USERSDONTMATCH, cmd.getCmdUser()->getNick()));
@@ -179,4 +186,46 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 
 	// to clean
 	return (ERR_NEEDMOREPARAMSmsg(ERR_NEEDMOREPARAMS, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[0]));
+}
+
+void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
+{
+	std::vector<unsigned char> buf = to_vector(":");
+	
+	if (code == RPL_UMODEIS
+		|| code == RPL_CHANNELMODEIS
+		|| code == MODE_CHANOPERSET)
+		add_to_vector(buf, user->getClient());
+	else if (code != OWN_NICK_RPL
+		&& code != JOINED_CHANNEL)
+		add_to_vector(buf, server_name);
+	add_to_vector(buf, numeric_response(code, user, param));
+	user->getRet().insert(user->getRet().end(), buf.begin(), buf.end());
+}
+
+std::vector<unsigned char> numeric_response(int num_code, User *user, std::vector<unsigned char> param)
+{
+	
+	switch (num_code)
+	{
+		case ERR_NOTONCHANNEL:
+		{
+			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, user->getNick(), param));
+		}
+		case ERR_NOSUCHNICK:
+		{
+			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, user->getNick(), param));
+		}
+		case RPL_CHANNELMODEIS:
+		{
+			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, user->getNick(), param));
+		}
+		case MODE_CHANOPERSET:
+		{
+			return (MODE_CHANOPERSETmsg(to_vector(" MODE"), param));
+		}
+	}
+
+	// to clean
+	return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, user->getNick(), param));
 }

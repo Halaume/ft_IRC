@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 14:10:39 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 18:21:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -536,4 +536,13 @@ bool isCharInVector(std::vector<unsigned char> v, char c)
 			return (true);
 	}
 	return (false);
+}
+
+void message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
+{
+	user->setRet(msg);
+	my_server.getEv().events = EPOLLOUT | EPOLLET;
+	my_server.getEv().data.fd = user->getfd();
+	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
+		return ;
 }

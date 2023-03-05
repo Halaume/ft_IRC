@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 22:45:42 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 16:40:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 
 
 void push_to_buf(int error, Command &cmd, const std::vector<unsigned char> &param);
+void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
+
 
 // pimp intro message 
 // add nick of user to RPL_WELCOME?
@@ -36,7 +38,9 @@ void push_to_buf(int error, Command &cmd, const std::vector<unsigned char> &para
 # define RPL_INVITINGmsg(code, nick, nick2, chan)     	concat_resp(code, nick, nick2, chan)
 # define RPL_NAMREPLYmsg(code, nick, all_the_rest)    	concat_resp(code, nick, all_the_rest)
 # define RPL_ENDOFNAMESmsg(code, nick, chan)          	concat_resp(code, nick, chan,         	to_vector(" :End of /NAMES list\r\n"))
-		
+# define RPL_YOUREOPERmsg(code, client)                 concat_resp(code, client,               to_vector(" :You are now an IRC operator\r\n"))
+
+
 # define ERR_NOSUCHNICKmsg(code, nick, no_such_nick)  	concat_resp(code, nick, no_such_nick, 	to_vector(" :No such nick\r\n"))
 # define ERR_NOSUCHCHANNELmsg(code, nick, chan)        	concat_resp(code, nick, chan,         	to_vector(" :No such chan\r\n"))
 # define ERR_TOOMANYCHANNELSmsg(code, nick, chan)    	concat_resp(code, nick, chan,         	to_vector(" :You have joined too many chans\r\n"))
@@ -55,13 +59,15 @@ void push_to_buf(int error, Command &cmd, const std::vector<unsigned char> &para
 # define ERR_BADCHANNELKEYmsg(code, nick, chan)         concat_resp(code, nick, chan,			to_vector(" :Cannot join chan (+k)\r\n"))
 # define ERR_BADCHANMASKmsg(code, chan)               	concat_resp(code, chan,					to_vector(" :Bad chan Mask\r\n")) // add nick?
 # define ERR_CHANOPRIVSNEEDEDmsg(code, nick, chan)    	concat_resp(code, nick, chan,			to_vector(" :You're not channel operator\r\n"))
+# define ERR_NOOPERHOSTmsg(code, nick)                  concat_resp(code, nick,                 to_vector(" :No O-lines for your host\r\n"))
 
 # define ERR_UMODEUNKNOWNFLAGmsg(code, nick)			concat_resp(code, nick,					to_vector(" :Unknown MODE flag\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, nick)				concat_resp(code, nick,					to_vector(" :Cant change mode for other users\r\n"))
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
 # define OWN_NICK_RPLmsg(nick, user_name, mask, nickold) concat_nick_rpl(nick, user_name, mask, nickold)
-# define JOINED_CHANNELmsg(client, chan)                 concat_resp(client, to_vector("JOIN"), chan)
+# define JOINED_CHANNELmsg(client, chan)                concat_resp(client, to_vector("JOIN"), chan)
+# define MODE_CHANOPERSETmsg(mode, all)                 concat_resp(mode, all)
 
 // # define JOINED_chanmsg(client, chan)               concat_resp(client, to_vector("JOIN"), add_to_vector(chan, static_cast<std::string>("\r\n")))
 // class Command;
@@ -79,6 +85,8 @@ enum numerics {
     RPL_INVITING            = 341,
     RPL_NAMREPLY            = 353,
     RPL_ENDOFNAMES          = 366,
+    RPL_YOUREOPER           = 381,
+
     
     ERR_NOSUCHNICK          = 401, //////////////// HHHHHHHHHHHERE
     ERR_NOSUCHCHANNEL     	= 403,
@@ -98,14 +106,18 @@ enum numerics {
     ERR_BADCHANNELKEY       = 475,
     ERR_BADCHANMASK         = 476,
     ERR_CHANOPRIVSNEEDED    = 482,
+    ERR_NOOPERHOST          = 491,
+
 
 	ERR_UMODEUNKNOWNFLAG	= 501,
 	ERR_USERSDONTMATCH		= 502,
 
     OWN_NICK_RPL            = 1000,
     JOINED_CHANNEL          = 1001,
+    MODE_CHANOPERSET        = 1002
 };
 
-std::vector<unsigned char>      numeric_response(int num_code, Command cmd, std::string server, std::vector<unsigned char> param); //std::vector<unsigned char> param);
+std::vector<unsigned char>      numeric_response(int, Command, const std::string, std::vector<unsigned char>);
+std::vector<unsigned char>      numeric_response(int, User*, std::vector<unsigned char>);
 
 #endif

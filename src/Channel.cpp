@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 22:43:22 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 19:07:47 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,37 @@ void Channel::addUser(User *user)
 	user->addChannel(this);
 }
 
+void Channel::delUserLst(User *user)
+{
+	std::list<User *>::iterator it = getUserListbg();
+
+	while (it != getUserListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+	user->delChannel(this);
+}
+
+void Channel::delOpLst(User *user)
+{
+	std::list<User *>::iterator it = getOpListbg();
+
+	while (it != getOpListend())
+	{
+		if (*it == user)
+		{
+			_op_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+}
+
 void	Channel::delUser(int fd)
 {
 	for (std::list<User *>::iterator it = this->_user_list.begin(); it != this->_user_list.end(); it++)
@@ -198,6 +229,16 @@ std::list<User *>	Channel::getUserList(void)
 std::vector<unsigned char>	Channel::getChanPassword(void) const
 {
 	return (_chan_password);
+}
+
+std::list<User *>::iterator	Channel::getUserListOpbg(void)
+{
+	return (_op_list.begin());
+}
+
+std::list<User *>::iterator	Channel::getUserListOpend(void)
+{
+	return (_op_list.end());
 }
 
 std::list<User *>::iterator	Channel::getUserListBanbg(void)
@@ -356,14 +397,80 @@ std::vector<unsigned char> Channel::getChannelModes(void)
 	return (ret);
 }
 
-int Channel::modesMessage(User *user, std::vector<std::vector<unsigned char> > input, bool isUserCommand)
+void Channel::operatorModeFct(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, int &return_value)
+{
+	std::vector<unsigned char> op_msg_bg;
+	std::vector<unsigned char> op_msg;
+	User *user_target;
+	int add_or_remove = 1;
+	
+	if (input.size() == 3 || input[3].empty()) // afficher la liste?
+		return;
+	if (input[2][0] == '-')
+		add_or_remove = -1;
+	user_target = my_server.findUserPtrNick(input[3]);
+	if (user_target == NULL)
+	{
+		push_to_buf(ERR_NOSUCHNICK, user, input[3]);
+		return_value++;
+	}
+	else
+	{
+		op_msg.clear();
+		op_msg = input[1];
+		add_to_v(op_msg, to_vector(" "));
+		add_to_v(op_msg, input[3]);
+		add_to_v(op_msg, to_vector(" :"));
+		if (add_or_remove == 1)
+			add_to_v(op_msg, to_vector(" +o"));
+		else
+			add_to_v(op_msg, to_vector(" -o"));
+		add_to_v(op_msg, to_vector("\r\n"));
+		push_to_buf(MODE_CHANOPERSET, user, op_msg);
+		op_msg_bg = to_vector(":" + server_name + " ");
+		add_to_v(op_msg_bg, user->getNick());
+		if (add_or_remove == 1 && !isOp(*user_target))
+		{
+			_op_list.push_back(user_target);
+			if (user_target->isInChan(this) == false)
+			{
+				_user_list.push_back(user_target);
+				user_target->addChannel(this);
+				add_to_v(op_msg_bg, to_vector(" has made you channel operator on "));
+				add_to_v(op_msg_bg, _chan_name);
+				add_to_v(op_msg_bg, to_vector("\r\n"));
+				message_to_user(my_server, my_server.findUserPtrNick(user_target->getNick()), op_msg_bg);
+			}
+		}
+		else if (add_or_remove == -1 && isOp(*user_target))
+		{
+			add_to_v(op_msg_bg, to_vector(" has removed you from the channel operators on "));
+			add_to_v(op_msg_bg, _chan_name);
+			add_to_v(op_msg_bg, to_vector("\r\n"));
+			message_to_user(my_server, my_server.findUserPtrNick(user_target->getNick()), op_msg_bg);
+			delOpLst(user_target);
+		}
+		return_value++;
+	}
+}
+
+void Channel::inviteModeFct(User *user, std::vector<std::vector<unsigned char> > input, int &return_value)
+{
+	if (input[2][0] == '-')
+		setMode('i', false);
+	else
+		setMode('i', true);
+	push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes());
+	return_value++;
+}
+
+int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, bool isUserCommand)
 {
 	std::vector<unsigned char> ret = to_vector(":");
 	std::vector<unsigned char> modes;
-	std::vector<std::vector<unsigned char> >::size_type i = 2;
+	std::vector<unsigned char>::size_type j = 0;
+	int return_value = 0;
 	int add_or_remove = 1; (void) add_or_remove;
-	// int error = 0;
-	// xcstd::vector<unsigned char> error_msg;
 	
 	if (isUserCommand == true)
 	{
@@ -373,74 +480,29 @@ int Channel::modesMessage(User *user, std::vector<std::vector<unsigned char> > i
 	add_to_v(ret, to_vector("MODE "));
 	add_to_v(ret, input[1]);
 	add_to_v(ret, to_vector(" "));
-
-	for (;i < input.size(); i++)
+	if (input[2][0] == '-')
 	{
-		for (std::vector<unsigned char>::size_type j = 0; j < input[i].size(); j++)
-		{
-			if (i == 2)
-			{
-				if (j == 0 && input[i][j] == '-')
-				{
-					modes.push_back('-');
-					add_or_remove = -1;
-					j++;
-				}
-				else if (j == 0 && input[i][j] == '-')
-				{
-					modes.push_back('+');
-					j++;
-				}
-				else if (j == 0)
-					modes.push_back('+');
-				// if (input)
-			}
-
-
-			
-		}
-	// 	if (isValidUserMode(input[it])
-	// 		&& isCharInVector(modes, input[it]) == false)
-	// 	{
-	// 		if (add_or_remove == 1
-	// 			&& getMode(input[it]) == false
-	// 			&& input[it] != 'o')
-	// 		{
-	// 			setMode(input[it], true);
-	// 			modes.push_back(input[it]);
-	// 		}
-	// 		else if (add_or_remove == -1
-	// 			&& getMode(input[it]) == true)
-	// 		{
-	// 			setMode(input[it], false);
-	// 			modes.push_back(input[it]);
-	// 		}
-	// 	}
-	// 	else if (!isValidUserMode(input[it]))
-	// 		error = 1;
+		ret.push_back('-');
+		add_or_remove = -1;
+		j++;
 	}
-
-
-
-
-
-
+	else if (input[2][0] == '+')
+	{
+		ret.push_back('+');
+		j++;
+	}
+	else
+		ret.push_back('+');
+	for (; j < input[2].size(); j++)
+	{
+		if (input[2][j] == 'o')
+			operatorModeFct(my_server, user, input, return_value);
+		else if (input[2][j] == 'i')
+			inviteModeFct(user, input, return_value);
+			// HHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRREEEEEEEEEEEEEE
 
 	
-	// if (modes.size() == 0 && !error)
-	// 	return (0);
-	// if (error == 1)
-	// {
-	// 	add_to_v(error_msg, to_vector(":"));
-	// 	add_to_v(error_msg, getClient());
-	// 	add_to_v(error_msg, ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, _nick));
-	// 	_ret.insert(_ret.end(), error_msg.begin(), error_msg.end());
-	// }
-	// if (modes.size() > 0)
-	// {
-	// 	add_to_v(ret, modes);
-	// 	add_to_v(ret, to_vector("\r\n"));
-	// 	_ret.insert(_ret.end(), ret.begin(), ret.end());
-	// }
-	return (0);
+	}
+	std::cout << "return valueeeeeeeeeeeeeeeeee:" << return_value << std::endl;
+	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 15:45:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:27:29 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,6 +287,21 @@ void User::setfd(int fd)
 	_fd = fd;
 }
 
+void User::delChannel(Channel *channel)
+{
+	std::vector<Channel *>::iterator it = _channels.begin();
+	
+	while (it != _channels.end())
+	{
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			return ;
+		}
+		it++;
+	}
+}
+
 void User::setUserMask(std::vector<unsigned char>& user_mask)
 {
 	_user_mask = user_mask;
@@ -305,6 +320,10 @@ bool	User::getOperator(void) const
 void	User::setOperator(bool val)
 {
 	_operator = val;
+	if (val == true)
+		setMode('o', true);
+	else
+		setMode('o', false);
 }
 
 void	User::clearCurrCmd(void)
@@ -357,6 +376,16 @@ int User::createNewNick(Server &my_server)
 	if (lastnum == 5)
 		return (1);
 	return (0);
+}
+
+bool User::isInChan(Channel *channel)
+{
+	for (std::vector<Channel *>::size_type it = 0; it < _channels.size(); it++)
+	{
+		if (_channels[it] == channel)
+			return (true);
+	}
+	return (false);
 }
 
 void	User::insertcmd(std::vector<unsigned char> & vec)
