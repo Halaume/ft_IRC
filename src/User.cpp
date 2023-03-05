@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:12:31 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:12:05 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,10 +105,10 @@ std::vector<unsigned char> User::getPasswd(void) const
 	return (_passwd);
 }
 
-int User::getPassStatus(void) const
-{
-	return (_pass_status);
-}
+// int User::getPassStatus(void) const
+// {
+// 	return (_pass_status);
+// }
 
 bool User::getRegistered(void) const
 {
@@ -249,6 +249,21 @@ void User::setUserMask(std::vector<unsigned char>& user_mask)
 void User::addChannel(Channel *channel)
 {
 	_channels.push_back(channel);
+}
+
+void User::delChannel(Channel *channel)
+{
+	std::vector<Channel *>::iterator it = _channels.begin();
+	
+	while (it != _channels.end())
+	{
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			return ;
+		}
+		it++;
+	}
 }
 
 bool	User::getOperator(void) const

@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/03 16:53:04 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 14:59:15 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,32 +34,33 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 
 
 
-# define RPL_TOPICmsg(code, nick, channel_and_topic)        concat_resp(code, nick, channel_and_topic)
-# define RPL_NAMREPLYmsg(code, nick, all_the_rest)          concat_resp(code, nick, all_the_rest)
-# define RPL_ENDOFNAMESmsg(code, nick, channel)             concat_resp(code, nick, channel,            to_vector(" :End of /NAMES list\r\n"))
-# define ERR_NOSUCHCHANNELmsg(code, client, channel)        concat_resp(code, client, channel,          to_vector(" :No such channel\r\n"))
-# define ERR_TOOMANYCHANNELSmsg(code, client, channel)      concat_resp(code, client, channel,          to_vector(" :You have joined too many channels\r\n"))
-# define ERR_NONICKNAMEGIVENmsg(code)                       concat_resp(code,                           to_vector(" :No nickname given\r\n"))
-# define ERR_ERRONEUSNICKNAMEmsg(code, client, nick)        concat_resp(code, client, nick,             to_vector(" :Erroneus nickname\r\n"))
-# define ERR_NICKNAMEINUSEmsg(code, nick)                   concat_resp(code, nick, nick,             to_vector(" :Nickname is already in use\r\n"))
-# define ERR_NOTONCHANNELmsg(code, client, channel)         concat_resp(code, client, channel,          to_vector(" :You're not on that channel\r\n"))
-# define ERR_USERONCHANNELmsg(code, client, nick, channel)  concat_resp(code, client, nick, channel,    to_vector(" :is already on channel\r\n"))
-# define ERR_NEEDMOREPARAMSmsg(code, client, cmd)           concat_resp(code, client, cmd,              to_vector(" :Not enough parameters\r\n"))
-# define ERR_ALREADYREGISTEREDmsg(code, client)             concat_resp(code, client,                   to_vector(" :You may not reregister\r\n"))
-# define ERR_PASSWDMISMATCHmsg(code, client)                concat_resp(code, client,                   to_vector(" :Password incorrect\r\n"))
+# define RPL_TOPICmsg(code, nick, channel_and_topic)            concat_resp(code, nick, channel_and_topic)
+# define RPL_NAMREPLYmsg(code, nick, all_the_rest)              concat_resp(code, nick, all_the_rest)
+# define RPL_ENDOFNAMESmsg(code, nick, channel)                 concat_resp(code, nick, channel,            to_vector(" :End of /NAMES list\r\n"))
+# define ERR_NOSUCHCHANNELmsg(code, client, channel)            concat_resp(code, client, channel,          to_vector(" :No such channel\r\n"))
+# define ERR_TOOMANYCHANNELSmsg(code, client, channel)          concat_resp(code, client, channel,          to_vector(" :You have joined too many channels\r\n"))
+# define ERR_NONICKNAMEGIVENmsg(code)                           concat_resp(code,                           to_vector(" :No nickname given\r\n"))
+# define ERR_ERRONEUSNICKNAMEmsg(code, client, nick)            concat_resp(code, client, nick,             to_vector(" :Erroneus nickname\r\n"))
+# define ERR_NICKNAMEINUSEmsg(code, nick)                       concat_resp(code, nick, nick,               to_vector(" :Nickname is already in use\r\n"))
+# define ERR_USERNOTINCHANNELmsg(code, client, nick, channel)   concat_resp(code, client, nick, channel,    to_vector(" :They aren't on that channel\r\n"))
+# define ERR_NOTONCHANNELmsg(code, client, channel)             concat_resp(code, client, channel,          to_vector(" :You're not on that channel\r\n"))
+# define ERR_USERONCHANNELmsg(code, client, nick, channel)      concat_resp(code, client, nick, channel,    to_vector(" :is already on channel\r\n"))
+# define ERR_NEEDMOREPARAMSmsg(code, client, cmd)               concat_resp(code, client, cmd,              to_vector(" :Not enough parameters\r\n"))
+# define ERR_ALREADYREGISTEREDmsg(code, client)                 concat_resp(code, client,                   to_vector(" :You may not reregister\r\n"))
+# define ERR_PASSWDMISMATCHmsg(code, client)                    concat_resp(code, client,                   to_vector(" :Password incorrect\r\n"))
    
-# define ERR_CHANNELISFULLmsg(code, client, channel)        concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+l)\r\n"))
-# define ERR_INVITEONLYCHANmsg(code, client, channel)       concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+i)\r\n"))
-# define ERR_BANNEDFROMCHANmsg(code, client, channel)       concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+b)\r\n"))
-# define ERR_BADCHANNELKEYmsg(code, client, channel)        concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+k)\r\n"))
-# define ERR_BADCHANMASKmsg(code, channel)                  concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n")) // add client?
+# define ERR_CHANNELISFULLmsg(code, client, channel)            concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+l)\r\n"))
+# define ERR_INVITEONLYCHANmsg(code, client, channel)           concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+i)\r\n"))
+# define ERR_BANNEDFROMCHANmsg(code, client, channel)           concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+b)\r\n"))
+# define ERR_BADCHANNELKEYmsg(code, client, channel)            concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+k)\r\n"))
+# define ERR_BADCHANMASKmsg(code, channel)                      concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n")) // add client?
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
-# define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)       concat_resp(code, nick, channel,            to_vector(" :You're not channel operator\r\n"))
-# define ERR_NOOPERHOSTmsg(code, nick)                      concat_resp(code, nick,                     to_vector(" :No O-lines for your host\r\n"))
-# define ERR_USERSDONTMATCHmsg(code, client)                concat_resp(code, client,                   to_vector(" :Cant change mode for other users\r\n"))
-# define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)    concat_nick_rpl(nick, user_name, mask, nickold)
-# define JOINED_CHANNELmsg(client, channel)                 concat_resp(client, to_vector("JOIN"), channel)
+# define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)          concat_resp(code, nick, channel,            to_vector(" :You're not channel operator\r\n"))
+# define ERR_NOOPERHOSTmsg(code, nick)                         concat_resp(code, nick,                     to_vector(" :No O-lines for your host\r\n"))
+# define ERR_USERSDONTMATCHmsg(code, client)                   concat_resp(code, client,                   to_vector(" :Cant change mode for other users\r\n"))
+# define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)       concat_nick_rpl(nick, user_name, mask, nickold)
+# define JOINED_CHANNELmsg(client, channel)                    concat_resp(client, to_vector("JOIN"), channel)
 
 // # define JOINED_CHANNELmsg(client, channel)               concat_resp(client, to_vector("JOIN"), add_to_vector(channel, static_cast<std::string>("\r\n")))
 // class Command;
@@ -83,6 +84,7 @@ enum numerics {
     ERR_NONICKNAMEGIVEN     = 431,
     ERR_ERRONEUSNICKNAME    = 432,
     ERR_NICKNAMEINUSE       = 433,
+    ERR_USERNOTINCHANNEL    = 441,
     ERR_NOTONCHANNEL        = 442,
     ERR_USERONCHANNEL       = 443,
 	ERR_NEEDMOREPARAMS      = 461,

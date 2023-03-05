@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:17:53 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 16:09:29 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ class Channel
 			void 							setMode(char, bool);
 	
 			void							addUser(User *);
+			void							delUserLst(User *user);
 			void 							addUserToBan(User*);
 			void 							addUserToInvite(User*);
 			void							delUser(int);

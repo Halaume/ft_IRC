@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:17:13 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 17:10:19 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,22 @@ void Channel::addUser(User *user)
 		_op_list.push_back(user);
 	_user_list.push_back(user);
 	user->addChannel(this);
+}
+
+void Channel::delUserLst(User *user)
+{
+	std::list<User *>::iterator it = getUserListbg();
+
+	while (it != getUserListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+	user->delChannel(this);
 }
 
 void	Channel::delUser(int fd)

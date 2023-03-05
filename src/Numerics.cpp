@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:26:29 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/05 15:00:43 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,13 +109,17 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
 		}
+		case ERR_USERNOTINCHANNEL:
+		{
+			return (ERR_USERNOTINCHANNELmsg(ERR_USERNOTINCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
+		}
 		case ERR_NOTONCHANNEL:
 		{
 			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_USERONCHANNEL:
 		{
-			return (ERR_USERONCHANNELmsg(ERR_USERONCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param ));
+			return (ERR_USERONCHANNELmsg(ERR_USERONCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{
