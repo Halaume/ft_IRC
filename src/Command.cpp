@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 16:43:45 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 16:49:36 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	Command::sendToChan(Server & my_server, std::vector<Channel>::iterator chan
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = (*itc)->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-			my_server.delUser(**itc);
+			my_server.delUser(*itc);
 	}
 }
 
@@ -202,11 +202,10 @@ int Command::_fun_JOIN(Server &my_server)
 			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
-			Channel new_channel(channels[it]);
-			new_channel.addUser(_cmd_user);
-			my_server.addNewChannel(new_channel);
+			my_server.addNewChannel(channels[it]);
 			if (my_server.findChan(channels[it]) == NULL)
 				return (0);
+			my_server.findChan(channels[it])->addUser(_cmd_user);
 			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);
@@ -247,7 +246,7 @@ int Command::_fun_JOIN(Server &my_server)
 
 int	Command::_fun_QUIT(Server &my_server)
 {
-	my_server.delUser(*(this->_cmd_user));
+	my_server.delUser(this->_cmd_user);
 	return (2);
 }
 
@@ -272,12 +271,18 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 
 	if (dest[0] != '#')
 	{
-		for (it = it + 1; it != dest.end(); it++)
+		for (; it != dest.end(); it++)
 		{
 			if (*it == '#')
+			{
 				chan = my_server.findExistingChan(std::vector<unsigned char>(it, dest.end()));
+				break ;
+			}
 			else if (*it == '@' || *it == '+')
+			{
+				std::cerr << "Setting op as true" << std::endl;
 				is_op = true;
+			}
 			else if (*it != '@' || *it != '+')
 				return ;
 		}
@@ -308,7 +313,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		ret.push_back(chan->getChanName()[i]);
 	ret.push_back(' ');
 	msg.insert(msg.begin(), ret.begin(), ret.end());
-	print_vector("MESSAGE FINALE = ", msg);
 	if (is_op)
 	{
 				for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
@@ -317,7 +321,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			my_server.getEv().events = EPOLLOUT | EPOLLET;
 			my_server.getEv().data.fd = (*itc)->getfd();
 			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				my_server.delUser(**itc);
+				my_server.delUser(*itc);
 		}
 	}
 	else
@@ -328,7 +332,7 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			my_server.getEv().events = EPOLLOUT | EPOLLET;
 			my_server.getEv().data.fd = (*itc)->getfd();
 			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				my_server.delUser(**itc);
+				my_server.delUser(*itc);
 		}
 	}
 }
@@ -387,7 +391,7 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		my_server.getEv().events = EPOLLOUT | EPOLLET;
 		my_server.getEv().data.fd = itu->getfd();
 		if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
-			my_server.delUser(*itu);
+			my_server.delUser(&(*itu));
 	}
 	return (0);
 }
@@ -700,7 +704,7 @@ int	Command::_fun_PART(Server &my_server)
 			sendToChan(my_server, itc, partMsg);
 		}
 	}
-		return (1);
+	return (1);
 }
 
 
@@ -743,8 +747,6 @@ int Command::answer(Server &my_server)
 			return (_fun_OPER(my_server));
 			break;
 		case 6:
-			if (!this->_cmd_user->getRegistered())
-				break ;
 			return (_fun_QUIT(my_server));
 			break;
 		case 7:
@@ -830,9 +832,4 @@ std::vector<std::vector<unsigned char> > Command::getCommand(void) const
 User* Command::getCmdUser(void) const
 {
 	return (_cmd_user);
-}
-
-std::vector<std::vector<unsigned char> >& Command::getRet()
-{
-	return (_ret);
 }

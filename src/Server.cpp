@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 17:21:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 16:52:38 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,10 @@ bool Server::isUserInList(int fd)
 	return (false);
 }
 
-void Server::addNewChannel(Channel& new_channel)
+void Server::addNewChannel(std::vector<unsigned char> new_channel)
 {
-	_channels.push_back(new_channel);
+	Channel	chan(new_channel);
+	_channels.push_back(chan);
 }
 
 void Server::run(void) // checker le nombre de connexions max?
@@ -168,7 +169,6 @@ void Server::run(void) // checker le nombre de connexions max?
 	_ev.events = EPOLLIN | EPOLLET;
 	std::vector<unsigned char> v;
 	std::vector<unsigned char>	CmdIt;
-	std::vector<unsigned char>::size_type shift; (void)shift;
 	std::vector<unsigned char> iv;
 	std::vector<unsigned char>::iterator iter;
 	Command	cmd;
@@ -217,8 +217,8 @@ void Server::run(void) // checker le nombre de connexions max?
 						{
 							case EPOLLOUT:
 								std::cerr << "Sending data" << std::endl;
+								Usr->clearCurrCmd();
 								sendto(Usr->getfd(), Usr->getRet());
-								cmd.getRet().clear();
 								Usr = findUser(_events[k].data.fd);
 								if (Usr == _users.end())
 								{
@@ -244,7 +244,6 @@ void Server::run(void) // checker le nombre de connexions max?
 										_users.erase(Usr);
 									break;
 								}
-								shift = 0;
 								if (Usr->getCurrCmd().size() > 0)
 								{
 									for (std::vector<unsigned char>::size_type it = 0; it < Usr->getCurrCmd().size(); it++)
@@ -277,7 +276,6 @@ void Server::run(void) // checker le nombre de connexions max?
 											}
 											cmd.setParsedCmd(ParsedCommand);
 											cmd.setUser(&(*Usr));
-											cmd.getRet().clear();
 											if (cmd.answer(*this) == 1)
 												break;
 											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), (Usr->getCurrCmdbg() + it + 1));
@@ -351,10 +349,8 @@ void Server::run(void) // checker le nombre de connexions max?
 									v.clear();
 									ParsedCommand.clear();
 									Usr->clearRet();
-									cmd.getRet().clear();
 									cmd._globalCmd.clear();
 									CmdIt.clear();
-									shift = 0;
 									iter = Usr->getCurrCmdbg();
 									for (std::vector<unsigned char>::size_type it = 0; it < Usr->getCurrCmd().size(); it++)
 									{
@@ -387,7 +383,6 @@ void Server::run(void) // checker le nombre de connexions max?
 											}
 											cmd.setParsedCmd(ParsedCommand);
 											cmd.setUser(&(*Usr));
-											cmd.getRet().clear();
 											int ans = cmd.answer(*this);
 											if (ans == 2)
 												break;
@@ -411,8 +406,6 @@ void Server::run(void) // checker le nombre de connexions max?
 											ParsedCommand.clear();
 										}
 									}
-									if (_ev.events != (EPOLLOUT | EPOLLET))
-										Usr->clearCurrCmd();
 								}
 								else if (retrec == 0 || Usr->getPassBeforeNickUser() == PASS_CONNECTION_ERROR)
 								{
@@ -495,13 +488,16 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 	return (NULL);
 }
 
-void	Server::delUser(User & Usr)
+void	Server::delUser(User * Usr)
 {
-	for (std::vector<Channel *>::iterator it = Usr.getChannelsbg(); it != Usr.getChannelsend(); it++)
-		(*it)->delUser(Usr.getfd());
-	_ev.data.fd = Usr.getfd();
-	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr.getfd(), &_ev);
-	close(Usr.getfd());
+	for (std::vector<Channel *>::iterator it = Usr->getChannelsbg(); it != Usr->getChannelsend(); it++)
+		(*it)->delUser(Usr->getfd());
+	_ev.data.fd = Usr->getfd();
+	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
+	close(Usr->getfd());
+	std::list<User>::iterator it;
+	for (it = this->_users.begin(); it->getfd() != Usr->getfd(); it++);
+	this->_users.erase(it);
 }
 
 void Server::printUsersList(void)

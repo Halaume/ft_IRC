@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 11:50:47 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 15:51:35 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ class Command
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
-		std::vector<std::vector<unsigned char> >&	getRet();
 		
 
 		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
@@ -76,7 +75,6 @@ class Command
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
 		// std::list<User>::iterator				_cmd_user;
-		std::vector<std::vector<unsigned char> > _ret;
 
 		int										_fun_PASS(void);
 		int										_fun_NICK(Server &);

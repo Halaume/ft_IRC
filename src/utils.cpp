@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 17:21:33 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 17:14:29 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,7 +259,7 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 		if (n != str.begin())
 			n++;
 		prev = n;
-		while (*n != ',')
+		while (*n != ',' && n != str.end())
 			n++;
 		if (n == str.end())
 			ret.insert(ret.end(), std::vector<unsigned char>(prev, str.end()));

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 17:21:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 16:31:46 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ class Server
 
 		// Channels
 		bool							channelExists(std::vector<unsigned char>&);
-		void							addNewChannel(Channel&);
+		void							addNewChannel(std::vector<unsigned char>);
 
 		// Channel*						findChanPtr(std::vector<unsigned char>);
 		void							send_to_client(int, std::vector<unsigned char>);
@@ -93,7 +93,7 @@ class Server
 		std::vector<unsigned char>		getPassword(void) const;
 		void							setBot(void);
 		int								nbConnections(User &);
-		void							delUser(User &);
+		void							delUser(User *);
 		int								nbConnectionsWithSameNick(User &);
 
 
