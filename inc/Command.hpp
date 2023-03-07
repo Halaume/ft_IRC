@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/01 11:19:04 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/06 15:51:35 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,16 +58,15 @@ class Command
 		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		std::vector<std::vector<unsigned char> >	getGobalCmd();
 		std::vector<std::vector<unsigned char> >	getParsedCmd();
-		std::vector<std::vector<unsigned char> >&	getRet();
 		
 
 		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
 		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
-		int											register_user(Server &, User &);	
+		int											register_user(Server &);	
 		
-		int											answer(Server &, User &);
+		int											answer(Server &);
 
 
 		
@@ -76,11 +75,10 @@ class Command
 		std::vector<unsigned char>				_cmd_buf;
 		int										_error;
 		// std::list<User>::iterator				_cmd_user;
-		std::vector<std::vector<unsigned char> > _ret;
 
-		int										_fun_PASS(Server &, User &);
-		int										_fun_NICK(Server &, User &);
-		int										_fun_USER(Server &, User &);
+		int										_fun_PASS(void);
+		int										_fun_NICK(Server &);
+		int										_fun_USER(Server &);
 		int										_fun_JOIN(Server &);
 		int										_fun_PRIVMSG(Server &);
 		int										_fun_OPER(Server &);
@@ -94,6 +92,7 @@ class Command
 		int										_fun_RESTART(Server &);
 		int										_fun_PONG(void);
 		int										_fun_NOTICE(Server &);
+		int										_fun_PART(Server &);
 
 		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 

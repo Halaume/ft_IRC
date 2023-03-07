@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:24:16 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 13:58:53 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,14 @@
 #include <vector>
 
 #include "Channel.hpp"
+#include "Server.hpp"
 
 #define PASSWORD_NOT_SET	0
 #define PASSWORD_SET		1
 
 class Channel;
+
+class Server;
 
 class User
 {
@@ -44,9 +47,6 @@ class User
 		std::vector<Channel *>::iterator		getChannelsend(void);
 		std::vector<unsigned char>::iterator	getCurrCmdbg(void);
 		std::vector<unsigned char>::iterator	getCurrCmdend(void);
-		std::vector<unsigned char>&				getAllCmd(void);
-		std::vector<unsigned char>::iterator	getAllCmdbg(void);
-		std::vector<unsigned char>::iterator	getAllCmdend(void);
 		int										getfd(void) const;
 		int										getPassStatus(void) const;
 		bool									getRegistered(void) const;
@@ -54,13 +54,11 @@ class User
 		std::vector<unsigned char>::const_iterator	getUserNamebg(void) const;
 		std::vector<unsigned char>::const_iterator	getUserNameend(void) const;
 		std::vector<unsigned char>				getPasswd(void) const;
-		std::vector<unsigned char>				getClient(void) const;
 		std::vector<unsigned char>				getNick(void) const;
 		std::vector<unsigned char>::const_iterator	getNickbg(void) const;
 		std::vector<unsigned char>::const_iterator	getNickend(void) const;
 		int										getNbChan(void);
 		std::vector<unsigned char>				getUserMask(void) const;
-		std::vector<unsigned char>				getUserNickNameMask(void) const;
 		int										getPassBeforeNickUser(void) const;
 		
 		void									setPassStatus(int);
@@ -74,18 +72,18 @@ class User
 		bool									getOperator(void) const;
 		void									setOperator(bool);
 		void									insertcmd(std::vector<unsigned char> &);
-		void									insertAllCmd(std::vector<unsigned char> &);
 		void									clearCurrCmd(void);
 		void									clearRet(void);
-					
-		void									setClient(std::vector<unsigned char>&);
-					
 		void 									setfd(int);
 		void									setNick(std::vector<unsigned char>);
 		void									setUserMask(std::vector<unsigned char>&);
-		void									setPassBeforeNickUser(int);
-					
+		void									setPassBeforeNickUser(int);					
+		std::vector<Channel *>::iterator		getChanIt(std::vector<unsigned char>);
 		void									addChannel(Channel*);
+		void									delChannel(Channel *);
+		void									del_chan(std::vector<Channel *>::iterator);
+		std::vector<unsigned char>				getClient(void);
+		int										createNewNick(Server &my_server);
 
 	private:
 		int							_fd;
@@ -96,13 +94,11 @@ class User
 		std::vector<unsigned char>	_currCmd;
 		std::vector<unsigned char>	_user_name;
 		std::vector<unsigned char>	_real_name;
-		std::vector<unsigned char>	_client;
 		std::vector<unsigned char>	_nick;
 		std::vector<unsigned char>	_ret;
 		std::vector<Channel *>		_channels;//	Size 10 ref:RFC 1459/1.3 Max number of chan for a User
 		std::vector<unsigned char>	_user_mask;
 		int							_pass_before_nick_user;
-		std::vector<unsigned char>	_allCmd;
 };
 
 std::ostream &		operator<<( std::ostream & o, User const & i);

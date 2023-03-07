@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/02/22 12:45:53 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/04 17:21:30 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,20 @@ void	signal_handling(int sig)
 	is_kill = sig;
 }
 
-void	check_kill(Server& server)
+int	check_kill(Server& server)
 {
-	if (is_kill == 130)// CTRL + C
+	if (is_kill != 0)// CTRL + C
 	{
 		free_fun(server);
-		exit(0);
+		return (1);
 	}
+	return (0);
 }
 
+/* TODO
+		tester les nc et CTRL+D
+		
+*/
 int main(int argc, char **argv)
 {
 	Server g_serv;

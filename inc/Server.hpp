@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 15:27:11 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:39:10 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ class Server
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
 		std::vector<Channel>			getChannel(void) const;
+		std::vector<Channel> &			getChannelref(void);
 		epoll_event &					getEv(void);
 
 
@@ -78,7 +79,7 @@ class Server
 
 		// Channels
 		bool							channelExists(std::vector<unsigned char>&);
-		void							addNewChannel(Channel&);
+		void							addNewChannel(std::vector<unsigned char>);
 
 		// Channel*						findChanPtr(std::vector<unsigned char>);
 		void							send_to_client(int, std::vector<unsigned char>);
@@ -93,7 +94,9 @@ class Server
 		std::vector<unsigned char>		getPassword(void) const;
 		void							setBot(void);
 		int								nbConnections(User &);
-		void							delUser(User &);
+		void							delUser(User *);
+		void							delChan(std::vector<Channel>::iterator);
+		int								nbConnectionsWithSameNick(User &);
 
 
 	private:

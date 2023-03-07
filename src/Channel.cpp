@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 14:24:15 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 14:54:06 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 #include "../inc/utils.hpp"
 
 
-Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_users_limit()
+Channel::Channel(void): _chan_name(), _chan_password(), _op_list(), _user_list(), _ban_list(), _nb_users_limit(), \
+							_invite_list(), _topic()
 {
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
@@ -33,17 +34,19 @@ Channel::Channel(void): _chan_name(), _chan_password(), _user_connected(), _nb_u
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::Channel(const Channel & copy): _chan_name(copy._chan_name), _chan_password(copy._chan_password), \
-_modes(copy._modes), _user_connected(copy._user_connected), _op_list(copy._op_list), \
-_user_list(copy._user_list), _ban_list(copy._ban_list), _nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list)
+											_modes(copy._modes), _op_list(copy._op_list), _user_list(copy._user_list), _ban_list(copy._ban_list), \
+																		 _nb_users_limit(copy._nb_users_limit), _invite_list(copy._invite_list), _topic(copy._topic)
 {
 }
 
-Channel::Channel(std::vector<unsigned char> name): _chan_name(name), _chan_password(), _user_connected(), \
-_nb_users_limit()
+Channel::Channel(std::vector<unsigned char> name): _chan_password(), _op_list(), _user_list(), \
+													   _ban_list(), _nb_users_limit(), _invite_list()
 {
+	this->_chan_name = name;
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
 	_modes.insert(std::make_pair('s', false));
@@ -55,10 +58,11 @@ _nb_users_limit()
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::Channel(std::vector<unsigned char> name, std::vector<unsigned char> password): _chan_name(name), \
-_chan_password(password), _user_connected(), _nb_users_limit()
+																							_chan_password(password), _op_list(), _user_list(), _nb_users_limit(), _invite_list(), _topic()
 {
 	_modes.insert(std::make_pair('o', false));
 	_modes.insert(std::make_pair('p', false));
@@ -71,65 +75,97 @@ _chan_password(password), _user_connected(), _nb_users_limit()
 	_modes.insert(std::make_pair('b', false));
 	_modes.insert(std::make_pair('v', false));
 	_modes.insert(std::make_pair('k', false));
+	_topic = to_vector("default topic");
 }
 
 Channel::~Channel(void)
 {
-	_chan_name.erase(_chan_name.begin(), _chan_name.end());
-	_chan_password.erase(_chan_password.begin(), _chan_password.end());
-	_modes.erase(_modes.begin(), _modes.end());
-	_op_list.erase(_op_list.begin(), _op_list.end());
-	_user_list.erase(_user_list.begin(), _user_list.end());
-	_ban_list.erase(_ban_list.begin(), _ban_list.end());
-	_invite_list.erase(_invite_list.begin(), _invite_list.end());
 }
 
-Channel &	Channel::operator=(const Channel & src)
+Channel& Channel::operator=(const Channel & src)
 {
 	if (&src == this)
 		return (*this);
+	_topic = src._topic;
+	_modes = src._modes;
+	_chan_name = src._chan_name;
+	_chan_password = src._chan_password;
+	_op_list = src._op_list;
+	_user_list = src._user_list;
+	_nb_users_limit = src._nb_users_limit;
+	_invite_list = src._invite_list;
+	_topic = src._topic;
 	return (*this);
 }
 
-bool	Channel::operator!=(const Channel & lhs) const
+bool Channel::operator!=(const Channel & lhs) const
 {
 	return (this->_chan_name != lhs._chan_name);
 }
 
-std::vector<unsigned char>	 Channel::getTopic(void) const
+std::vector<unsigned char>& Channel::getTopic(void)
 {
-	return (this->_topic);	
+	return (_topic);
 }
 
-std::map<char, bool>		 Channel::getModes(void) const
+std::map<char, bool> Channel::getModes(void) const
 {
-	return (this->_modes);
+	return (_modes);
 }
 
-void        Channel::setTopic(std::vector<unsigned char> topic)
+void Channel::setTopic(std::vector<unsigned char> topic)
 {
 	this->_topic = topic;
 }
 
 bool    Channel::isOp(User usr) const
 {
-    for (std::list<User *>::const_iterator it = _op_list.begin(); it != _op_list.end(); it++)
-    {
+	for (std::list<User *>::const_iterator it = _op_list.begin(); it != _op_list.end(); it++)
+	{
 		if (**it == usr)
-            return (true);
+			return (true);
 	}
-    return (false);
+	return (false);
 }
 
-void Channel::addUser(User * new_user)
+void Channel::addUser(User *user)
 {
-	_user_list.push_back(new_user);
-	new_user->addChannel(this);
+	if (_user_list.size() == 0)
+		_op_list.push_back(user);
+	_user_list.push_back(user);
+	user->addChannel(this);
+}
+
+void Channel::delUserLst(User *user)
+{
+	std::list<User *>::iterator it = getOpListbg();
+
+	while (it != getOpListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+
+	it = getUserListbg();
+	while (it != getUserListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+	user->delChannel(this);
 }
 
 void	Channel::delUser(int fd)
 {
-	for (std::list<User *>::iterator it = this->_user_list.begin(); it != this->_user_list.end(); it++)
+	for (std::list<User *>::iterator it = this->_user_list.begin();it != this->_user_list.end(); it++)
 	{
 		if ((*it)->getfd() == fd)
 			this->_user_list.erase(it);
@@ -227,6 +263,13 @@ int Channel::getNbUsersLimit(void)
 	return (_nb_users_limit);
 }
 
+void Channel::makeOp(User *user)
+{
+	if (user == NULL)
+		return;
+	_op_list.push_back(user);
+}
+
 bool	Channel::isOp(User *usr) const
 {
 	for (std::list<User *>::const_iterator it = this->_op_list.begin(); it != this->_op_list.end(); it++)
@@ -316,10 +359,19 @@ bool Channel::isUserInvited(User *user)
 std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User *>::iterator it;
-	
+	std::vector<unsigned char> vec = this->_chan_name;
+	vec.push_back('\0');
+	std::cerr << "name of the Channel : " << vec.data() << std::endl;
+	for (std::list<User *>::iterator j = this->_user_list.begin(); j != this->_user_list.end(); j++)
+	{
+		vec = (*j)->getNick();
+		vec.push_back('\0');
+		std::cerr << "Name of users : " << vec.data() << std::endl;
+	}
+
 	for (it = this->_user_list.begin(); it != this->_user_list.end(); it++)
 	{
-		if ((*it)->getUserName() == nick)
+		if ((*it)->getNick() == nick)
 			return (it);
 	}
 	return (it);
