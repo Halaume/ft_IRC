@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 16:49:36 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:03:21 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -684,24 +684,23 @@ int	Command::_fun_PART(Server &my_server)
 	for (std::vector<std::vector<unsigned char> >::iterator it = chans.begin(); it != chans.end(); it++, i++)
 	{
 		itc = my_server.findExistingChan(chans[i]);
-		if (itc == my_server.getChannel().end())
+		if (itc == my_server.getChannelsend())
 			push_to_buf(ERR_NOSUCHCHANNEL, *this, chans[i]);
-
-		std::list<User *>::iterator	itu = itc->findUser(_cmd_user->getUserName());
-		if (itu == itc->getUserListend())
+		else if (itc->findUser(_cmd_user->getNick()) == itc->getUserListend())
 			push_to_buf(ERR_NOTONCHANNEL, *this, itc->getChanName());
 		else
 		{
 			std::vector<unsigned char> chanName = itc->getChanName();
-			itc->delUser(this->_cmd_user->getfd());
-			this->_cmd_user->del_chan(chanName);
+			itc->delUserLst(this->_cmd_user);
 			std::vector<unsigned char> partMsg;
 			partMsg.push_back(':');
-			std::vector<unsigned char> client = this->_cmd_user->getClient();//TODO Build the message
+			std::vector<unsigned char> client = this->_cmd_user->getClient();
 			partMsg.insert(partMsg.end(), client.begin(), client.end());
 			insert_all(partMsg, " PART ");
 			partMsg.insert(partMsg.end(), chanName.begin(), chanName.end());
 			sendToChan(my_server, itc, partMsg);
+			if (itc->getUserList().size() == 0)
+				my_server.getChannelref().erase(itc);
 		}
 	}
 	return (1);

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 16:52:38 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:03:19 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ std::vector<unsigned char>	Server::getPassword(void) const
 {
 	return (_passwd);
 }
-
 
 std::vector<Channel>::iterator    Server::findExistingChan(std::vector<unsigned char> channel)
 {
@@ -317,6 +316,19 @@ void Server::run(void) // checker le nombre de connexions max?
 								break;							
 							case EPOLLIN:
 								std::cerr << "Receiving data" << std::endl;
+								std::cerr << "nb de chan : " << this->_channels.size() << std::endl;
+								for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+								{
+									std::vector<unsigned char> vec = it->getChanName();
+									vec.push_back('\0');
+									std::cerr << "Channel : " << vec.data() << std::endl;
+									for (std::list<User *>::iterator j = it->getUserListbg(); j != it->getUserListend(); j++)
+									{
+										vec = (*j)->getNick();
+										vec.push_back('\0');
+										std::cerr << "Name of users : " << vec.data() << std::endl;
+									}
+								}
 								if (isUserInList(_events[k].data.fd) == false)
 								{
 									User new_user(_events[k].data.fd);
@@ -490,8 +502,10 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 
 void	Server::delUser(User * Usr)
 {
-	for (std::vector<Channel *>::iterator it = Usr->getChannelsbg(); it != Usr->getChannelsend(); it++)
-		(*it)->delUser(Usr->getfd());
+	while (Usr->getChannelsbg() != Usr->getChannelsend())
+	{
+		(*(Usr->getChannelsbg()))->delUserLst(Usr);
+	}
 	_ev.data.fd = Usr->getfd();
 	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
 	close(Usr->getfd());
@@ -509,6 +523,10 @@ void Server::printUsersList(void)
 }
 
 // GETTERS
+std::vector<Channel> &	Server::getChannelref(void)
+{
+	return (_channels);
+}
 
 std::vector<Channel>	Server::getChannel(void) const
 {

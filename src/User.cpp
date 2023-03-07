@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 16:48:17 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 13:58:54 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,22 +25,22 @@
 # define PASS_CONNECTION_ERROR 4
 
 User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+					  _user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
 }
 
 User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+						_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
 }
 
 User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
-_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
-_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
+								   _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
+													   _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
 {
 }
 
@@ -335,18 +335,37 @@ int User::createNewNick(Server &my_server)
 	return (0);
 }
 
+std::vector<Channel *>::iterator	User::getChanIt(std::vector<unsigned char> chanName)
+{
+	for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+		if ((*it)->getChanName() == chanName)
+			return (it);
+	return (this->_channels.end());
+}
+
 void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
 }
 
-void	User::del_chan(std::vector<unsigned char> chanName)
+void User::delChannel(Channel *channel)
 {
-	for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+	std::vector<Channel *>::iterator it = _channels.begin();
+
+	while (it != _channels.end())
 	{
-		if ((*it)->getChanName() == chanName)
-			this->_channels.erase(it);
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			return ;
+		}
+		it++;
 	}
+}
+
+void	User::del_chan(std::vector<Channel *>::iterator chan)
+{
+	this->_channels.erase(chan);
 }
 
 std::ostream &		operator<<( std::ostream & o, User const & i)

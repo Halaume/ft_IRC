@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 16:31:46 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:03:17 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ class Server
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
 		std::vector<Channel>			getChannel(void) const;
+		std::vector<Channel> &			getChannelref(void);
 		epoll_event &					getEv(void);
 
 

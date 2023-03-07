@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 16:49:25 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 14:54:06 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ bool Channel::operator!=(const Channel & lhs) const
 
 std::vector<unsigned char>& Channel::getTopic(void)
 {
-	return (_topic);	
+	return (_topic);
 }
 
 std::map<char, bool> Channel::getModes(void) const
@@ -134,6 +134,33 @@ void Channel::addUser(User *user)
 		_op_list.push_back(user);
 	_user_list.push_back(user);
 	user->addChannel(this);
+}
+
+void Channel::delUserLst(User *user)
+{
+	std::list<User *>::iterator it = getOpListbg();
+
+	while (it != getOpListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+
+	it = getUserListbg();
+	while (it != getUserListend())
+	{
+		if (*it == user)
+		{
+			_user_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+	user->delChannel(this);
 }
 
 void	Channel::delUser(int fd)
@@ -332,10 +359,19 @@ bool Channel::isUserInvited(User *user)
 std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 {
 	std::list<User *>::iterator it;
+	std::vector<unsigned char> vec = this->_chan_name;
+	vec.push_back('\0');
+	std::cerr << "name of the Channel : " << vec.data() << std::endl;
+	for (std::list<User *>::iterator j = this->_user_list.begin(); j != this->_user_list.end(); j++)
+	{
+		vec = (*j)->getNick();
+		vec.push_back('\0');
+		std::cerr << "Name of users : " << vec.data() << std::endl;
+	}
 
 	for (it = this->_user_list.begin(); it != this->_user_list.end(); it++)
 	{
-		if ((*it)->getUserName() == nick)
+		if ((*it)->getNick() == nick)
 			return (it);
 	}
 	return (it);
