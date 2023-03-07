@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:12:36 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:52:18 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,13 @@ void push_to_buf(int error, Command &cmd, std::vector<unsigned char> &param);
 # define RPL_WELCOMEmsg(code, client)                       concat_resp(code, client,                   to_vector(" :Welcome to gim irc\r\n"))
 # define RPL_YOURHOSTmsg(code, client, server_name)         concat_resp(code, client,                   to_vector(" :Your host is " + server_name + ", running version 1.0\r\n"))
 # define RPL_CREATEDmsg(code, client, date_and_time)        concat_resp(code, client,                   to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))
-# define RPL_MYINFOmsg(code, client, server_name)           concat_resp(code, client,                   to_vector(" :" + server_name + " 1.0\r\n")) // add user modes and channel modes
+# define RPL_MYINFOmsg(code, client, server_name)           concat_resp(code, client,                   to_vector(" " + server_name + " 1.0\r\n")) // add user modes and channel modes
 # define RPL_UMODEISmsg(code, nick, mode)                   concat_resp(code, nick, mode)
 # define RPL_INVITINGmsg(code, nick, nick2, channel)        concat_resp(code, nick, nick2, channel)
 # define RPL_YOUREOPERmsg(code, client)                     concat_resp(code, client,                   to_vector(" :You are now an IRC operator\r\n"))
 
 
-
-# define RPL_TOPICmsg(code, nick, channel_and_topic)            concat_resp(code, nick, channel_and_topic)
+# define RPL_TOPICmsg(code, nick, channel, topic)               concat_resp(code, nick, channel,             to_vector(" :" + to_string(topic) + "\r\n"))
 # define RPL_NAMREPLYmsg(code, nick, all_the_rest)              concat_resp(code, nick, all_the_rest)
 # define RPL_ENDOFNAMESmsg(code, nick, channel)                 concat_resp(code, nick, channel,            to_vector(" :End of /NAMES list\r\n"))
 # define ERR_NOSUCHCHANNELmsg(code, client, channel)            concat_resp(code, client, channel,          to_vector(" :No such channel\r\n"))

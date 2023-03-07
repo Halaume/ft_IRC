@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 16:29:52 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:18:48 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,5 +71,8 @@ void                                       insert_all(std::vector<unsigned char>
 
 int	                                       my_compare(std::vector<unsigned char> my_vec, std::string str);
 int                                        my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2);
+
+
+std::string                                to_string(std::vector<unsigned char>);
 
 #endif

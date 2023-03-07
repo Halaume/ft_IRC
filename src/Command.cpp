@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:33:39 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 16:30:16 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -535,10 +535,6 @@ int	Command::_fun_INVITE(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_TOPIC(Server &my_server)
 {
-	//std::vector<unsigned char> 		ret;
-	//std::list<User *>::iterator		Usrlst = itc->getUserListbg();
-
-	//ret = _parsedCmd[0];
 	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	
@@ -550,46 +546,43 @@ int	Command::_fun_TOPIC(Server &my_server)
 	if (user == channel->getUserListend())
 		return (push_to_buf(ERR_NOTONCHANNEL, *this, _parsedCmd[1]), 1);
 	
+	if (channel->getMode('t') == true && !channel->isOp(this->_cmd_user))
+		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
 
+	std::vector<unsigned char>	Topic = channel->getTopic();
+	if (_parsedCmd.size() == 2)
+	{
+		if (Topic.size() > 0)
+			return (push_to_buf(RPL_TOPIC, *this, Topic), 1);
+	}
+	
+	else if (_parsedCmd.size() >= 3 && _parsedCmd[2][0] != ':')
+		return (0);
 
-	
-	// std::vector<unsigned char>	Topic = channel->getTopic();
-	// if (_parsedCmd.size() == 2)
-	// {
-	// 	if (Topic.size() > 0)
-	// 		return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
-	// 	// else
-	// 	// 	insert_all(ret, " RPL_NOTOPIC\r\n");
-	// 	// this->_cmd_user->setRet(ret);
-	// 	// return (1) ;
-	// }
-	
-	// else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
-	// {
-	// 	Topic.clear();
-	// 	channel->setTopic(Topic);
-	// 	return (push_to_buf(RPL_TOPIC, *this, _parsedCmd[2]), 1);
-	// 	//insert_all(ret, " RPL_TOPIC\r\n");
-	// 	//this->_cmd_user->setRet(ret);
-	// 	//sendToChan(my_server, itc, ret);
-	// }
-	// else
-	// {
-	// 	Topic.clear();
-	// 	std::vector<std::vector<unsigned char> >::iterator iterator = _parsedCmd.begin();
-	// 	if (*(iterator->begin()) == ':')
-	// 		Topic.insert(Topic.end(), iterator->begin() + 1, iterator->end());
-	// 	iterator++;
-	// 	Topic.push_back(' ');
-	// 	while (iterator != _parsedCmd.end())
-	// 	{
-	// 		iterator++;
-	// 		Topic.insert(Topic.end(), iterator->begin(), iterator->end());
-	// 		Topic.push_back(' ');
-	// 	}
-	// 	itc->setTopic(Topic);
-	// 	sendToChan(my_server, itc, ret);
-	// }
+	else if (_parsedCmd.size() == 3 && _parsedCmd[2].size() == 1 && _parsedCmd[2][0] == ':')
+	{
+		Topic.clear();
+		channel->setTopic(Topic);
+		return (push_to_buf(RPL_TOPIC, *this, Topic), 1);
+	}
+
+	else
+	{
+		Topic.clear();
+		std::vector<std::vector<unsigned char> >::iterator iterator = _parsedCmd.begin() + 2;
+		if (*(iterator->begin()) == ':')
+			Topic.insert(Topic.begin(), iterator->begin() + 1, iterator->end());
+		iterator++;
+		Topic.push_back(' ');
+		while (iterator != _parsedCmd.end())
+		{
+			Topic.insert(Topic.end(), iterator->begin(), iterator->end());
+			Topic.push_back(' ');
+			iterator++;
+		}
+		channel->setTopic(Topic);
+		return (push_to_buf(RPL_TOPIC, *this, Topic), 1);
+	}
 	return (0);
 }
 

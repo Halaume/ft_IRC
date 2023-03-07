@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:04:12 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:06:56 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case RPL_TOPIC:
 		{
-			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), param));
+			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
 		}
 		case RPL_NAMREPLY:
 		{

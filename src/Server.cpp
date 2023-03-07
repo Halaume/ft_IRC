@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:10:32 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 14:14:34 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,6 +308,19 @@ void Server::run(void) // checker le nombre de connexions max?
 							break;							
 						case EPOLLIN:
 							std::cerr << "OOOOOOOOO EVENT EPOLLIN" << std::endl;
+							std::cerr << "nb de chan : " << this->_channels.size() << std::endl;
+							for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+							{
+								std::vector<unsigned char> vec = it->getChanName();
+								vec.push_back('\0');
+								std::cerr << "Channel : " << vec.data() << std::endl;
+								for (std::list<User *>::iterator j = it->getUserListbg(); j != it->getUserListend(); j++)
+								{
+									vec = (*j)->getNick();
+									vec.push_back('\0');
+									std::cerr << "Name of users : " << vec.data() << std::endl;
+								}
+							}
 							if (isUserInList(_events[k].data.fd) == false)
 							{
 								User new_user(_events[k].data.fd);

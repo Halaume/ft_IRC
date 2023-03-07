@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/02 17:49:57 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:29:28 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -502,4 +502,16 @@ std::vector<unsigned char> rpl_name(Channel *channel)
 	}
 	add_to_vector(ret, static_cast<std::string>("\r\n"));
 	return (ret);
+}
+
+std::string	to_string(std::vector<unsigned char> vec)
+{
+	std::vector<unsigned char>::size_type i = 0;
+	std::string ret;
+	while (i < vec.size())
+	{
+		ret.push_back(vec[i]);
+		i++;
+	}
+	return (ret);	
 }
