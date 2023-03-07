@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 15:03:21 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 15:52:52 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -686,6 +686,21 @@ int	Command::_fun_PART(Server &my_server)
 		itc = my_server.findExistingChan(chans[i]);
 		if (itc == my_server.getChannelsend())
 			push_to_buf(ERR_NOSUCHCHANNEL, *this, chans[i]);
+		else if (itc->getUserList().size() == 1)
+		{
+			std::vector<unsigned char> chanName = itc->getChanName();
+			std::vector<unsigned char> partMsg;
+			partMsg.push_back(':');
+			std::vector<unsigned char> client = this->_cmd_user->getClient();
+			partMsg.insert(partMsg.end(), client.begin(), client.end());
+			insert_all(partMsg, " PART ");
+			partMsg.insert(partMsg.end(), chanName.begin(), chanName.end());
+			partMsg.push_back('\r');
+			partMsg.push_back('\n');
+			sendToChan(my_server, itc, partMsg);
+
+			my_server.delChan(itc);
+		}
 		else if (itc->findUser(_cmd_user->getNick()) == itc->getUserListend())
 			push_to_buf(ERR_NOTONCHANNEL, *this, itc->getChanName());
 		else
@@ -698,9 +713,9 @@ int	Command::_fun_PART(Server &my_server)
 			partMsg.insert(partMsg.end(), client.begin(), client.end());
 			insert_all(partMsg, " PART ");
 			partMsg.insert(partMsg.end(), chanName.begin(), chanName.end());
+			partMsg.push_back('\r');
+			partMsg.push_back('\n');
 			sendToChan(my_server, itc, partMsg);
-			if (itc->getUserList().size() == 0)
-				my_server.getChannelref().erase(itc);
 		}
 	}
 	return (1);
