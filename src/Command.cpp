@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:58:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 19:17:53 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ int Command::_fun_NICK(Server &my_server)
 }
 
 // /*''''''''''''''''''''''''''''''''''''
-// 				USER
+// 				USER TODO : quand on se conencte avec un nick deja utilise via telnet un nouveau nick  ca ne se connecte pa autmatiquement
 // ''''''''''''''''''''''''''''''''''''''*/
 int Command::_fun_USER(Server &my_server)
 {
@@ -188,6 +188,7 @@ int Command::_fun_JOIN(Server &my_server)
 	std::vector<std::vector<unsigned char> > channels;
 	std::vector<std::vector<unsigned char> > keys;
 	std::vector<unsigned char> param;
+	Channel * channel;
 
 	if (_parsedCmd.size() < 2)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
@@ -217,28 +218,29 @@ int Command::_fun_JOIN(Server &my_server)
 		}
 		else
 		{
-			if (my_server.findChan(channels[it]) == NULL)
+			channel = my_server.findChan(channels[it]); 
+			if (channel == NULL)
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('k') == true // to verify in irssi
-				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], my_server.findChan(channels[it])->getChanPassword()))))
+			else if (channel->getMode('k') == true // to verify in irssi
+				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], channel->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('l') == true // to verify in irssi
-				&& my_server.findChan(channels[it])->getNbUsers() >= my_server.findChan(channels[it])->getNbUsersLimit())
+			else if (channel->getMode('l') == true // to verify in irssi
+				&& channel->getNbUsers() >= channel->getNbUsersLimit())
 				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
 			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // to verify in irssi
 				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('b') == true // dont forget to set mode b when banning a user // to verify in irssi
-				&& my_server.findChan(channels[it])->isUserBanned(&(*_cmd_user)))
+			else if (channel->isUserBanned(&(*_cmd_user))) // to verify in irssi
 				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
-			else if (my_server.findChan(channels[it])->getMode('i') == true	// voir pour channel operator // to verify in irssi
-				&& my_server.findChan(channels[it])->isUserInvited(&(*_cmd_user)) == false)
+			else if (channel->getMode('i') == true	// voir pour channel operator // to verify in irssi
+				&& (channel->isUserInvited(&(*_cmd_user)) == false
+				&& channel->isOp(*_cmd_user) == false))
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
-			if (my_server.findChan(channels[it])->isUserInChannel(_cmd_user) == false)
-				my_server.findChan(channels[it])->addUser(&(*_cmd_user));
+			if (channel->isUserInChannel(_cmd_user) == false)
+				channel->addUser(&(*_cmd_user));
 			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
-			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
+			param = rpl_topic(channels[it], channel->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);
-			param = rpl_name(my_server.findChan(channels[it]));
+			param = rpl_name(channel);
 			push_to_buf(RPL_NAMREPLY, *this, param);
 			return (push_to_buf(RPL_ENDOFNAMES, *this, channels[it]), 1);
 		}
@@ -439,7 +441,6 @@ int Command::_fun_MODE(Server &my_server)
 			return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
 		if (_parsedCmd.size() < 3 || _parsedCmd[2].empty())
 			return (push_to_buf(RPL_CHANNELMODEIS, *this, my_server.findChan(_parsedCmd[1])->getChannelModes()), 1);
-		std::cout << "channel is op:" << channel->isOp(_cmd_user) << " user get op:" << _cmd_user->getOperator() << std::endl;
 		if (_parsedCmd.size() >= 3 && !channel->isOp(_cmd_user) && !_cmd_user->getOperator())
 			return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
 		return (channel->modesMessage(my_server, _cmd_user, _parsedCmd, true));

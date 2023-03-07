@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:59:55 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 18:34:24 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,13 @@
 #include <vector>
 #include "User.hpp"
 #include "Server.hpp"
+
+# define ADD 1
+# define REMOVE -1
+
+# define NO_RET 0
+# define RET 1
+# define RET_AND_UMODEIS 2
 
 class User;
 class Server;
@@ -75,7 +82,8 @@ class Channel
 		void							delOpLst(User*);
 
 		void							delUser(int);
-	
+		void							delBanLst(User *);
+
 		bool							isUserInChannel(User*);
 		bool							isUserBanned(User*);
 		bool							isUserInvited(User*);
@@ -93,8 +101,13 @@ class Channel
 		int 							modesMessage(Server&, User*, std::vector<std::vector<unsigned char> >, bool);
 		std::vector<unsigned char>		getChannelModes(void);
 
-		void							operatorModeFct(Server&, User*, std::vector<std::vector<unsigned char> >, int &);
-		void							inviteModeFct(User *user, std::vector<std::vector<unsigned char> >, int &return_value);
+		void							operatorModeFct(Server&, User*, std::vector<std::vector<unsigned char> >, int &, int);
+		void							inviteModeFct(int &, int);
+		void							limitModeFct(std::vector<std::vector<unsigned char> >, int &, int);
+		void 							keyModeFct(User *, std::vector<std::vector<unsigned char> >, int &, int);
+		void							topicModeFct(int &, int);
+		void							banModeFct(Server &, std::vector<std::vector<unsigned char> >, int &, int);
+
 
 	private:	
 		std::vector<unsigned char>		_chan_name;

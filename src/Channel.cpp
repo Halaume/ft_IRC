@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 19:07:47 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 19:18:38 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,6 +165,21 @@ void Channel::delOpLst(User *user)
 	}
 }
 
+void Channel::delBanLst(User *user)
+{
+	std::list<User *>::iterator it = getUserListBanbg();
+
+	while (it != getUserListBanend())
+	{
+		if (*it == user)
+		{
+			_ban_list.erase(it);
+			break ;
+		}
+		it++;
+	}
+}
+
 void	Channel::delUser(int fd)
 {
 	for (std::list<User *>::iterator it = this->_user_list.begin(); it != this->_user_list.end(); it++)
@@ -188,16 +203,11 @@ std::vector<unsigned char>	Channel::getChanName(void) const
 
 void Channel::addUserToBan(User *new_user)
 {
-	// verify if user not already in list..
-	// check list limit etc...
 	_ban_list.push_back(new_user);
 }
 
 void Channel::addUserToInvite(User *new_user)
 {
-	// verify if user not already in list..
-	// check list limit etc...
-	print_vector("nick in chan", new_user->getNick());
 	_invite_list.push_back(new_user);
 }
 
@@ -397,71 +407,118 @@ std::vector<unsigned char> Channel::getChannelModes(void)
 	return (ret);
 }
 
-void Channel::operatorModeFct(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, int &return_value)
+void Channel::operatorModeFct(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
 {
-	std::vector<unsigned char> op_msg_bg;
+	std::vector<std::vector<unsigned char> > param;
+	std::vector<unsigned char> op_notification;
 	std::vector<unsigned char> op_msg;
 	User *user_target;
-	int add_or_remove = 1;
-	
 	if (input.size() == 3 || input[3].empty()) // afficher la liste?
 		return;
-	if (input[2][0] == '-')
-		add_or_remove = -1;
 	user_target = my_server.findUserPtrNick(input[3]);
 	if (user_target == NULL)
 	{
 		push_to_buf(ERR_NOSUCHNICK, user, input[3]);
-		return_value++;
+		return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
 	}
 	else
 	{
-		op_msg.clear();
-		op_msg = input[1];
-		add_to_v(op_msg, to_vector(" "));
-		add_to_v(op_msg, input[3]);
-		add_to_v(op_msg, to_vector(" :"));
-		if (add_or_remove == 1)
-			add_to_v(op_msg, to_vector(" +o"));
-		else
-			add_to_v(op_msg, to_vector(" -o"));
-		add_to_v(op_msg, to_vector("\r\n"));
-		push_to_buf(MODE_CHANOPERSET, user, op_msg);
-		op_msg_bg = to_vector(":" + server_name + " ");
-		add_to_v(op_msg_bg, user->getNick());
-		if (add_or_remove == 1 && !isOp(*user_target))
+		if ((add_or_remove == ADD && isOp(*user_target))
+			|| (add_or_remove == REMOVE && !isOp(*user_target)))
+			return;
+		param.insert(param.end(), input.begin() + 3, input.end());
+		op_msg = concatMode(input[1], to_vector("o"), param, add_or_remove);
+		push_to_buf(MODE_MESSAGE, user, op_msg);
+		return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
+		op_notification = userMadeOpertorMsg(_chan_name, user, add_or_remove);
+		message_to_user(my_server, user_target, op_notification);
+		if (add_or_remove == ADD && !isOp(*user_target))
 		{
 			_op_list.push_back(user_target);
-			if (user_target->isInChan(this) == false)
-			{
-				_user_list.push_back(user_target);
-				user_target->addChannel(this);
-				add_to_v(op_msg_bg, to_vector(" has made you channel operator on "));
-				add_to_v(op_msg_bg, _chan_name);
-				add_to_v(op_msg_bg, to_vector("\r\n"));
-				message_to_user(my_server, my_server.findUserPtrNick(user_target->getNick()), op_msg_bg);
-			}
+			_user_list.push_back(user_target);
+			user_target->addChannel(this);
 		}
-		else if (add_or_remove == -1 && isOp(*user_target))
-		{
-			add_to_v(op_msg_bg, to_vector(" has removed you from the channel operators on "));
-			add_to_v(op_msg_bg, _chan_name);
-			add_to_v(op_msg_bg, to_vector("\r\n"));
-			message_to_user(my_server, my_server.findUserPtrNick(user_target->getNick()), op_msg_bg);
+		else if (add_or_remove == REMOVE && isOp(*user_target))
 			delOpLst(user_target);
-		}
-		return_value++;
 	}
 }
 
-void Channel::inviteModeFct(User *user, std::vector<std::vector<unsigned char> > input, int &return_value)
+void Channel::inviteModeFct(int &return_value, int add_or_remove)
 {
-	if (input[2][0] == '-')
-		setMode('i', false);
-	else
+	if (add_or_remove == ADD)
 		setMode('i', true);
-	push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes());
-	return_value++;
+	else if (add_or_remove == REMOVE)
+		setMode('i', false);
+	return_value = RET_AND_UMODEIS;
+}
+
+void Channel::limitModeFct(std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
+{
+	if (!(input.size() == 3 || input[3].empty()) && (add_or_remove == ADD && vtoi(input[3]) > 0))
+	{
+		setMode('l', true);
+		_nb_users_limit = vtoi(input[3]);
+	}
+	else if (add_or_remove == REMOVE && getMode('l') == true)
+	{
+		setMode('l', false);
+		_nb_users_limit = 0;
+	}
+	return_value = RET_AND_UMODEIS;
+}
+
+void Channel::keyModeFct(User *user, std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
+{
+	if (input.size() == 3 || input[3].empty())
+		return;
+	if (add_or_remove == ADD)
+	{
+		setMode('k', true);
+		_chan_password = input[3];
+		return_value = RET_AND_UMODEIS;
+	}
+	else if (add_or_remove == REMOVE && getMode('k') == true && _chan_password == input[3])
+	{
+		setMode('k', false);
+		_chan_password.clear();
+		return_value = RET_AND_UMODEIS;
+	}
+	else if (add_or_remove == REMOVE && getMode('k') == true && _chan_password != input[3])
+	{
+		push_to_buf(ERR_INVALIDKEY, user, _chan_name);
+		return_value = RET;
+	}
+}
+
+void Channel::topicModeFct(int &return_value, int add_or_remove)
+{
+	if (add_or_remove == ADD && getMode('t') == false)
+		setMode('t', true);
+	else if (add_or_remove == REMOVE && getMode('t') == true)
+		setMode('t', false);
+	return_value = RET_AND_UMODEIS;
+}
+
+void Channel::banModeFct(Server &my_server, std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
+{
+	if (input.size() == 3 || input[3].empty())
+		return; // list bans
+	User *user_to_ban;
+	std::vector<unsigned char>::size_type i = 3;
+	for (; i < input.size(); i++)
+	{
+		user_to_ban = my_server.findUserPtrNick(input[i]);
+		if (user_to_ban != NULL && add_or_remove == ADD && !isUserBanned(user_to_ban))
+			_ban_list.push_back(user_to_ban);
+		else if (user_to_ban != NULL && add_or_remove == REMOVE && isUserBanned(user_to_ban))
+			_ban_list.push_back(user_to_ban);
+	} ///////////////////////HEEEEEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRREEEE
+	// write ban message iwth MDE_MESSAGE
+	// if (add_or_remove == ADD && getMode('t') == false)
+	// 	setMode('t', true);
+	// else if (add_or_remove == REMOVE && getMode('t') == true)
+	// 	setMode('t', false);
+	return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
 }
 
 int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, bool isUserCommand)
@@ -469,8 +526,8 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 	std::vector<unsigned char> ret = to_vector(":");
 	std::vector<unsigned char> modes;
 	std::vector<unsigned char>::size_type j = 0;
-	int return_value = 0;
-	int add_or_remove = 1; (void) add_or_remove;
+	int return_value = NO_RET;
+	int add_or_remove = ADD;
 	
 	if (isUserCommand == true)
 	{
@@ -483,7 +540,7 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 	if (input[2][0] == '-')
 	{
 		ret.push_back('-');
-		add_or_remove = -1;
+		add_or_remove = REMOVE;
 		j++;
 	}
 	else if (input[2][0] == '+')
@@ -495,14 +552,30 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 		ret.push_back('+');
 	for (; j < input[2].size(); j++)
 	{
-		if (input[2][j] == 'o')
-			operatorModeFct(my_server, user, input, return_value);
+		if (input[2][j] == '-')
+			add_or_remove = REMOVE;
+		else if(input[2][j] == '+')
+			add_or_remove = ADD;
+		else if (input[2][j] == 'o')
+			operatorModeFct(my_server, user, input, return_value, add_or_remove);
 		else if (input[2][j] == 'i')
-			inviteModeFct(user, input, return_value);
-			// HHHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRREEEEEEEEEEEEEE
+			inviteModeFct(return_value, add_or_remove);
+		else if (input[2][j] == 'l')
+			limitModeFct(input, return_value, add_or_remove);
+		else if (input[2][j] == 'k')
+			keyModeFct(user, input, return_value, add_or_remove);
+		else if (input[2][j] == 't')
+			topicModeFct(return_value, add_or_remove);
+		else if (input[2][j] == 'b')
+			banModeFct(my_server, input, return_value, add_or_remove);
 
+	// add ERR_UNKNOWNMODE to this and USER!!
 	
 	}
+	if (return_value == RET_AND_UMODEIS)
+		push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes()); // add l + k value
 	std::cout << "return valueeeeeeeeeeeeeeeeee:" << return_value << std::endl;
+	if (return_value == NO_RET)
+		return (0);
 	return (1);
 }

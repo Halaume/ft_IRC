@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:50:33 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 18:32:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,11 +193,11 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
 	std::vector<unsigned char> buf = to_vector(":");
 	
 	if (code == RPL_UMODEIS
-		|| code == RPL_CHANNELMODEIS
-		|| code == MODE_CHANOPERSET)
+		|| code == RPL_CHANNELMODEIS)
 		add_to_vector(buf, user->getClient());
-	else if (code != OWN_NICK_RPL
+	else if ((code != OWN_NICK_RPL
 		&& code != JOINED_CHANNEL)
+		|| code == MODE_MESSAGE)
 		add_to_vector(buf, server_name);
 	add_to_vector(buf, numeric_response(code, user, param));
 	user->getRet().insert(user->getRet().end(), buf.begin(), buf.end());
@@ -220,9 +220,13 @@ std::vector<unsigned char> numeric_response(int num_code, User *user, std::vecto
 		{
 			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, user->getNick(), param));
 		}
-		case MODE_CHANOPERSET:
+		case ERR_INVALIDKEY:
 		{
-			return (MODE_CHANOPERSETmsg(to_vector(" MODE"), param));
+			return (ERR_INVALIDKEYmsg(num_code, param));
+		}
+		case MODE_MESSAGE:
+		{
+			return (MODE_MESSAGEmsg(to_vector(" MODE"), param));
 		}
 	}
 

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:21:24 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 18:47:11 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
+
+#include "../inc/utils.hpp"
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "../inc/User.hpp"
@@ -53,6 +56,26 @@ std::string itos(int n)
 	for (std::basic_string<char>::size_type i = 0; i < l / 2; i++)
         std::swap(str[i], str[l - i - 1]);
 	return (str);
+}
+
+int vtoi(std::vector<unsigned char> v)
+{
+	long nb = 0;
+	
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (it == 0 && v[it] == '+')
+			it++;
+		else if(it == 0 && !(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		if (!(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		nb *= 10;
+		nb += v[it] - '0';
+		if (nb >= INT_MAX)
+			return (0);
+	}
+	return (static_cast<int>(nb));
 }
 
 void add_to_vector(std::vector<unsigned char>& v, char *str)
@@ -540,9 +563,44 @@ bool isCharInVector(std::vector<unsigned char> v, char c)
 
 void message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
 {
-	user->setRet(msg);
+	user->getRet().insert(user->getRet().begin(), msg.begin(), msg.end());
 	my_server.getEv().events = EPOLLOUT | EPOLLET;
 	my_server.getEv().data.fd = user->getfd();
 	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
 		return ;
+}
+
+std::vector<unsigned char> concatMode(std::vector<unsigned char> channel, std::vector<unsigned char> mode, std::vector<std::vector<unsigned char> > param, int add_or_remove)
+{
+	std::vector<unsigned char> ret;
+
+	ret = channel;
+	if (add_or_remove == ADD)
+		add_to_v(ret, to_vector(" +"));
+	else
+		add_to_v(ret, to_vector(" -"));
+	add_to_v(ret, mode);
+	ret.push_back(' ');
+	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it != param.size(); it++)
+	{
+		ret.insert(ret.end(), param[it].begin(), param[it].end());
+		ret.push_back(' ');
+	}
+	add_to_v(ret, to_vector("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> userMadeOpertorMsg(std::vector<unsigned char> channel, User *user, int add_or_remove)
+{
+	std::vector<unsigned char> ret;
+
+	ret = to_vector(":" + server_name + " ");
+	add_to_v(ret, user->getNick());
+	if (add_or_remove == ADD)
+		add_to_v(ret, to_vector(" has made you channel operator on "));
+	else if (add_or_remove == REMOVE)
+		add_to_v(ret, to_vector(" has removed you from the channel operators on "));
+	add_to_v(ret, channel);
+	add_to_v(ret, to_vector("\r\n"));
+	return (ret);
 }

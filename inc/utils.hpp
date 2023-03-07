@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:21:37 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 18:43:59 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,12 @@ bool                                        isValidUserMode(const char c);
 bool                                        isCharInVector(std::vector<unsigned char> v, char c);
 
 void										message_to_user(Server&, User*, std::vector<unsigned char>);
+
+int                                         vtoi(std::vector<unsigned char> v);
+
+
+std::vector<unsigned char>                  concatMode(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >, int);
+std::vector<unsigned char>                  userMadeOpertorMsg(std::vector<unsigned char> channel, User *user, int add_or_remove);
 
 
 #endif

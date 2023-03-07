@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 16:40:06 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 18:19:02 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,12 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 
 # define ERR_UMODEUNKNOWNFLAGmsg(code, nick)			concat_resp(code, nick,					to_vector(" :Unknown MODE flag\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, nick)				concat_resp(code, nick,					to_vector(" :Cant change mode for other users\r\n"))
+# define ERR_INVALIDKEYmsg(code, chan)                  concat_resp(code, chan,                 to_vector(" :Key is wrong\r\n"))
 
 // # define OWN_NICK_RPLmsg(nick, user_name, mask, new_nick)   concat_resp(add_to_vector(add_to_vector(add_to_vector(add_to_vector(nick, "!"), user_name), "@"), mask), to_insert("NICK"), add_to_vector(new_nick, "\r\n"))
-# define OWN_NICK_RPLmsg(nick, user_name, mask, nickold) concat_nick_rpl(nick, user_name, mask, nickold)
+# define OWN_NICK_RPLmsg(nick, user_name, mask, nickold)concat_nick_rpl(nick, user_name, mask, nickold)
 # define JOINED_CHANNELmsg(client, chan)                concat_resp(client, to_vector("JOIN"), chan)
-# define MODE_CHANOPERSETmsg(mode, all)                 concat_resp(mode, all)
+# define MODE_MESSAGEmsg(mode, all)                     concat_resp(mode, all)
 
 // # define JOINED_chanmsg(client, chan)               concat_resp(client, to_vector("JOIN"), add_to_vector(chan, static_cast<std::string>("\r\n")))
 // class Command;
@@ -111,10 +112,11 @@ enum numerics {
 
 	ERR_UMODEUNKNOWNFLAG	= 501,
 	ERR_USERSDONTMATCH		= 502,
+    ERR_INVALIDKEY          = 525,
 
     OWN_NICK_RPL            = 1000,
     JOINED_CHANNEL          = 1001,
-    MODE_CHANOPERSET        = 1002
+    MODE_MESSAGE            = 1002
 };
 
 std::vector<unsigned char>      numeric_response(int, Command, const std::string, std::vector<unsigned char>);
