@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 16:30:16 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:17:25 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -599,8 +599,8 @@ int	Command::_fun_KICK(Server &my_server)
 	if (channel == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
 	
-	if (!channel->isOp(this->_cmd_user))
-		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
+	// if (!channel->isOp(this->_cmd_user))
+	// 	return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[1]), 1);
 	
 	std::list<User *>::iterator	user = channel->findUser(_cmd_user->getNick());
 	if (user == channel->getUserListend())
@@ -615,7 +615,21 @@ int	Command::_fun_KICK(Server &my_server)
 			verif = 1;
 		}
 		else
+		{
 			channel->delUserLst(my_server.findUserPtrNick(_parsedCmd[i]));
+			std::vector<unsigned char> chanName = channel->getChanName();
+			std::vector<unsigned char> kickMsg;
+			kickMsg.push_back(':');
+			std::vector<unsigned char> client = this->_cmd_user->getClient();
+			kickMsg.insert(kickMsg.end(), client.begin(), client.end());
+			insert_all(kickMsg, " KICK ");
+			kickMsg.insert(kickMsg.end(), chanName.begin(), chanName.end());
+			kickMsg.push_back(' ');
+			kickMsg.insert(kickMsg.end(), _parsedCmd[i].begin(), _parsedCmd[i].end());
+			kickMsg.push_back('\r');
+			kickMsg.push_back('\n');
+			sendToChan(my_server,channel, kickMsg);
+		}
 	}
 	return (verif);
 }
