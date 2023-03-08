@@ -31,6 +31,7 @@ _pass_before_nick_user(WAITING_FOR_PASS), _modes()
 	_modes.insert(std::make_pair('r', false));
 	_modes.insert(std::make_pair('w', false));
 	_modes.insert(std::make_pair('s', false));
+	this->_operator = false;
 }
 
 User::User(int fd): _fd(fd), _registered(false), _passwd(), \
@@ -46,9 +47,10 @@ _pass_before_nick_user(WAITING_FOR_PASS), _modes()
 	_modes.insert(std::make_pair('r', false));
 	_modes.insert(std::make_pair('w', false));
 	_modes.insert(std::make_pair('s', false));
+	this->_operator = false;
 }
 
-User::User(const User & copy): _fd(copy._fd), _registered(copy._registered), \
+User::User(const User & copy): _fd(copy._fd), _operator(copy._operator), _registered(copy._registered), \
 _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
 _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), \
 _pass_before_nick_user(copy._pass_before_nick_user), _modes(copy._modes)
@@ -73,6 +75,7 @@ User& User::operator=(const User & src)
 	_currCmd = src._currCmd;
 	_nick = src._nick;
 	_pass_before_nick_user = src._pass_before_nick_user;
+	this->_operator = src._operator;
 	return (*this);
 }
 
