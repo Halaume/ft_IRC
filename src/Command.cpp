@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 16:17:40 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:21:29 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,12 +283,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 
 	ret = this->_cmd_user->getClient();
 	ret.insert(ret.begin(), ':');
-	// ret.push_back('!');
-	// for (i = 0; i < chan->getChanName().size(); i++)
-	// 	ret.insert(ret.end(), this->_cmd_user->getUserNamebg(), this->_cmd_user->getUserNameend());
-	// ret.push_back('@');
-	// for (i = 0; i < this->_cmd_user->getUserMask().size(); i++)
-	// 		ret.push_back(this->_cmd_user->getUserMask()[i]);
 	while (text[j])
 		ret.push_back(text[j++]);
 	for (i = 0; i < chan->getChanName().size(); i++)
@@ -392,22 +386,24 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 			itu = my_server.findUser(*it);
 			if (itu == my_server.getUsersend())
 				push_to_buf(ERR_NOSUCHNICK, *this, *it);
-		
-			std::vector<unsigned char>	tmp = msg;
-			tmp.push_back(':');
-			tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
-			unsigned char text[] = " PRIVMSG ";
-			for (int j = 0; text[j]; j++)
-				tmp.push_back(text[j]);
-			tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
-			tmp.push_back(' ');
-			tmp.push_back(':');
-			tmp2.insert(tmp2.begin(), tmp.begin(), tmp.end());
-			itu->setRet(tmp2);
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = itu->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
-				my_server.delUser(&(*itu));
+			else
+			{
+				std::vector<unsigned char>	tmp = msg;
+				tmp.push_back(':');
+				tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
+				unsigned char text[] = " PRIVMSG ";
+				for (int j = 0; text[j]; j++)
+					tmp.push_back(text[j]);
+				tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
+				tmp.push_back(' ');
+				tmp.push_back(':');
+				tmp2.insert(tmp2.begin(), tmp.begin(), tmp.end());
+				itu->setRet(tmp2);
+				my_server.getEv().events = EPOLLOUT | EPOLLET;
+				my_server.getEv().data.fd = itu->getfd();
+				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
+					my_server.delUser(&(*itu));
+			}
 		}
 	}
 	return (1);
@@ -418,56 +414,58 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_NOTICE(Server &my_server) // TODO Reprendre privmsg
 {
-	(void)my_server;
-	// std::vector<unsigned char>	msg;
-	// std::list<User>::iterator	itu;
-	// if (this->_parsedCmd.size() < 3)
-	// 	return (1);
-		
-	// if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
-	// 	return (1);
+	std::vector<unsigned char>	msg;
+	std::list<User>::iterator	itu;
+	if (this->_parsedCmd.size() < 3)
+		return (0);
+	if (this->_parsedCmd.size() > 3 && this->_parsedCmd[2][0] != ':')
+		return (0);
 
-	// std::vector<unsigned char>	*it = this->_parsedCmd[1];
-	// if (this->_parsedCmd[2][0] == ':')
-	// {
-	// 	msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
-	// 	for (std::vector<unsigned char>::size_type i = 3; i != this->_parsedCmd.size(); i++)
-	// 	{
-	// 		msg.push_back(' ');
-	// 		msg.insert(msg.end(), this->_parsedCmd[i].begin(), this->_parsedCmd[i].end());
-	// 	}
-	// }
-	
-	// else
-	// 	msg = this->_parsedCmd[2];
-	// msg.push_back('\r');
-	// msg.push_back('\n');
-	
-	// if (*(*it.begin()) == '+' || *(*it.begin()) == '&' || *(*it.begin()) == '@' || *(*it.begin()) == '%' || *(*it.begin()) == '~' || *(*it.begin()) == '#')
-	// 	return (do_chan(*it, my_server, msg), 1);
-		
-	// else
-	// {
-	// 	itu = my_server.findUser(this->_parsedCmd[1]);
-	// 	if (itu == my_server.getUsersend())
-	// 		return (1);
-	
-	// 	std::vector<unsigned char>	tmp;
-	// 	tmp.push_back(':');
-	// 	tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
-	// 	unsigned char text[] = " NOTICE ";
-	// 	for (int j = 0; text[j]; j++)
-	// 		tmp.push_back(text[j]);
-	// 	tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
-	// 	tmp.push_back(' ');
-	// 	tmp.push_back(':');
-	// 	msg.insert(msg.begin(), tmp.begin(), tmp.end());
-	// 	itu->setRet(msg);
-	// 	my_server.getEv().events = EPOLLOUT | EPOLLET;
-	// 	my_server.getEv().data.fd = itu->getfd();
-	// 	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
-	// 		my_server.delUser(&(*itu));
-	// }
+
+	if (this->_parsedCmd[2][0] == ':')
+	{
+		msg = std::vector<unsigned char>(this->_parsedCmd[2].begin() + 1, this->_parsedCmd[2].end());
+		for (std::vector<unsigned char>::size_type i = 3; i != this->_parsedCmd.size(); i++)
+		{
+			msg.push_back(' ');
+			msg.insert(msg.end(), this->_parsedCmd[i].begin(), this->_parsedCmd[i].end());
+		}
+	}
+	else
+		msg = this->_parsedCmd[2];
+	msg.push_back('\r');
+	msg.push_back('\n');
+	std::vector<std::vector<unsigned char> >	target = splitOnComa(this->_parsedCmd[1]);
+	for (std::vector<std::vector<unsigned char> >::iterator it = target.begin(); it != target.end(); it++)
+	{
+		std::vector<unsigned char> tmp2 = msg;
+		if (*((*it).begin()) == '+' || *((*it).begin()) == '&' || *((*it).begin()) == '@' || *((*it).begin()) == '%' || *((*it).begin()) == '~' || *((*it).begin()) == '#')
+			do_chan(*it, my_server, tmp2);
+		else
+		{
+			itu = my_server.findUser(*it);
+			if (itu == my_server.getUsersend());
+			else
+			{
+				std::vector<unsigned char>	tmp = msg;
+				tmp.push_back(':');
+				tmp.insert(tmp.begin() + 1, this->_cmd_user->getNickbg(), this->_cmd_user->getNickend());
+				unsigned char text[] = " PRIVMSG ";
+				for (int j = 0; text[j]; j++)
+					tmp.push_back(text[j]);
+				tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
+				tmp.push_back(' ');
+				tmp.push_back(':');
+				tmp2.insert(tmp2.begin(), tmp.begin(), tmp.end());
+				itu->setRet(tmp2);
+				my_server.getEv().events = EPOLLOUT | EPOLLET;
+				my_server.getEv().data.fd = itu->getfd();
+				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
+					my_server.delUser(&(*itu));
+			}
+		}
+	}
+	return (1);
 	return (0);
 }
 
