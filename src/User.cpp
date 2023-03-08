@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 13:58:54 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:49:25 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,10 +107,10 @@ std::vector<unsigned char> User::getPasswd(void) const
 	return (_passwd);
 }
 
-int User::getPassStatus(void) const
-{
-	return (_pass_status);
-}
+// int User::getPassStatus(void) const
+// {
+// 	return (_pass_status);
+// }
 
 bool User::getRegistered(void) const
 {
@@ -257,6 +257,21 @@ void User::addChannel(Channel *channel)
 	_channels.push_back(channel);
 }
 
+void User::delChannel(Channel *channel)
+{
+	std::vector<Channel *>::iterator it = _channels.begin();
+	
+	while (it != _channels.end())
+	{
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			return ;
+		}
+		it++;
+	}
+}
+
 bool	User::getOperator(void) const
 {
 	return (_operator);
@@ -346,21 +361,6 @@ std::vector<Channel *>::iterator	User::getChanIt(std::vector<unsigned char> chan
 void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
-}
-
-void User::delChannel(Channel *channel)
-{
-	std::vector<Channel *>::iterator it = _channels.begin();
-
-	while (it != _channels.end())
-	{
-		if (*it == channel)
-		{
-			_channels.erase(it);
-			return ;
-		}
-		it++;
-	}
 }
 
 void	User::del_chan(std::vector<Channel *>::iterator chan)

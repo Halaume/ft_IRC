@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 17:14:29 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:35:55 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,6 +205,38 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
+
+std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3, std::vector<unsigned char> msg)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	std::string scode = itos(code);
+	
+	ret.push_back(' ');
+	if (code < 10)
+	{
+		ret.push_back('0');
+		ret.push_back('0');
+		ret.push_back(scode[0]);
+	}
+	else
+	{
+		for (std::string::size_type j = 0; j < scode.size(); j++)
+			ret.push_back(scode[j]);
+	}
+	ret.push_back(' ');
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v3.size(); i++)
+		ret.push_back(v3[i]);
+	for (i = 0; i < msg.size(); i++)
+		ret.push_back(msg[i]);
+	return (ret);
+}
 std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3)
 {
 	std::vector<unsigned char> ret;
@@ -220,6 +252,7 @@ std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vecto
 		ret.push_back(v3[i]);
 	return (ret);
 }
+
 
 void print_vector2(std::string s, std::vector<std::vector<unsigned char> > v)
 {
@@ -267,34 +300,6 @@ std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> 
 			ret.insert(ret.end(), std::vector<unsigned char>(prev, n));
 	}
 	return (ret);
-}
-
-int	my_compare(std::vector<unsigned char> my_vec, std::string str)
-{
-	if (my_vec.size() != str.length())
-		return (1);
-
-	for (std::vector<unsigned char>::size_type i = 0; i < my_vec.size(); i++)
-	{
-		if (my_vec[i] != str[i])
-			return (1);
-			
-	}
-	return (0);
-}
-
-int	my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
-{
-	// std::cout << "size1:" << v1.size() << " size2:" << v2.size() << std::endl;
-	if (v1.size() != v2.size())
-		return (1);
-	for (std::vector<unsigned char>::size_type i = 0; i < v1.size(); i++)
-	{
-		// std::cout << "getcli:" << v1[i] << " and cli:" << v2[i] << std::endl;
-		if (v1[i] != v2[i])
-			return (1);
-	}
-	return (0);
 }
 
 bool isValidCharacter(unsigned char c)
@@ -424,6 +429,34 @@ std::vector<unsigned char> concat_nick_rpl(std::vector<unsigned char> nick_old, 
 	return (ret);
 }
 
+int	my_compare(std::vector<unsigned char> my_vec, std::string str)
+{
+	if (my_vec.size() != str.length())
+		return (1);
+
+	for (std::vector<unsigned char>::size_type i = 0; i < my_vec.size(); i++)
+	{
+		if (my_vec[i] != str[i])
+			return (1);
+			
+	}
+	return (0);
+}
+
+int	my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	// std::cout << "size1:" << v1.size() << " size2:" << v2.size() << std::endl;
+	if (v1.size() != v2.size())
+		return (1);
+	for (std::vector<unsigned char>::size_type i = 0; i < v1.size(); i++)
+	{
+		// std::cout << "getcli:" << v1[i] << " and cli:" << v2[i] << std::endl;
+		if (v1[i] != v2[i])
+			return (1);
+	}
+	return (0);
+}
+
 bool contains_ctrl_g(std::vector<unsigned char> v)
 {
 	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
@@ -472,4 +505,16 @@ std::vector<unsigned char> rpl_name(Channel *channel)
 	}
 	add_to_vector(ret, static_cast<std::string>("\r\n"));
 	return (ret);
+}
+
+std::string	to_string(std::vector<unsigned char> vec)
+{
+	std::vector<unsigned char>::size_type i = 0;
+	std::string ret;
+	while (i < vec.size())
+	{
+		ret.push_back(vec[i]);
+		i++;
+	}
+	return (ret);	
 }

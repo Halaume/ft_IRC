@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 16:13:40 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 15:39:41 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ Channel*	Server::findChan(std::vector<unsigned char> channel)
 
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
-		if (!my_compare(it->getChanName(), channel))
+		if (it->getChanName() == channel)
 			return (&(*it));
 	}
 	return (NULL);
@@ -316,19 +316,6 @@ void Server::run(void) // checker le nombre de connexions max?
 								break;							
 							case EPOLLIN:
 								std::cerr << "Receiving data" << std::endl;
-								std::cerr << "nb de chan : " << this->_channels.size() << std::endl;
-								for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-								{
-									std::vector<unsigned char> vec = it->getChanName();
-									vec.push_back('\0');
-									std::cerr << "Channel : " << vec.data() << std::endl;
-									for (std::list<User *>::iterator j = it->getUserListbg(); j != it->getUserListend(); j++)
-									{
-										vec = (*j)->getNick();
-										vec.push_back('\0');
-										std::cerr << "Name of users : " << vec.data() << std::endl;
-									}
-								}
 								if (isUserInList(_events[k].data.fd) == false)
 								{
 									User new_user(_events[k].data.fd);
@@ -450,9 +437,10 @@ void Server::run(void) // checker le nombre de connexions max?
 void Server::sendto(int fd, std::vector<unsigned char> buf)
 {
 	long int ret;
+
+	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	buf.push_back('\0');
 	std::cerr << "Sending : " << buf.data() << "To fd : " << fd << std::endl;
-	ret = send(fd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 	{
 		std::list<User>::iterator Usr = findUser(fd);
@@ -493,7 +481,7 @@ User* Server::findUserPtrNick(std::vector<unsigned char> nick)
 
 	for (itu = _users.begin(); itu != _users.end(); ++itu)
 	{
-		if (!my_compare(itu->getNick(), nick))
+		if (itu->getNick() == nick)
 			return (&(*itu));
 		i++;
 	}
@@ -597,7 +585,7 @@ bool Server::channelExists(std::vector<unsigned char>& channel_name)
 
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
-		if (!my_compare(it->getChanName(), channel_name))
+		if (it->getChanName() == channel_name)
 			return (true);
 	}
 	return (false);

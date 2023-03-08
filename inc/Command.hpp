@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Command.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 15:51:35 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:54:18 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,64 +37,60 @@ class Server;
 
 class User;
 
-
-
 class Command
 {
 	public:
-		Command(void);
-		Command(const Command &copy);
-		~Command(void);
-		Command &	operator=(const Command & src);
-
-
-		void										setCommand(std::vector<std::vector<unsigned char> >);
-		void										setUser(User*);
-		void										setParsedCmd(std::vector<std::vector<unsigned char> >);
-
-		// Getters
-		std::vector<std::vector<unsigned char> >	getCommand(void) const;
-		User*										getCmdUser(void) const;
-		unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
-		std::vector<std::vector<unsigned char> >	getGobalCmd();
-		std::vector<std::vector<unsigned char> >	getParsedCmd();
+	
+			Command(void);
+			Command(const Command &copy);
+			~Command(void);
+			Command &	operator=(const Command & src);
 		
-
-		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
-		std::vector<unsigned char>					_globalCmd;
-		std::vector<std::vector<unsigned char> >	_parsedCmd;
-
-		int											register_user(Server &);	
+			std::vector<std::vector<unsigned char> >	getCommand(void) const;
+			std::vector<std::vector<unsigned char> >	getGobalCmd();
+			std::vector<std::vector<unsigned char> >	getParsedCmd();
+			std::vector<std::vector<unsigned char> >&	getRet();
+			User*										getCmdUser(void) const;
+			unsigned char								getParsedCmdChar(std::vector<std::vector<unsigned char> >::size_type, std::vector<std::vector<unsigned char> >::size_type);
 		
-		int											answer(Server &);
+			void										setCommand(std::vector<std::vector<unsigned char> >);
+			void										setUser(User*);
+			void										setParsedCmd(std::vector<std::vector<unsigned char> >);
 
-
+			std::vector<unsigned char>					_globalCmd;
+			std::vector<std::vector<unsigned char> >	_parsedCmd;
+			int											register_user(Server &);	
+			int											answer(Server &);
+			void										message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg);
+			void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
 		
 	private:
-		User*									_cmd_user;
-		std::vector<unsigned char>				_cmd_buf;
-		int										_error;
-		// std::list<User>::iterator				_cmd_user;
+	
+			User*										_cmd_user;
+			std::vector<unsigned char>					_cmd_buf;
+			int											_error;
+			std::vector<std::vector<unsigned char> >	_ret;
 
-		int										_fun_PASS(void);
-		int										_fun_NICK(Server &);
-		int										_fun_USER(Server &);
-		int										_fun_JOIN(Server &);
-		int										_fun_PRIVMSG(Server &);
-		int										_fun_OPER(Server &);
-		int										_fun_QUIT(Server &);
-		int										_fun_ERROR(Server &);
-		int										_fun_MODE(Server &);
-		int										_fun_TOPIC(Server &);
-		int										_fun_KICK(Server &);
-		int										_fun_INVITE(Server &);
-		int										_fun_KILL(Server &);
-		int										_fun_RESTART(Server &);
-		int										_fun_PONG(void);
-		int										_fun_NOTICE(Server &);
-		int										_fun_PART(Server &);
+			int		_fun_PASS();	
+			int		_fun_NICK(Server &);
+			int		_fun_USER(Server &);
+			int		_fun_JOIN(Server &);
+			int		_fun_PRIVMSG(Server &);
+			int		_fun_OPER(Server &);
+			int		_fun_QUIT(Server &);
+			int		_fun_ERROR(Server &);
+			int		_fun_MODE(Server &);
+			int		_fun_TOPIC(Server &);
+			int		_fun_KICK(Server &);
+			int		_fun_INVITE(Server &);
+			int		_fun_KILL(Server &);
+			int		_fun_RESTART(Server &);
+			int		_fun_PONG(void);
+			int		_fun_NOTICE(Server &);
+			int		_fun_PART(Server &my_server);
 
-		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
+
+			void	do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
 
 
 };

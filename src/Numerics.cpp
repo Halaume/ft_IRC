@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/04 12:51:02 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:38:54 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case RPL_TOPIC:
 		{
-			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), param));
+			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
 		}
 		case RPL_NAMREPLY:
 		{
@@ -75,6 +75,18 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, cmd.getCmdUser()->getClient(), param));
 		}
+		case RPL_UMODEIS:
+		{
+			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), param));
+		}
+		case RPL_INVITING:
+		{
+			return (RPL_INVITINGmsg(RPL_INVITING, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
+		}
+		case RPL_YOUREOPER:
+		{
+			return (RPL_YOUREOPERmsg(RPL_YOUREOPER, cmd.getCmdUser()->getNick()));
+		}
 		case ERR_NOSUCHCHANNEL:
 		{
 			return (ERR_NOSUCHCHANNELmsg(ERR_NOSUCHCHANNEL, cmd.getCmdUser()->getNick(), param));
@@ -85,7 +97,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_NONICKNAMEGIVEN:
 		{
-			return (ERR_NONICKNAMEGIVENmsg(ERR_NONICKNAMEGIVEN, cmd.getCmdUser()->getNick()));
+			return (ERR_NONICKNAMEGIVENmsg(ERR_NONICKNAMEGIVEN));
 		}
 		case ERR_ERRONEUSNICKNAME:
 		{
@@ -95,9 +107,17 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (ERR_NICKNAMEINUSEmsg(ERR_NICKNAMEINUSE, param));
 		}
+		case ERR_USERNOTINCHANNEL:
+		{
+			return (ERR_USERNOTINCHANNELmsg(ERR_USERNOTINCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
+		}
 		case ERR_NOTONCHANNEL:
 		{
 			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, cmd.getCmdUser()->getNick(), param));
+		}
+		case ERR_USERONCHANNEL:
+		{
+			return (ERR_USERONCHANNELmsg(ERR_USERONCHANNEL, cmd.getCmdUser()->getUserName(), cmd.getCmdUser()->getNick(), param));
 		}
 		case ERR_NEEDMOREPARAMS:
 		{
@@ -130,6 +150,22 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		case ERR_BADCHANMASK:
 		{
 			return (ERR_BADCHANMASKmsg(ERR_BADCHANMASK, param));
+		}
+		case ERR_NOPRIVILEGES:
+		{
+			return (ERR_NOPRIVILEGESmsg(ERR_NOPRIVILEGES, cmd.getCmdUser()->getNick()));
+		}
+		case  ERR_CHANOPRIVSNEEDED:
+		{
+			return (ERR_CHANOPRIVSNEEDEDmsg(ERR_CHANOPRIVSNEEDED, cmd.getCmdUser()->getNick(), param));	
+		}
+		case  ERR_NOOPERHOST:
+		{
+			return (ERR_NOOPERHOSTmsg(ERR_NOOPERHOST, cmd.getCmdUser()->getNick()));
+		}
+		case ERR_USERSDONTMATCH:
+		{
+			return (ERR_USERSDONTMATCHmsg(ERR_USERSDONTMATCH, cmd.getCmdUser()->getNick()));
 		}
 		case OWN_NICK_RPL:
 		{

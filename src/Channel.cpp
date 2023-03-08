@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 14:54:06 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 15:02:40 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ bool Channel::operator!=(const Channel & lhs) const
 	return (this->_chan_name != lhs._chan_name);
 }
 
-std::vector<unsigned char>& Channel::getTopic(void)
+std::vector<unsigned char> Channel::getTopic(void) const
 {
 	return (_topic);
 }
@@ -139,16 +139,6 @@ void Channel::addUser(User *user)
 void Channel::delUserLst(User *user)
 {
 	std::list<User *>::iterator it = getOpListbg();
-
-	while (it != getOpListend())
-	{
-		if (*it == user)
-		{
-			_user_list.erase(it);
-			break ;
-		}
-		it++;
-	}
 
 	it = getUserListbg();
 	while (it != getUserListend())
@@ -277,6 +267,7 @@ bool	Channel::isOp(User *usr) const
 			return (true);
 	return (false);
 }
+
 
 bool Channel::getMode(char c)
 {

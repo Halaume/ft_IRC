@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
+/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 15:39:10 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/07 17:48:14 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 		Server &	operator=(const Server & src);
-		
 		int								init(char **);
 		void							run(void);
 		int								accept_socket(int);
@@ -52,7 +51,7 @@ class Server
 
 		void							printUsersList(void);
 		void							printChannelsList(void);
-	
+		
 		// GETTERS	
 		int								getSct(void) const;
 		int								getEpollfd(void) const;
@@ -100,18 +99,17 @@ class Server
 
 
 	private:
-		char **						_argv;
-		sockaddr_in					_server;
-		int							_sct;
-		std::vector<unsigned char>	_passwd;
-		int							_epollfd;
-		epoll_event *				_events;
-		epoll_event					_ev;
-		std::vector<Channel>		_channels;
-		std::list<User>				_users;
-		User						_bot;
-
-		
+	
+			char **						_argv;
+			sockaddr_in					_server;
+			int							_sct;
+			std::vector<unsigned char>	_passwd;
+			int							_epollfd;
+			epoll_event *				_events;
+			epoll_event					_ev;
+			std::vector<Channel>		_channels;
+			std::list<User>				_users;
+			User						_bot;
 };
 
 std::ostream &		operator<<( std::ostream & o, Server & i);
