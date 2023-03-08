@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:15:05 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 21:40:41 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,38 @@ std::string itos(int n)
 	for (std::basic_string<char>::size_type i = 0; i < l / 2; i++)
         std::swap(str[i], str[l - i - 1]);
 	return (str);
+}
+
+int vtoi(std::vector<unsigned char> v)
+{
+	long nb = 0;
+	
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (it == 0 && v[it] == '+')
+			it++;
+		else if(it == 0 && !(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		if (!(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		nb *= 10;
+		nb += v[it] - '0';
+		if (nb >= INT_MAX)
+			return (0);
+	}
+	return (static_cast<int>(nb));
+}
+
+std::vector<unsigned char> itov(int n)
+{
+	std::vector<unsigned char> ret;
+	
+	while (n > 0)
+	{
+		ret.push_back('0' + n % 10);
+		n /= 10;
+	}
+	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v, char *str)
@@ -209,6 +241,18 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
+std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
+	return (ret);
+}
 
 std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3, std::vector<unsigned char> msg)
 {
@@ -239,19 +283,6 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 		ret.push_back(v3[i]);
 	for (i = 0; i < msg.size(); i++)
 		ret.push_back(msg[i]);
-	return (ret);
-}
-
-std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
-{
-	std::vector<unsigned char> ret;
-	std::vector<unsigned char>::size_type i;
-	
-	for (i = 0; i < v1.size(); i++)
-		ret.push_back(v1[i]);
-	ret.push_back(' ');
-	for (i = 0; i < v2.size(); i++)
-		ret.push_back(v2[i]);
 	return (ret);
 }
 
@@ -300,7 +331,7 @@ void insert_all(std::vector<unsigned char> &my_vec, std::string to_insert)
 		my_vec.push_back(static_cast<unsigned char>(to_insert[i]));
 }
 
-std::vector<std::vector<unsigned char> >	splitOnComa(std::vector<unsigned char> str)
+std::vector<std::vector<unsigned char> > splitOnComa(std::vector<unsigned char> str)
 {
 	std::vector<std::vector<unsigned char> >	ret;
 	std::vector<unsigned char>::iterator	n = str.begin();
@@ -463,12 +494,10 @@ int	my_compare(std::vector<unsigned char> my_vec, std::string str)
 
 int	my_compare(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
 {
-	// std::cout << "size1:" << v1.size() << " size2:" << v2.size() << std::endl;
 	if (v1.size() != v2.size())
 		return (1);
 	for (std::vector<unsigned char>::size_type i = 0; i < v1.size(); i++)
 	{
-		// std::cout << "getcli:" << v1[i] << " and cli:" << v2[i] << std::endl;
 		if (v1[i] != v2[i])
 			return (1);
 	}
@@ -525,6 +554,16 @@ std::vector<unsigned char> rpl_name(Channel *channel)
 	return (ret);
 }
 
+bool isCharInVector(std::vector<unsigned char> v, char c)
+{
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (v[it] == c)
+			return (true);
+	}
+	return (false);
+}
+
 std::string	to_string(std::vector<unsigned char> vec)
 {
 	std::vector<unsigned char>::size_type i = 0;
@@ -535,18 +574,6 @@ std::string	to_string(std::vector<unsigned char> vec)
 		i++;
 	}
 	return (ret);	
-}
-
-std::vector<unsigned char> itov(int n)
-{
-	std::vector<unsigned char> ret;
-	
-	while (n > 0)
-	{
-		ret.push_back('0' + n % 10);
-		n /= 10;
-	}
-	return (ret);
 }
 
 void message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
@@ -616,26 +643,6 @@ std::vector<unsigned char> concatMode(Channel *channel, User *user, std::vector<
 		ret.clear();
 	}
 	return (ret);
-}
-
-int vtoi(std::vector<unsigned char> v)
-{
-	long nb = 0;
-	
-	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
-	{
-		if (it == 0 && v[it] == '+')
-			it++;
-		else if(it == 0 && !(v[it] >= '0' && v[it] <= '9'))
-			return (0);
-		if (!(v[it] >= '0' && v[it] <= '9'))
-			return (0);
-		nb *= 10;
-		nb += v[it] - '0';
-		if (nb >= INT_MAX)
-			return (0);
-	}
-	return (static_cast<int>(nb));
 }
 
 bool isValidUserMode(const char c)

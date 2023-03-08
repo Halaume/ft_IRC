@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 20:56:22 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 21:34:44 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,22 +19,39 @@
 #include "../inc/Numerics.hpp"
 
 User::User(void): _fd(0), _registered(false), _passwd(), \
-_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), \
+_pass_before_nick_user(WAITING_FOR_PASS), _modes()
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
+	_modes.insert(std::make_pair('a', false));
+	_modes.insert(std::make_pair('i', true));
+	_modes.insert(std::make_pair('o', false));
+	_modes.insert(std::make_pair('O', false));
+	_modes.insert(std::make_pair('r', false));
+	_modes.insert(std::make_pair('w', false));
+	_modes.insert(std::make_pair('s', false));
 }
 
 User::User(int fd): _fd(fd), _registered(false), _passwd(), \
-_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), \
+_pass_before_nick_user(WAITING_FOR_PASS), _modes()
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
+	_modes.insert(std::make_pair('a', false));
+	_modes.insert(std::make_pair('i', true));
+	_modes.insert(std::make_pair('o', false));
+	_modes.insert(std::make_pair('O', false));
+	_modes.insert(std::make_pair('r', false));
+	_modes.insert(std::make_pair('w', false));
+	_modes.insert(std::make_pair('s', false));
 }
 
 User::User(const User & copy): _fd(copy._fd), _registered(copy._registered), \
 _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
-_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
+_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), \
+_pass_before_nick_user(copy._pass_before_nick_user), _modes(copy._modes)
 {
 }
 
@@ -95,22 +112,53 @@ int User::getfd(void) const
 	return (_fd);
 }
 
+bool User::getMode(char c)
+{
+	return (_modes[c]);
+}
+
+std::map<char, bool>::iterator User::getModesbg(void)
+{
+	return (_modes.begin());
+}
+
+std::map<char, bool>::iterator User::getModesend(void)
+{
+	return (_modes.end());
+}
+
+void User::setMode(char c, bool mode)
+{
+	std::map<char, bool>::iterator it;
+
+	for (it = _modes.begin(); it != _modes.end(); ++it)
+	{
+		if (it->first == c)
+			it->second = mode;
+	}
+}
+
 std::vector<unsigned char> User::getPasswd(void) const
 {
 	return (_passwd);
 }
 
-// int User::getPassStatus(void) const
-// {
-// 	return (_pass_status);
-// }
+std::vector<unsigned char>::const_iterator User::getNickbg(void) const
+{
+	return (_nick.begin());	
+}
+
+std::vector<unsigned char>::const_iterator User::getNickend(void) const
+{
+	return (_nick.end());	
+}
 
 bool User::getRegistered(void) const
 {
 	return (_registered);
 }
 
-std::vector<unsigned char> &	User::getRet(void)
+std::vector<unsigned char> &User::getRet(void)
 {
 	return (_ret);
 }
@@ -125,34 +173,24 @@ int User::getPassBeforeNickUser(void) const
 	return (_pass_before_nick_user);
 }
 
-std::vector<Channel *>::iterator	User::getChannelsbg(void)
+std::vector<Channel *>::iterator User::getChannelsbg(void)
 {
 	return (_channels.begin());
 }
 
-std::vector<Channel *>::iterator	User::getChannelsend(void)
+std::vector<Channel *>::iterator User::getChannelsend(void)
 {
 	return (_channels.end());
 }
 
-std::vector<unsigned char>::iterator	User::getCurrCmdbg(void)
+std::vector<unsigned char>::iterator User::getCurrCmdbg(void)
 {
 	return (_currCmd.begin());
 }
 
-std::vector<unsigned char>::iterator	User::getCurrCmdend(void)
+std::vector<unsigned char>::iterator User::getCurrCmdend(void)
 {
 	return (_currCmd.end());
-}
-
-std::vector<unsigned char>::const_iterator	User::getUserNamebg(void) const
-{
-	return (this->_user_name.begin());
-}
-
-std::vector<unsigned char>::const_iterator	User::getUserNameend(void) const
-{
-	return (this->_user_name.end());
 }
 
 std::vector<unsigned char>	User::getUserName(void) const
@@ -205,16 +243,6 @@ std::vector<Channel *> User::getChannels(void) const
 	return (_channels);
 }
 
-std::vector<unsigned char>::const_iterator User::getNickbg(void) const
-{
-	return (_nick.begin());	
-}
-
-std::vector<unsigned char>::const_iterator User::getNickend(void) const
-{
-	return (_nick.end());	
-}
-
 std::vector<unsigned char> User::getNick(void) const
 {
 	return (_nick);	
@@ -225,6 +253,22 @@ std::vector<unsigned char> User::getUserMask(void) const
 	return (_user_mask);
 }
 
+std::vector<unsigned char> User::getClient(void)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type it;
+
+	for (it = 0; it < _nick.size(); ++it)
+		ret.push_back(_nick[it]);
+	ret.push_back('!');
+	for (it = 0; it < _user_name.size(); ++it)
+		ret.push_back(_user_name[it]);
+	ret.push_back('@');
+	for (it = 0; it < _user_mask.size(); ++it)
+		ret.push_back(_user_mask[it]);
+	return (ret);
+}
+
 void User::setNick(std::vector<unsigned char> nick)
 {
 	_nick = nick;
@@ -233,16 +277,6 @@ void User::setNick(std::vector<unsigned char> nick)
 void User::setfd(int fd)
 {
 	_fd = fd;
-}
-
-void User::setUserMask(std::vector<unsigned char>& user_mask)
-{
-	_user_mask = user_mask;
-}
-
-void User::addChannel(Channel *channel)
-{
-	_channels.push_back(channel);
 }
 
 void User::delChannel(Channel *channel)
@@ -258,6 +292,16 @@ void User::delChannel(Channel *channel)
 		}
 		it++;
 	}
+}
+
+void User::setUserMask(std::vector<unsigned char>& user_mask)
+{
+	_user_mask = user_mask;
+}
+
+void User::addChannel(Channel *channel)
+{
+	_channels.push_back(channel);
 }
 
 bool	User::getOperator(void) const
@@ -278,22 +322,6 @@ void	User::clearCurrCmd(void)
 void	User::clearRet(void)
 {
 	_ret.clear();
-}
-
-std::vector<unsigned char> User::getClient(void)
-{
-	std::vector<unsigned char> ret;
-	std::vector<unsigned char>::size_type it;
-
-	for (it = 0; it < _nick.size(); ++it)
-		ret.push_back(_nick[it]);
-	ret.push_back('!');
-	for (it = 0; it < _user_name.size(); ++it)
-		ret.push_back(_user_name[it]);
-	ret.push_back('@');
-	for (it = 0; it < _user_mask.size(); ++it)
-		ret.push_back(_user_mask[it]);
-	return (ret);
 }
 
 int User::createNewNick(Server &my_server)
@@ -338,22 +366,19 @@ int User::createNewNick(Server &my_server)
 	return (0);
 }
 
-std::vector<Channel *>::iterator	User::getChanIt(std::vector<unsigned char> chanName)
+bool User::isInChan(Channel *channel)
 {
-	for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-		if ((*it)->getChanName() == chanName)
-			return (it);
-	return (this->_channels.end());
+	for (std::vector<Channel *>::size_type it = 0; it < _channels.size(); it++)
+	{
+		if (_channels[it] == channel)
+			return (true);
+	}
+	return (false);
 }
 
 void	User::insertcmd(std::vector<unsigned char> & vec)
 {
 	_currCmd.insert(_currCmd.end(), vec.begin(), vec.end());
-}
-
-void	User::del_chan(std::vector<Channel *>::iterator chan)
-{
-	this->_channels.erase(chan);
 }
 
 std::ostream &		operator<<( std::ostream & o, User const & i)
@@ -372,9 +397,7 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << " fd: " << i.getfd() << " usr reg:" << i.getRegistered() << " passwd:";
 	for (m = 0; m < i.getPasswd().size(); m++)
 		o << i.getPasswd()[m];
-	// o << " Ad: " << &i;
 	o << std::endl;
-
 	return o;
 }
 
@@ -452,28 +475,25 @@ int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
 	return (1);
 }
 
-std::map<char, bool>::iterator User::getModesbg(void)
+std::vector<unsigned char>::const_iterator	User::getUserNamebg(void) const
 {
-	return (_modes.begin());
+	return (this->_user_name.begin());
 }
 
-std::map<char, bool>::iterator User::getModesend(void)
+std::vector<unsigned char>::const_iterator	User::getUserNameend(void) const
 {
-	return (_modes.end());
+	return (this->_user_name.end());
 }
 
-bool User::getMode(char c)
+std::vector<Channel *>::iterator	User::getChanIt(std::vector<unsigned char> chanName)
 {
-	return (_modes[c]);
+	for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+		if ((*it)->getChanName() == chanName)
+			return (it);
+	return (this->_channels.end());
 }
 
-void User::setMode(char c, bool mode) // easier way to do it?
+void	User::del_chan(std::vector<Channel *>::iterator chan)
 {
-	std::map<char, bool>::iterator it;
-
-	for (it = _modes.begin(); it != _modes.end(); ++it)
-	{
-		if (it->first == c)
-			it->second = mode;
-	}
+	this->_channels.erase(chan);
 }
