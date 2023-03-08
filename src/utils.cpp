@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 17:35:55 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 18:22:20 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
+
+#include "../inc/utils.hpp"
+#include "../inc/Numerics.hpp"
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "../inc/User.hpp"
@@ -58,6 +62,38 @@ std::string itos(int n)
 	return (str);
 }
 
+int vtoi(std::vector<unsigned char> v)
+{
+	long nb = 0;
+	
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (it == 0 && v[it] == '+')
+			it++;
+		else if(it == 0 && !(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		if (!(v[it] >= '0' && v[it] <= '9'))
+			return (0);
+		nb *= 10;
+		nb += v[it] - '0';
+		if (nb >= INT_MAX)
+			return (0);
+	}
+	return (static_cast<int>(nb));
+}
+
+std::vector<unsigned char> itov(int n)
+{
+	std::vector<unsigned char> ret;
+	
+	while (n > 0)
+	{
+		ret.push_back('0' + n % 10);
+		n /= 10;
+	}
+	return (ret);
+}
+
 void add_to_vector(std::vector<unsigned char>& v, char *str)
 {
 	for (size_t i = 0; i < strlen(str); i++)
@@ -85,26 +121,6 @@ void add_to_vv(std::vector<std::vector <unsigned char> >& vv, std::string str)
 	vv.push_back(v);
 }
 
-std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
-{
-	std::vector<unsigned char> ret;
-	
-	ret = v;
-	int i = 0;
-	while (s[i])
-	{
-		ret.push_back(static_cast<unsigned char>(s[i]));
-		i++;
-	}
-	return (ret);
-}
-
-void add_to_v(std::vector<unsigned char> &v1, std::vector<unsigned char> &v2)
-{
-	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
-		v1.push_back(v2[i]);
-}
-
 void add_to_vector(std::vector<unsigned char>& v1, std::vector<unsigned char> v2)
 {
 	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
@@ -124,6 +140,19 @@ std::vector<unsigned char> concat_vectors(std::vector<unsigned char> v1, std::ve
 		ret.push_back(v1[i]);
 	for (std::vector<unsigned char>::size_type j = 0; j < v2.size(); j++)
 		ret.push_back(v2[j]);
+	return (ret);
+}
+
+std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2)
+{
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char>::size_type i;
+	
+	for (i = 0; i < v1.size(); i++)
+		ret.push_back(v1[i]);
+	ret.push_back(' ');
+	for (i = 0; i < v2.size(); i++)
+		ret.push_back(v2[i]);
 	return (ret);
 }
 
@@ -205,7 +234,6 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 	return (ret);
 }
 
-
 std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3, std::vector<unsigned char> msg)
 {
 	std::vector<unsigned char> ret;
@@ -237,6 +265,7 @@ std::vector<unsigned char> concat_resp(int code, std::vector<unsigned char> v1, 
 		ret.push_back(msg[i]);
 	return (ret);
 }
+
 std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vector<unsigned char> v2, std::vector<unsigned char> v3)
 {
 	std::vector<unsigned char> ret;
@@ -252,7 +281,6 @@ std::vector<unsigned char> concat_resp(std::vector<unsigned char> v1, std::vecto
 		ret.push_back(v3[i]);
 	return (ret);
 }
-
 
 void print_vector2(std::string s, std::vector<std::vector<unsigned char> > v)
 {
@@ -467,6 +495,26 @@ bool contains_ctrl_g(std::vector<unsigned char> v)
 	return (false);
 }
 
+void add_to_v(std::vector<unsigned char> &v1, const std::vector<unsigned char> &v2)
+{
+	for (std::vector<unsigned char>::size_type i = 0; i < v2.size(); i++)
+		v1.push_back(v2[i]);
+}
+
+std::vector<unsigned char> add_to_v(std::vector<unsigned char> v, std::string s)
+{
+	std::vector<unsigned char> ret;
+	
+	ret = v;
+	int i = 0;
+	while (s[i])
+	{
+		ret.push_back(static_cast<unsigned char>(s[i]));
+		i++;
+	}
+	return (ret);
+}
+
 std::vector<unsigned char> rpl_topic(std::vector<unsigned char> channel, std::vector<unsigned char> topic)
 {
 	std::vector<unsigned char> ret;
@@ -517,4 +565,95 @@ std::string	to_string(std::vector<unsigned char> vec)
 		i++;
 	}
 	return (ret);	
+}
+
+bool isValidUserMode(const char c)
+{
+	std::vector<unsigned char> valid_char = to_vector("io");
+	
+	for (std::vector<unsigned char>::size_type it = 0; it < valid_char.size(); it++)
+	{
+		if (c == valid_char[it])
+			return (true);
+	}
+	return (false);
+}
+
+bool isCharInVector(std::vector<unsigned char> v, char c)
+{
+	for (std::vector<unsigned char>::size_type it = 0; it < v.size(); it++)
+	{
+		if (v[it] == c)
+			return (true);
+	}
+	return (false);
+}
+
+void message_to_user(Server &my_server, User *user, std::vector<unsigned char> msg)
+{
+	user->getRet().insert(user->getRet().begin(), msg.begin(), msg.end());
+	my_server.getEv().events = EPOLLOUT | EPOLLET;
+	my_server.getEv().data.fd = user->getfd();
+	if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, user->getfd(), &my_server.getEv()) == - 1)
+		return ;
+}
+
+std::vector<unsigned char> concatMode(std::vector<unsigned char> channel, std::vector<unsigned char> mode, std::vector<std::vector<unsigned char> > param, int add_or_remove)
+{
+	std::vector<unsigned char> ret;
+
+	ret = channel;
+	if (add_or_remove == ADD)
+		add_to_v(ret, to_vector(" +"));
+	else
+		add_to_v(ret, to_vector(" -"));
+	add_to_v(ret, mode);
+	ret.push_back(' ');
+	for (std::vector<std::vector<unsigned char> >::size_type it = 0; it != param.size(); it++)
+	{
+		ret.insert(ret.end(), param[it].begin(), param[it].end());
+		ret.push_back(' ');
+	}
+	add_to_v(ret, to_vector("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> userMadeOpertorMsg(std::vector<unsigned char> channel, User *user, int add_or_remove)
+{
+	std::vector<unsigned char> ret;
+
+	ret = to_vector(":" + server_name + " ");
+	add_to_v(ret, user->getNick());
+	if (add_or_remove == ADD)
+		add_to_v(ret, to_vector(" has made you channel operator on "));
+	else if (add_or_remove == REMOVE)
+		add_to_v(ret, to_vector(" has removed you from the channel operators on "));
+	add_to_v(ret, channel);
+	add_to_v(ret, to_vector("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> concatMode(Channel *channel, User *user, std::vector<unsigned char> nick)
+{
+	std::vector<unsigned char> ret_init;
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char> v;
+	std::list<User*>::iterator ut = channel->getUserListBanbg();
+	
+	ret_init.push_back(' ');
+	add_to_v(ret_init, nick);
+	ret_init.push_back(' ');
+	add_to_v(ret_init, channel->getChanName());
+	ret_init.push_back(' ');
+	for (; ut != channel->getUserListBanend(); ut++)
+	{
+		ret = ret_init;
+		v = (*ut)->getClient();
+		ret.insert(ret.end(), v.begin(), v.end());
+		add_to_v(ret, to_vector("\r\n"));
+		push_to_buf(RPL_BANLIST, user, ret);
+		v.clear();
+		ret.clear();
+	}
+	return (ret);
 }

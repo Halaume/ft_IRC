@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 17:04:04 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 17:55:41 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -642,6 +642,12 @@ std::ostream & operator<<( std::ostream & o, Server & i)
 		for (itu = m->getUserListbg(); itu != m->getUserListend(); ++itu)
 		{
 			o << (*(*itu));
+		}
+		o << "\n--------USERS OP--------\n";
+		for (itu = m->getUserListOpbg(); itu != m->getUserListOpend(); ++itu)
+		{
+			if (*itu != NULL)
+				o << (*(*itu));
 		}
 		o << "\n--------USERS BANNED--------\n";
 		for (itu = m->getUserListBanbg(); itu != m->getUserListBanend(); ++itu)
