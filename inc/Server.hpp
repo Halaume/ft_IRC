@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 15:39:10 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 10:56:27 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,9 @@ class Server
 		std::list<User>				_users;
 		User						_bot;
 
-		
+		//--------------------BOT----------------
+	public:
+		User &	getBot(void);
 };
 
 std::ostream &		operator<<( std::ostream & o, Server & i);

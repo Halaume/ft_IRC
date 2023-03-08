@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 14:54:06 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 12:07:00 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,4 +375,14 @@ std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 			return (it);
 	}
 	return (it);
+}
+
+std::vector<unsigned char>::iterator	Channel::getChanNamebg(void)
+{
+	return (this->_chan_name.begin());
+}
+
+std::vector<unsigned char>::iterator	Channel::getChanNameend(void)
+{
+	return (this->_chan_name.end());
 }

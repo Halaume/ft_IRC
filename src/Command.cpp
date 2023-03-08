@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 15:52:52 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 12:10:13 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,8 @@ int Command::_fun_USER(Server &my_server)
 	return (0);
 }
 
+//TODO	ADD BOTJOIN
+
 int Command::_fun_JOIN(Server &my_server)
 {
 	std::vector<std::vector<unsigned char> > channels;
@@ -294,6 +296,12 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		push_to_buf(ERR_NOSUCHNICK, *this, this->_parsedCmd[1]);
 		return ;
 	}
+
+	if (dest == to_vector("#bot"))
+		this->_botMessage(my_server, msg);
+
+	//Build Message
+
 	std::vector<unsigned char> ret;
 	std::vector<std::vector<unsigned char> >::size_type i;
 	unsigned char text[] = " PRIVMSG ";
@@ -313,6 +321,9 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		ret.push_back(chan->getChanName()[i]);
 	ret.push_back(' ');
 	msg.insert(msg.begin(), ret.begin(), ret.end());
+
+	//Message Built
+
 	if (is_op)
 	{
 				for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
@@ -846,4 +857,121 @@ std::vector<std::vector<unsigned char> > Command::getCommand(void) const
 User* Command::getCmdUser(void) const
 {
 	return (_cmd_user);
+}
+
+
+//------------------------------BOT RELATED------------------------
+//
+
+void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
+{
+	std::string    options[] = {"Quoi", "How many on server ?", "Am I odd or even ?", "How many on channel ?", "List users", "List channel", "help"};
+	int k = 0;
+	while (k < 7 && my_compare(msg, options[k]) != 0)
+		k++;
+	std::vector<Channel>::iterator chan = my_server.findExistingChan(to_vector("#bot"));
+	if (chan == my_server.getChannelsend())
+	{
+		std::cerr << "Oula le bot chan existe po" << std::endl;
+		return ;
+	}
+	switch (k)
+	{
+		case 0:
+			msg = to_vector("Feur !");
+			break;
+		case 1:
+			msg = to_vector(std::string(("There is " + my_server.getUsers().size()) + std::string(" users on this Awesome server !")));
+			break;
+		case 2:
+			if (this->_cmd_user->getfd() % 2 == 0)
+				msg = to_vector("You are even Wow !");
+			else
+				msg = to_vector("You are odd, Cringe..");
+			break;
+		case 3:
+			msg = to_vector(std::string(("There is " + chan->getUserList().size()) + std::string(" users on this Awesome server !")));
+			break;
+		case 4:
+			msg = to_vector("User on this server : ");
+			for (std::list<User>::iterator it = my_server.getUsersbg(); it != my_server.getUsersend(); it++)
+			{
+				msg.insert(msg.end(), it->getNickbg(), it->getNickend());
+				msg.push_back(',');
+				msg.push_back(' ');
+			}
+			break;
+		case 5:
+			msg = to_vector("Channels on this server : ");
+			for (std::vector<Channel>::iterator it = my_server.getChannelsbg(); it != my_server.getChannelsend(); it++)
+			{
+				msg.insert(msg.end(), it->getChanNamebg(), it->getChanNameend());
+				msg.push_back(',');
+				msg.push_back(' ');
+			}
+			break;
+		case 6:
+			msg = to_vector("All my commands are : How many on server ?, Am I odd or even ?, How many on channel ?, List users, List channel.");
+			break;
+		default:
+			msg = to_vector("No such Command");
+	}
+
+	std::vector<unsigned char> ret;
+	std::vector<std::vector<unsigned char> >::size_type i;
+	unsigned char text[] = " PRIVMSG ";
+	int j = 0;
+
+	ret = my_server.getBot().getNick();
+	ret.insert(ret.begin(), ':');
+	ret.push_back('!');
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.insert(ret.end(), my_server.getBot().getUserNamebg(), my_server.getBot().getUserNameend());
+	ret.push_back('@');
+	for (i = 0; i < my_server.getBot().getUserMask().size(); i++)
+			ret.push_back(my_server.getBot().getUserMask()[i]);
+	while (text[j])
+		ret.push_back(text[j++]);
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.push_back(chan->getChanName()[i]);
+	ret.push_back(' ');
+	msg.insert(msg.begin(), ret.begin(), ret.end());
+	msg.push_back('\r');
+	msg.push_back('\n');
+
+	sendToChan(my_server, chan, msg);
+}
+
+void	Command::_botWelcome(Server & my_server)
+{
+	std::vector<Channel>::iterator chan = my_server.findExistingChan(to_vector("#bot"));
+	if (chan == my_server.getChannelsend())
+	{
+		std::cerr << "Oula le bot chan existe po" << std::endl;
+		return ;
+	}
+	std::vector<unsigned char> msg = to_vector("Welcome to the Channel litle firend");
+	std::vector<unsigned char> ret;
+	std::vector<std::vector<unsigned char> >::size_type i;
+	unsigned char text[] = " PRIVMSG ";
+	int j = 0;
+
+	ret = my_server.getBot().getNick();
+	ret.insert(ret.begin(), ':');
+	ret.push_back('!');
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.insert(ret.end(), my_server.getBot().getUserNamebg(), my_server.getBot().getUserNameend());
+	ret.push_back('@');
+	for (i = 0; i < my_server.getBot().getUserMask().size(); i++)
+			ret.push_back(my_server.getBot().getUserMask()[i]);
+	while (text[j])
+		ret.push_back(text[j++]);
+	for (i = 0; i < chan->getChanName().size(); i++)
+		ret.push_back(chan->getChanName()[i]);
+	ret.push_back(' ');
+	msg.insert(msg.begin(), ret.begin(), ret.end());
+	msg.push_back('\r');
+	msg.push_back('\n');
+
+	sendToChan(my_server, chan, msg);
 }

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/06 15:51:35 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 12:07:33 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,10 @@ class Command
 		int										_fun_PART(Server &);
 
 		void									do_chan(std::vector<unsigned char>, Server &, std::vector<unsigned char>);
+		//-------------------------BOT RELATED--------------------
+		//
+		void	_botMessage(Server &, std::vector<unsigned char>);
+		void	_botWelcome(Server &);
 
 
 };

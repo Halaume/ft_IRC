@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 13:28:05 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 12:07:01 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ class Channel
 
 		// GETTERS
 		std::vector<unsigned char>		getChanName(void) const;
+		std::vector<unsigned char>::iterator		getChanNamebg(void);
+		std::vector<unsigned char>::iterator		getChanNameend(void);
 		std::vector<unsigned char>		getChanPassword(void) const;
 		std::list<User *>::iterator		getOpListbg(void);
 		std::list<User *>::iterator		getOpListend(void);
