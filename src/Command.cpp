@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:10:38 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 22:43:07 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,10 +205,11 @@ int Command::_fun_JOIN(Server &my_server)
 		else if (my_server.channelExists(channels[it]) == false)
 		{
 			Channel new_channel(channels[it]);
-			new_channel.addUser(_cmd_user);
 			my_server.addNewChannel(new_channel);
 			if (my_server.findChan(channels[it]) == NULL)
 				return (0);
+			std::vector<Channel>::iterator  itc = my_server.findExistingChan(channels[it]);
+			itc->addUser(_cmd_user);
 			push_to_buf(JOINED_CHANNEL, *this, channels[it]);
 			param = rpl_topic(channels[it], my_server.findChan(channels[it])->getTopic());
 			push_to_buf(RPL_TOPIC, *this, param);
