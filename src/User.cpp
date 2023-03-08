@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 22:33:37 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:36:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@
 #include "../inc/Numerics.hpp"
 
 
-# define WAITING_FOR_PASS 0
-# define PASS_ORDER_OK 1
-# define PASS_ORDER_ERROR -1
-# define PASS_NICK_OK 2
-# define PASS_USER_OK 3
-# define PASS_CONNECTION_ERROR 4
+// # define WAITING_FOR_PASS 0
+// # define PASS_ORDER_OK 1
+// # define PASS_ORDER_ERROR -1
+// # define PASS_NICK_OK 2
+// # define PASS_USER_OK 3
+// # define PASS_CONNECTION_ERROR 4
 
 User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
 _user_name(), _real_name(), _nick(), _channels(), _user_mask(), \
@@ -444,7 +444,7 @@ int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
 	std::vector<unsigned char> modes;
 	std::vector<unsigned char> error_msg;
 	std::vector<unsigned char>::size_type it = 0;
-	int add_or_remove = 1;
+	int add_or_remove = ADD;
 	int error = 0;
 	
 	if (isUserCommand == true)
@@ -458,7 +458,7 @@ int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
 	if (input[0] == '-')
 	{
 		ret.push_back('-');
-		add_or_remove = -1;
+		add_or_remove = REMOVE;
 		it++;
 	}
 	else
@@ -467,18 +467,14 @@ int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
 		it++;
 	for (;it < input.size(); it++)
 	{
-		if (isValidUserMode(input[it])
-			&& isCharInVector(modes, input[it]) == false)
+		if (isValidUserMode(input[it]))
 		{
-			if (add_or_remove == 1
-				&& getMode(input[it]) == false
-				&& input[it] != 'o')
+			if (add_or_remove == ADD && getMode(input[it]) == false && input[it] != 'o')
 			{
 				setMode(input[it], true);
 				modes.push_back(input[it]);
 			}
-			else if (add_or_remove == -1
-				&& getMode(input[it]) == true)
+			else if (add_or_remove == REMOVE && getMode(input[it]) == true)
 			{
 				setMode(input[it], false);
 				modes.push_back(input[it]);
@@ -487,13 +483,11 @@ int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
 		else if (!isValidUserMode(input[it]))
 			error = 1;
 	}
-	if (modes.size() == 0 && !error)
-		return (0);
 	if (error == 1)
 	{
 		add_to_v(error_msg, to_vector(":"));
 		add_to_v(error_msg, getClient());
-		add_to_v(error_msg, ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, _nick));
+		add_to_v(error_msg, ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, getNick()));
 		_ret.insert(_ret.end(), error_msg.begin(), error_msg.end());
 	}
 	if (modes.size() > 0)

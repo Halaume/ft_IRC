@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 22:08:35 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 15:45:46 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 # define ERR_PASSWDMISMATCHmsg(code, nick)            	concat_resp(code, nick,					to_vector(" :Password incorrect\r\n"))
 	
 # define ERR_CHANNELISFULLmsg(code, nick, chan)         concat_resp(code, nick, chan,			to_vector(" :Cannot join chan (+l)\r\n"))
+# define ERR_UNKNOWNMODEmsg(code, nick, modechar)       concat_resp(code, nick, modechar,       to_vector(" :is unknown mode char to me\r\n"))
 # define ERR_INVITEONLYCHANmsg(code, nick, chan)      	concat_resp(code, nick, chan,			to_vector(" :Cannot join chan (+i)\r\n"))
 # define ERR_BANNEDFROMCHANmsg(code, nick, chan)      	concat_resp(code, nick, chan,			to_vector(" :Cannot join chan (+b)\r\n"))
 # define ERR_BADCHANNELKEYmsg(code, nick, chan)         concat_resp(code, nick, chan,			to_vector(" :Cannot join chan (+k)\r\n"))
@@ -63,7 +64,7 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 # define ERR_CHANOPRIVSNEEDEDmsg(code, nick, chan)    	concat_resp(code, nick, chan,			to_vector(" :You're not channel operator\r\n"))
 # define ERR_NOOPERHOSTmsg(code, nick)                  concat_resp(code, nick,                 to_vector(" :No O-lines for your host\r\n"))
 
-# define ERR_UMODEUNKNOWNFLAGmsg(code, nick)			concat_resp(code, nick,					to_vector(" :Unknown MODE flag\r\n"))
+# define ERR_UMODEUNKNOWNFLAGmsg(code, nick)   			concat_resp(code, nick,					to_vector(" :Unknown MODE flag\r\n"))
 # define ERR_USERSDONTMATCHmsg(code, nick)				concat_resp(code, nick,					to_vector(" :Cant change mode for other users\r\n"))
 # define ERR_INVALIDKEYmsg(code, chan)                  concat_resp(code, chan,                 to_vector(" :Key is wrong\r\n"))
 
@@ -106,6 +107,7 @@ enum numerics {
     ERR_PASSWDMISMATCH      = 464,
     
     ERR_CHANNELISFULL       = 471,
+    ERR_UNKNOWNMODE         = 472,
     ERR_INVITEONLYCHAN      = 473,
     ERR_BANNEDFROMCHAN      = 474,
     ERR_BADCHANNELKEY       = 475,

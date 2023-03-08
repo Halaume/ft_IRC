@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 23:16:03 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:06:05 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -394,6 +394,7 @@ std::list<User *>::iterator	Channel::findUser(std::vector<unsigned char> nick)
 std::vector<unsigned char> Channel::getChannelModes(void)
 {
 	std::vector<unsigned char> ret = to_vector(" ");
+	std::vector<unsigned char> nb_limit;
 	
 	add_to_v(ret, _chan_name);
 	add_to_v(ret, to_vector(" +"));
@@ -401,6 +402,17 @@ std::vector<unsigned char> Channel::getChannelModes(void)
 	{
 		if (mode->second == true)
 			ret.push_back(mode->first);
+	}
+	if (getMode('l') == true)
+	{
+		ret.push_back(' ');
+		nb_limit = itov(_nb_users_limit);
+		ret.insert(ret.end(), nb_limit.begin(), nb_limit.end());
+	}
+	if (getMode('k') == true)
+	{
+		ret.push_back(' ');
+		ret.insert(ret.end(), _chan_password.begin(), _chan_password.end());
 	}
 	ret.push_back('\r');
 	ret.push_back('\n');
@@ -539,6 +551,7 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 	std::vector<unsigned char> ret = to_vector(":");
 	std::vector<unsigned char> modes;
 	std::vector<unsigned char>::size_type j = 0;
+	std::string char_to_v;
 	int return_value = NO_RET;
 	int add_or_remove = ADD;
 	
@@ -581,10 +594,13 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 			topicModeFct(return_value, add_or_remove);
 		else if (input[2][j] == 'b')
 			banModeFct(my_server, user, input, return_value, add_or_remove);
-
-///////////////HERE
-	// add ERR_UNKNOWNMODE to this channel MODE and to USER MODE!!
-	
+		else
+		{
+			char_to_v.push_back(input[2][j]);
+			push_to_buf(ERR_UNKNOWNMODE, user, to_vector(char_to_v));
+			char_to_v.clear();
+			return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
+		}
 	}
 	if (return_value == RET_AND_UMODEIS)
 		push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes()); // add l + k value

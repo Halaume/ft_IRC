@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 22:09:20 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 15:43:28 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,10 +160,6 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, const std
 		{
 			return (ERR_CHANOPRIVSNEEDEDmsg(ERR_CHANOPRIVSNEEDED, cmd.getCmdUser()->getNick(), param));	
 		}
-		case ERR_UMODEUNKNOWNFLAG:
-		{
-			return (ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, cmd.getCmdUser()->getNick()));
-		}
 		case  ERR_NOOPERHOST:
 		{
 			return (ERR_NOOPERHOSTmsg(ERR_NOOPERHOST, cmd.getCmdUser()->getNick()));
@@ -226,6 +222,10 @@ std::vector<unsigned char> numeric_response(int num_code, User *user, std::vecto
 		case RPL_ENDOFBANLIST:
 		{
 			return (RPL_ENDOFBANLISTmsg(RPL_ENDOFBANLIST, param));
+		}
+		case ERR_UNKNOWNMODE:
+		{
+			return (ERR_UNKNOWNMODEmsg(ERR_UNKNOWNMODE, user->getNick(), param));
 		}
 		case ERR_INVALIDKEY:
 		{

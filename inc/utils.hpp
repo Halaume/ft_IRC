@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 23:13:18 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:01:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ bool                                        isCharInVector(std::vector<unsigned 
 void										message_to_user(Server&, User*, std::vector<unsigned char>);
 
 int                                         vtoi(std::vector<unsigned char> v);
+std::vector<unsigned char>                  itov(int n);
 
 
 std::vector<unsigned char>                  concatMode(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >, int);

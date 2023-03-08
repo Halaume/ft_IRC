@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 23:13:11 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:10:55 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,18 @@ int vtoi(std::vector<unsigned char> v)
 			return (0);
 	}
 	return (static_cast<int>(nb));
+}
+
+std::vector<unsigned char> itov(int n)
+{
+	std::vector<unsigned char> ret;
+	
+	while (n > 0)
+	{
+		ret.push_back('0' + n % 10);
+		n /= 10;
+	}
+	return (ret);
 }
 
 void add_to_vector(std::vector<unsigned char>& v, char *str)
@@ -542,7 +554,7 @@ std::vector<unsigned char> rpl_name(Channel *channel)
 
 bool isValidUserMode(const char c)
 {
-	std::vector<unsigned char> valid_char = to_vector("aiwroOs");
+	std::vector<unsigned char> valid_char = to_vector("io");
 	
 	for (std::vector<unsigned char>::size_type it = 0; it < valid_char.size(); it++)
 	{

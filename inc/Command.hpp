@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 18:21:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 16:51:13 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,9 @@
 # define PASS_ORDER_ERROR -1
 # define PASS_NICK_OK 2
 # define PASS_USER_OK 3
-# define PASS_CONNECTION_ERROR 4
+# define PASS_USER_NICK_OK 4
+# define PASS_CONNECTION_ERROR 5
+# define PASS_OK_NICKINUSE 6
 
 
 
@@ -61,7 +63,7 @@ class Command
 		std::vector<std::vector<unsigned char> >&	getRet();
 		
 
-		void										sendToChan(Server &, std::vector<Channel>::iterator, std::vector<unsigned char>);
+		void										sendToChan(Server &, Channel *, std::vector<unsigned char>);
 		std::vector<unsigned char>					_globalCmd;
 		std::vector<std::vector<unsigned char> >	_parsedCmd;
 
