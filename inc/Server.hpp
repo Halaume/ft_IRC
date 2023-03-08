@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 17:48:14 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 10:56:27 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,17 +99,20 @@ class Server
 
 
 	private:
-	
-			char **						_argv;
-			sockaddr_in					_server;
-			int							_sct;
-			std::vector<unsigned char>	_passwd;
-			int							_epollfd;
-			epoll_event *				_events;
-			epoll_event					_ev;
-			std::vector<Channel>		_channels;
-			std::list<User>				_users;
-			User						_bot;
+		char **						_argv;
+		sockaddr_in					_server;
+		int							_sct;
+		std::vector<unsigned char>	_passwd;
+		int							_epollfd;
+		epoll_event *				_events;
+		epoll_event					_ev;
+		std::vector<Channel>		_channels;
+		std::list<User>				_users;
+		User						_bot;
+
+		//--------------------BOT----------------
+	public:
+		User &	getBot(void);
 };
 
 std::ostream &		operator<<( std::ostream & o, Server & i);
