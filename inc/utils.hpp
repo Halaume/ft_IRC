@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 18:43:59 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 23:13:18 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,9 @@ int                                         vtoi(std::vector<unsigned char> v);
 
 
 std::vector<unsigned char>                  concatMode(std::vector<unsigned char>, std::vector<unsigned char>, std::vector<std::vector<unsigned char> >, int);
-std::vector<unsigned char>                  userMadeOpertorMsg(std::vector<unsigned char> channel, User *user, int add_or_remove);
+std::vector<unsigned char>                  concatMode(Channel *, User *, std::vector<unsigned char>);
+std::vector<unsigned char>                  userMadeOpertorMsg(std::vector<unsigned char>, User *, int);
+
 
 
 #endif

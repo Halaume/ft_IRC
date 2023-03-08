@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 19:18:38 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 23:16:03 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -413,7 +413,7 @@ void Channel::operatorModeFct(Server &my_server, User *user, std::vector<std::ve
 	std::vector<unsigned char> op_notification;
 	std::vector<unsigned char> op_msg;
 	User *user_target;
-	if (input.size() == 3 || input[3].empty()) // afficher la liste?
+	if (input.size() == 3 || input[3].empty())
 		return;
 	user_target = my_server.findUserPtrNick(input[3]);
 	if (user_target == NULL)
@@ -499,26 +499,39 @@ void Channel::topicModeFct(int &return_value, int add_or_remove)
 	return_value = RET_AND_UMODEIS;
 }
 
-void Channel::banModeFct(Server &my_server, std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
+void Channel::banModeFct(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, int &return_value, int add_or_remove)
 {
+	std::vector<std::vector<unsigned char> > list_users;
+	std::vector<unsigned char> ban_msg;
+	bool flag = false;
+	
 	if (input.size() == 3 || input[3].empty())
-		return; // list bans
-	User *user_to_ban;
-	std::vector<unsigned char>::size_type i = 3;
-	for (; i < input.size(); i++)
 	{
-		user_to_ban = my_server.findUserPtrNick(input[i]);
-		if (user_to_ban != NULL && add_or_remove == ADD && !isUserBanned(user_to_ban))
-			_ban_list.push_back(user_to_ban);
-		else if (user_to_ban != NULL && add_or_remove == REMOVE && isUserBanned(user_to_ban))
-			_ban_list.push_back(user_to_ban);
-	} ///////////////////////HEEEEEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRREEEE
-	// write ban message iwth MDE_MESSAGE
-	// if (add_or_remove == ADD && getMode('t') == false)
-	// 	setMode('t', true);
-	// else if (add_or_remove == REMOVE && getMode('t') == true)
-	// 	setMode('t', false);
-	return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
+		ban_msg = concatMode(this, user, user->getNick());
+		push_to_buf(RPL_ENDOFBANLIST, user, _chan_name);
+		return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
+		return;
+	}
+	User *user_to_ban;
+	user_to_ban = my_server.findUserPtrNick(input[3]);
+	if (user_to_ban != NULL && add_or_remove == ADD && !isUserBanned(user_to_ban))
+	{
+		_ban_list.push_back(user_to_ban);
+		list_users.push_back(input[3]);
+		flag = true;
+	}
+	else if (user_to_ban != NULL && add_or_remove == REMOVE && isUserBanned(user_to_ban))
+	{
+		list_users.push_back(input[3]);
+		delBanLst(user_to_ban);
+		flag = true;
+	}
+	if (flag == true)
+	{
+		ban_msg = concatMode(input[1], to_vector("b"), list_users, add_or_remove);
+		push_to_buf(MODE_MESSAGE, user, ban_msg);
+		return_value = (return_value == RET_AND_UMODEIS) ? RET_AND_UMODEIS : RET;
+	}
 }
 
 int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector<unsigned char> > input, bool isUserCommand)
@@ -567,9 +580,10 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 		else if (input[2][j] == 't')
 			topicModeFct(return_value, add_or_remove);
 		else if (input[2][j] == 'b')
-			banModeFct(my_server, input, return_value, add_or_remove);
+			banModeFct(my_server, user, input, return_value, add_or_remove);
 
-	// add ERR_UNKNOWNMODE to this and USER!!
+///////////////HERE
+	// add ERR_UNKNOWNMODE to this channel MODE and to USER MODE!!
 	
 	}
 	if (return_value == RET_AND_UMODEIS)

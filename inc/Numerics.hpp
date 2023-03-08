@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 18:19:02 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 22:08:35 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 # define RPL_INVITINGmsg(code, nick, nick2, chan)     	concat_resp(code, nick, nick2, chan)
 # define RPL_NAMREPLYmsg(code, nick, all_the_rest)    	concat_resp(code, nick, all_the_rest)
 # define RPL_ENDOFNAMESmsg(code, nick, chan)          	concat_resp(code, nick, chan,         	to_vector(" :End of /NAMES list\r\n"))
+# define RPL_BANLISTmsg(code, all)						concat_resp(code, all)
+# define RPL_ENDOFBANLISTmsg(code, channel)				concat_resp(code, channel,				to_vector(" :End of channel ban list\r\n"))
 # define RPL_YOUREOPERmsg(code, client)                 concat_resp(code, client,               to_vector(" :You are now an IRC operator\r\n"))
 
 
@@ -86,6 +88,8 @@ enum numerics {
     RPL_INVITING            = 341,
     RPL_NAMREPLY            = 353,
     RPL_ENDOFNAMES          = 366,
+	RPL_BANLIST				= 367,
+	RPL_ENDOFBANLIST		= 368,
     RPL_YOUREOPER           = 381,
 
     

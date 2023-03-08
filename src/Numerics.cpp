@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 18:32:40 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 22:09:20 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,11 +193,11 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
 	std::vector<unsigned char> buf = to_vector(":");
 	
 	if (code == RPL_UMODEIS
-		|| code == RPL_CHANNELMODEIS)
+		|| code == RPL_CHANNELMODEIS
+		|| code == MODE_MESSAGE)
 		add_to_vector(buf, user->getClient());
 	else if ((code != OWN_NICK_RPL
-		&& code != JOINED_CHANNEL)
-		|| code == MODE_MESSAGE)
+		&& code != JOINED_CHANNEL))
 		add_to_vector(buf, server_name);
 	add_to_vector(buf, numeric_response(code, user, param));
 	user->getRet().insert(user->getRet().end(), buf.begin(), buf.end());
@@ -205,7 +205,6 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
 
 std::vector<unsigned char> numeric_response(int num_code, User *user, std::vector<unsigned char> param)
 {
-	
 	switch (num_code)
 	{
 		case ERR_NOTONCHANNEL:
@@ -219,6 +218,14 @@ std::vector<unsigned char> numeric_response(int num_code, User *user, std::vecto
 		case RPL_CHANNELMODEIS:
 		{
 			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, user->getNick(), param));
+		}
+		case RPL_BANLIST:
+		{
+			return (RPL_BANLISTmsg(RPL_BANLIST, param));
+		}
+		case RPL_ENDOFBANLIST:
+		{
+			return (RPL_ENDOFBANLISTmsg(RPL_ENDOFBANLIST, param));
 		}
 		case ERR_INVALIDKEY:
 		{

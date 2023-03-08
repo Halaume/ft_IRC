@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 18:47:11 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 23:13:11 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <limits.h>
 
 #include "../inc/utils.hpp"
+#include "../inc/Numerics.hpp"
 #include "../inc/Server.hpp"
 #include "../inc/Channel.hpp"
 #include "../inc/User.hpp"
@@ -602,5 +603,32 @@ std::vector<unsigned char> userMadeOpertorMsg(std::vector<unsigned char> channel
 		add_to_v(ret, to_vector(" has removed you from the channel operators on "));
 	add_to_v(ret, channel);
 	add_to_v(ret, to_vector("\r\n"));
+	return (ret);
+}
+
+std::vector<unsigned char> concatMode(Channel *channel, User *user, std::vector<unsigned char> nick)
+{
+	std::vector<unsigned char> ret_init;
+	std::vector<unsigned char> ret;
+	std::vector<unsigned char> v;
+	std::list<User*>::iterator ut = channel->getUserListBanbg();
+	
+	ret_init.push_back(' ');
+	add_to_v(ret_init, nick);
+	ret_init.push_back(' ');
+	add_to_v(ret_init, channel->getChanName());
+	ret_init.push_back(' ');
+	for (; ut != channel->getUserListBanend(); ut++)
+	{
+		ret = ret_init;
+		v = (*ut)->getClient();
+		ret.insert(ret.end(), v.begin(), v.end());
+		add_to_v(ret, to_vector("\r\n"));
+		push_to_buf(RPL_BANLIST, user, ret);
+		v.clear();
+		ret.clear();
+	}
+	
+	// print_vector("RETTTTTT", ret);
 	return (ret);
 }

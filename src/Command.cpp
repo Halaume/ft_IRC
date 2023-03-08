@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 19:17:53 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 22:13:49 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -436,6 +436,7 @@ int Command::_fun_MODE(Server &my_server)
 	}
 	else if (_parsedCmd[1][0] == '#' || _parsedCmd[1][0] == '&')
 	{
+		std::cout << "THIISSSSSSSSSSSSSSSSSSSSSSS\n";
 		channel = my_server.findChan(_parsedCmd[1]);
 		if (my_server.findChan(_parsedCmd[1]) == NULL)
 			return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);

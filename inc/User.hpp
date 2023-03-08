@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 17:28:06 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 22:32:45 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ class User
 		std::map<char, bool>::iterator 			getModesend(void);
 		std::vector<unsigned char> &			getRet(void);
 		bool									getOperator(void) const;
+		std::vector<unsigned char>::iterator	getNickbg(void);
+		std::vector<unsigned char>::iterator	getNickend(void);
 		
 		void									setPassStatus(int);
 		std::vector<unsigned char>				getRealName(void) const;

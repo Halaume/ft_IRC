@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/05 17:27:29 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/07 22:33:37 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,16 @@ void User::setMode(char c, bool mode) // easier way to do it?
 std::vector<unsigned char> User::getPasswd(void) const
 {
 	return (_passwd);
+}
+
+std::vector<unsigned char>::iterator User::getNickbg(void)
+{
+	return (_nick.begin());
+}
+
+std::vector<unsigned char>::iterator User::getNickend(void)
+{
+	return (_nick.end());
 }
 
 int User::getPassStatus(void) const
