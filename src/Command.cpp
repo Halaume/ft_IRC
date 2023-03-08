@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 18:18:39 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/08 18:39:06 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ int Command::_fun_JOIN(Server &my_server)
 	std::vector<unsigned char> param;
 	Channel * channel;
 
-	if (_parsedCmd.size() < 2)
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
 	if (_parsedCmd.size() > 2)
@@ -886,11 +886,11 @@ int Command::answer(Server &my_server)
 				break ;
 			return (_fun_RESTART(my_server));
 			break;
-		case 14:
-			if (!this->_cmd_user->getRegistered())
-				break ;
-			return (_fun_PONG());
-			break;
+		// case 14:
+		// 	if (!this->_cmd_user->getRegistered())
+		// 		break ;
+		// 	return (_fun_PONG());
+		// 	break;
 		case 15:
 			if (!this->_cmd_user->getRegistered())
 				break ;
