@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 17:49:25 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 20:56:22 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,31 +16,25 @@
 #include "../inc/utils.hpp"
 #include "../inc/User.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/Numerics.hpp"
 
-# define WAITING_FOR_PASS 0
-# define PASS_ORDER_OK 1
-# define PASS_ORDER_ERROR -1
-# define PASS_NICK_OK 2
-# define PASS_USER_OK 3
-# define PASS_CONNECTION_ERROR 4
-
-User::User(void): _fd(0), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-					  _user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+User::User(void): _fd(0), _registered(false), _passwd(), \
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(int fd): _fd(fd), _pass_status(PASSWORD_NOT_SET), _registered(false), _passwd(), \
-						_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
+User::User(int fd): _fd(fd), _registered(false), _passwd(), \
+_user_name(), _real_name(), _nick(), _channels(), _user_mask(), _pass_before_nick_user(WAITING_FOR_PASS)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
 }
 
-User::User(const User & copy): _fd(copy._fd), _pass_status(copy._pass_status), _registered(copy._registered), \
-								   _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
-													   _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
+User::User(const User & copy): _fd(copy._fd), _registered(copy._registered), \
+_passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
+_nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), _pass_before_nick_user(copy._pass_before_nick_user)
 {
 }
 
@@ -52,17 +46,16 @@ User& User::operator=(const User & src)
 {
 	if (&src == this)
 		return (*this);
-	this->_fd = src._fd;
-	this->_pass_status = src._pass_status;
-	this->_registered = src._registered;
-	this->_passwd = src._passwd;
-	this->_user_name = src._user_name;
-	this->_real_name = src._real_name;
-	this->_channels = src._channels;
-	this->_user_mask = src._user_mask;
-	this->_currCmd = src._currCmd;
-	this->_nick = src._nick;
-	this->_pass_before_nick_user = src._pass_before_nick_user;
+	_fd = src._fd;
+	_registered = src._registered;
+	_passwd = src._passwd;
+	_user_name = src._user_name;
+	_real_name = src._real_name;
+	_channels = src._channels;
+	_user_mask = src._user_mask;
+	_currCmd = src._currCmd;
+	_nick = src._nick;
+	_pass_before_nick_user = src._pass_before_nick_user;
 	return (*this);
 }
 
@@ -237,11 +230,6 @@ void User::setNick(std::vector<unsigned char> nick)
 	_nick = nick;
 }
 
-void User::setPassStatus(int pass_status)
-{
-	_pass_status = pass_status;
-}
-
 void User::setfd(int fd)
 {
 	_fd = fd;
@@ -390,3 +378,102 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	return o;
 }
 
+std::vector<unsigned char> User::getUserModes(void)
+{
+	std::vector<unsigned char> ret = to_vector(" +");
+	for (std::map<char, bool>::iterator mode = this->getModesbg(); mode != this->getModesend(); mode++)
+	{
+		if (mode->second == true)
+			ret.push_back(mode->first);
+	}
+	ret.push_back('\r');
+	ret.push_back('\n');
+	return (ret);
+}
+
+int User::modesMessage(std::vector<unsigned char> input, bool isUserCommand)
+{
+	std::vector<unsigned char> ret = to_vector(":");
+	std::vector<unsigned char> modes;
+	std::vector<unsigned char> error_msg;
+	std::vector<unsigned char>::size_type it = 0;
+	int add_or_remove = ADD;
+	int error = 0;
+	
+	if (isUserCommand == true)
+	{
+		add_to_v(ret, getNick());
+		add_to_v(ret, to_vector(" "));
+	}
+	add_to_v(ret, to_vector("MODE "));
+	add_to_v(ret, getNick());
+	add_to_v(ret, to_vector(" :"));
+	if (input[0] == '-')
+	{
+		ret.push_back('-');
+		add_or_remove = REMOVE;
+		it++;
+	}
+	else
+		ret.push_back('+');
+	if (input[0] == '+')
+		it++;
+	for (;it < input.size(); it++)
+	{
+		if (isValidUserMode(input[it]))
+		{
+			if (add_or_remove == ADD && getMode(input[it]) == false && input[it] != 'o')
+			{
+				setMode(input[it], true);
+				modes.push_back(input[it]);
+			}
+			else if (add_or_remove == REMOVE && getMode(input[it]) == true)
+			{
+				setMode(input[it], false);
+				modes.push_back(input[it]);
+			}
+		}
+		else if (!isValidUserMode(input[it]))
+			error = 1;
+	}
+	if (error == 1)
+	{
+		add_to_v(error_msg, to_vector(":"));
+		add_to_v(error_msg, getClient());
+		add_to_v(error_msg, ERR_UMODEUNKNOWNFLAGmsg(ERR_UMODEUNKNOWNFLAG, getNick()));
+		_ret.insert(_ret.end(), error_msg.begin(), error_msg.end());
+	}
+	if (modes.size() > 0)
+	{
+		add_to_v(ret, modes);
+		add_to_v(ret, to_vector("\r\n"));
+		_ret.insert(_ret.end(), ret.begin(), ret.end());
+	}
+	return (1);
+}
+
+std::map<char, bool>::iterator User::getModesbg(void)
+{
+	return (_modes.begin());
+}
+
+std::map<char, bool>::iterator User::getModesend(void)
+{
+	return (_modes.end());
+}
+
+bool User::getMode(char c)
+{
+	return (_modes[c]);
+}
+
+void User::setMode(char c, bool mode) // easier way to do it?
+{
+	std::map<char, bool>::iterator it;
+
+	for (it = _modes.begin(); it != _modes.end(); ++it)
+	{
+		if (it->first == c)
+			it->second = mode;
+	}
+}

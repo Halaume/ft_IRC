@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 10:56:27 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 20:51:46 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,23 +18,19 @@
 #include <string>
 #include <list>
 #include <ctime>
-
 #include <netinet/in.h>
-
 #include "Channel.hpp"
 #include "User.hpp"
 #include "Command.hpp"
 
 #define BUFFER_SIZE 1048576
 
-const std::time_t g_time= std::time(0);   // get time now
+const std::time_t g_time= std::time(0);
 
 const struct tm  tstruct = *localtime(&g_time);
 
 class Channel;
-
 class User;
-
 class Command;
 
 class Server
@@ -44,19 +40,17 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 		Server &	operator=(const Server & src);
+		
 		int								init(char **);
 		void							run(void);
 		int								accept_socket(int);
 
-
 		void							printUsersList(void);
 		void							printChannelsList(void);
 		
-		// GETTERS	
 		int								getSct(void) const;
 		int								getEpollfd(void) const;
 		std::vector<unsigned char>		getPasswd(void) const;
-		// User*							getUser(int fd);
 		void							getGobalCmd(Command*, std::vector<unsigned char>, int);
 		std::vector<Channel>::iterator	getChannelsbg(void);
 		std::vector<Channel>::iterator	getChannelsend(void);
@@ -64,11 +58,8 @@ class Server
 		std::vector<Channel> &			getChannelref(void);
 		epoll_event &					getEv(void);
 
-
 		void 							printGlobalCommand(Command cmd);
 		void 							printParsedCommand(Command cmd);
-		// GETTERS
-
 
 		char **							getArgv(void) const;
 		std::vector<Channel>::iterator	findExistingChan(std::vector<unsigned char> channel);
@@ -76,11 +67,10 @@ class Server
 		std::list<User>::iterator		findUser(std::vector<unsigned char> nick);
 		bool							isUserInList(int);
 
-		// Channels
 		bool							channelExists(std::vector<unsigned char>&);
 		void							addNewChannel(std::vector<unsigned char>);
+		void							addNewChannel(Channel&);
 
-		// Channel*						findChanPtr(std::vector<unsigned char>);
 		void							send_to_client(int, std::vector<unsigned char>);
 			
 		std::list<User>::iterator		findUser(std::string nick);
@@ -96,7 +86,6 @@ class Server
 		void							delUser(User *);
 		void							delChan(std::vector<Channel>::iterator);
 		int								nbConnectionsWithSameNick(User &);
-
 
 	private:
 		char **						_argv;

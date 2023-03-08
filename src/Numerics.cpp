@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Numerics.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/07 17:38:54 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 21:13:54 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,27 +16,24 @@
 #include <string.h>
 #include <ctime>
 #include <time.h>
-
-
 #include "../inc/Command.hpp"
 #include "../inc/Numerics.hpp"
 #include "../inc/utils.hpp"
 
-void push_to_buf(int code, Command &cmd, std::vector<unsigned char> param)
+void push_to_buf(int code, Command &cmd, const std::vector<unsigned char> &param)
 {
-	std::vector<unsigned char> buf;
-	std::string server_name = "mig.42.fr";
-	std::string ddots = ":";
+	std::vector<unsigned char> buf = to_vector(":");
 	
-	if (code == OWN_NICK_RPL || code == JOINED_CHANNEL)
-		add_to_vector(buf, ddots);
-	else
-		add_to_vector(buf, ddots + server_name);
+	if (code == RPL_UMODEIS || code == RPL_CHANNELMODEIS)
+		add_to_vector(buf, cmd.getCmdUser()->getClient());
+	else if (code != OWN_NICK_RPL
+		&& code != JOINED_CHANNEL)
+		add_to_vector(buf, server_name);
 	add_to_vector(buf, numeric_response(code, cmd, server_name, param));
 	cmd.getCmdUser()->getRet().insert(cmd.getCmdUser()->getRet().end(), buf.begin(), buf.end());
 }
 
-std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)//std::vector<unsigned char> param)
+std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::string server_name, std::vector<unsigned char> param)
 {
 	switch (num_code)
 	{
@@ -50,7 +47,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case RPL_CREATED:
 		{
-			char       time_buf[80];
+			char time_buf[80];
 			strftime(time_buf, sizeof(time_buf), "%Y-%m-%d @ %X", &tstruct);
 			std::string date_and_time(time_buf);
 			return (RPL_CREATEDmsg(RPL_CREATED, cmd.getCmdUser()->getNick(), date_and_time));
@@ -59,9 +56,26 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		{
 			return (RPL_MYINFOmsg(RPL_MYINFO, cmd.getCmdUser()->getNick(), server_name));
 		}
+		case RPL_UMODEIS:
+		{
+			std::vector<unsigned char> modes = cmd.getCmdUser()->getUserModes();
+			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), modes));
+		}
+		case RPL_CHANNELMODEIS:
+		{
+			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, cmd.getCmdUser()->getNick(), param));
+		}
 		case RPL_TOPIC:
 		{
 			return (RPL_TOPICmsg(RPL_TOPIC, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
+		}
+		case RPL_INVITING:
+		{
+			std::vector<unsigned char> v;
+			v.push_back(' ');
+			add_to_v(v, param);
+			add_to_vector(v, static_cast<std::string>("\r\n"));
+			return (RPL_INVITINGmsg(RPL_INVITING, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], v));
 		}
 		case RPL_NAMREPLY:
 		{
@@ -73,15 +87,7 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 		}
 		case ERR_NOSUCHNICK:
 		{
-			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, cmd.getCmdUser()->getClient(), param));
-		}
-		case RPL_UMODEIS:
-		{
-			return (RPL_UMODEISmsg(RPL_UMODEIS, cmd.getCmdUser()->getNick(), param));
-		}
-		case RPL_INVITING:
-		{
-			return (RPL_INVITINGmsg(RPL_INVITING, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[1], param));
+			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, cmd.getCmdUser()->getNick(), param));
 		}
 		case RPL_YOUREOPER:
 		{
@@ -180,4 +186,59 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 	}
 	// to clean
 	return (ERR_NEEDMOREPARAMSmsg(ERR_NEEDMOREPARAMS, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[0]));
+}
+
+void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
+{
+	std::vector<unsigned char> buf = to_vector(":");
+	
+	if (code == RPL_UMODEIS
+		|| code == RPL_CHANNELMODEIS
+		|| code == MODE_MESSAGE)
+		add_to_vector(buf, user->getClient());
+	else if ((code != OWN_NICK_RPL
+		&& code != JOINED_CHANNEL))
+		add_to_vector(buf, server_name);
+	add_to_vector(buf, numeric_response(code, user, param));
+	user->getRet().insert(user->getRet().end(), buf.begin(), buf.end());
+}
+
+std::vector<unsigned char> numeric_response(int num_code, User *user, std::vector<unsigned char> param)
+{
+	switch (num_code)
+	{
+		case ERR_NOTONCHANNEL:
+		{
+			return (ERR_NOTONCHANNELmsg(ERR_NOTONCHANNEL, user->getNick(), param));
+		}
+		case ERR_NOSUCHNICK:
+		{
+			return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, user->getNick(), param));
+		}
+		case RPL_CHANNELMODEIS:
+		{
+			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, user->getNick(), param));
+		}
+		case RPL_BANLIST:
+		{
+			return (RPL_BANLISTmsg(RPL_BANLIST, param));
+		}
+		case RPL_ENDOFBANLIST:
+		{
+			return (RPL_ENDOFBANLISTmsg(RPL_ENDOFBANLIST, param));
+		}
+		case ERR_UNKNOWNMODE:
+		{
+			return (ERR_UNKNOWNMODEmsg(ERR_UNKNOWNMODE, user->getNick(), param));
+		}
+		case ERR_INVALIDKEY:
+		{
+			return (ERR_INVALIDKEYmsg(num_code, param));
+		}
+		case MODE_MESSAGE:
+		{
+			return (MODE_MESSAGEmsg(to_vector(" MODE"), param));
+		}
+	}
+	return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, user->getNick(), param));
 }

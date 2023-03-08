@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
+/*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 17:04:04 by madelaha         ###   ########.fr       */
+/*   Updated: 2023/03/08 20:51:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,6 +449,11 @@ void Server::sendto(int fd, std::vector<unsigned char> buf)
 		_users.erase(Usr);
 		close(fd);
 	}
+}
+
+void Server::addNewChannel(Channel& new_channel)
+{
+	_channels.push_back(new_channel);
 }
 
 std::list<User>::iterator Server::findUser(std::vector<unsigned char> nick)
