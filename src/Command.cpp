@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 12:10:13 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 13:38:24 by ghanquer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <cstdlib>
+#include <sstream>
 #include <stdlib.h>
 
 #include "../inc/Server.hpp"
@@ -875,13 +877,17 @@ void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 		std::cerr << "Oula le bot chan existe po" << std::endl;
 		return ;
 	}
+	std::stringstream ss;
+	std::string str;
 	switch (k)
 	{
 		case 0:
 			msg = to_vector("Feur !");
 			break;
 		case 1:
-			msg = to_vector(std::string(("There is " + my_server.getUsers().size()) + std::string(" users on this Awesome server !")));
+			ss << my_server.getUsers().size();
+			str = ss.str();
+			msg = to_vector(std::string("There is ") + str + std::string(" users on this Awesome server !"));
 			break;
 		case 2:
 			if (this->_cmd_user->getfd() % 2 == 0)
@@ -890,7 +896,9 @@ void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 				msg = to_vector("You are odd, Cringe..");
 			break;
 		case 3:
-			msg = to_vector(std::string(("There is " + chan->getUserList().size()) + std::string(" users on this Awesome server !")));
+			ss << my_server.getUsers().size();
+			str = ss.str();
+			msg = to_vector(std::string(("There is ")) + str + std::string(" channels on this Awesome server !"));
 			break;
 		case 4:
 			msg = to_vector("User on this server : ");
