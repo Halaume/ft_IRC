@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 13:38:24 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 17:04:31 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,22 +307,28 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	{
 				for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
 		{
-			(*itc)->getRet().insert((*itc)->getRet().begin(), msg.begin(), msg.end());
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = (*itc)->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				my_server.delUser(*itc);
+			if (!((*itc)->getNick() == this->_cmd_user->getNick()))
+			{
+				(*itc)->getRet().insert((*itc)->getRet().begin(), msg.begin(), msg.end());
+				my_server.getEv().events = EPOLLOUT | EPOLLET;
+				my_server.getEv().data.fd = (*itc)->getfd();
+				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+					my_server.delUser(*itc);
+			}
 		}
 	}
 	else
 	{
 		for (std::list<User *>::iterator itc = chan->getUserListbg(); itc != chan->getUserListend(); itc++)
 		{
-			(*itc)->getRet().insert((*itc)->getRet().begin(), msg.begin(), msg.end());
-			my_server.getEv().events = EPOLLOUT | EPOLLET;
-			my_server.getEv().data.fd = (*itc)->getfd();
-			if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
-				my_server.delUser(*itc);
+			if (!((*itc)->getNick() == this->_cmd_user->getNick()))
+			{
+				(*itc)->getRet().insert((*itc)->getRet().begin(), msg.begin(), msg.end());
+				my_server.getEv().events = EPOLLOUT | EPOLLET;
+				my_server.getEv().data.fd = (*itc)->getfd();
+				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, (*itc)->getfd(), &my_server.getEv()) == - 1)
+					my_server.delUser(*itc);
+			}
 		}
 	}
 }
@@ -921,7 +927,7 @@ User* Command::getCmdUser(void) const
 
 void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 {
-	std::string    options[] = {"Quoi", "How many on server ?", "Am I odd or even ?", "How many on channel ?", "List users", "List channel", "help"};
+	std::string    options[] = {"Quoi\r\n", "How many on server ?\r\n", "Am I odd or even ?\r\n", "How many channel ?\r\n", "List users\r\n", "List channel\r\n", "help\r\n"};
 	int k = 0;
 	while (k < 7 && my_compare(msg, options[k]) != 0)
 		k++;
@@ -950,9 +956,9 @@ void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 				msg = to_vector("You are odd, Cringe..");
 			break;
 		case 3:
-			ss << my_server.getUsers().size();
+			ss << my_server.getChannel().size();
 			str = ss.str();
-			msg = to_vector(std::string(("There is ")) + str + std::string(" channels on this Awesome server !"));
+			msg = to_vector(std::string(("There is ")) + str + std::string(" channel(s) on this Awesome server !"));
 			break;
 		case 4:
 			msg = to_vector("User on this server : ");
@@ -964,7 +970,7 @@ void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 			}
 			break;
 		case 5:
-			msg = to_vector("Channels on this server : ");
+			msg = to_vector("Channel(s) on this server : ");
 			for (std::vector<Channel>::iterator it = my_server.getChannelsbg(); it != my_server.getChannelsend(); it++)
 			{
 				msg.insert(msg.end(), it->getChanNamebg(), it->getChanNameend());
@@ -973,7 +979,7 @@ void	Command::_botMessage(Server & my_server, std::vector<unsigned char> msg)
 			}
 			break;
 		case 6:
-			msg = to_vector("All my commands are : How many on server ?, Am I odd or even ?, How many on channel ?, List users, List channel.");
+			msg = to_vector("All my commands are { How many on server ?, Am I odd or even ?, How many channel ?, List users, List channel. }");
 			break;
 		default:
 			msg = to_vector("No such Command");

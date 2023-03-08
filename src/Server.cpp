@@ -6,7 +6,7 @@
 /*   By: madelaha <madelaha@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 10:57:01 by ghanquer         ###   ########.fr       */
+/*   Updated: 2023/03/08 17:04:04 by madelaha         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ void	Server::setBot(void)
 	this->_bot = User();
 	Channel	botchan = Channel();
 
-	std::vector<unsigned char>	botvec = to_vector("bot");
+	std::vector<unsigned char>	botvec = to_vector("#bot");
 
 	this->_bot.setNick(botvec);
 	this->_bot.setRegistered(true);
