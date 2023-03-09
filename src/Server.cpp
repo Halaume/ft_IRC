@@ -118,7 +118,7 @@ int	Server::init(char **argv)
 
 	this->_users = std::list<User>();
 	this->_channels = std::vector<Channel>();
-	add_to_vector(_passwd, argv[2]);
+	this->_passwd = to_vector(argv[2]);
 
 	_server.sin_addr.s_addr = INADDR_ANY;
 	_server.sin_family = AF_INET;
@@ -274,7 +274,7 @@ void Server::run(void) // checker le nombre de connexions max?
 											}
 											cmd.setParsedCmd(ParsedCommand);
 											cmd.setUser(&(*Usr));
-											if (cmd.answer(*this) == 1)
+											if (cmd.answer(*this) != 0)
 												break;
 											Usr->getCurrCmd().erase(Usr->getCurrCmdbg(), (Usr->getCurrCmdbg() + it + 1));
 											_ev.events = EPOLLIN | EPOLLET;

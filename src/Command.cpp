@@ -353,7 +353,9 @@ int	Command::_fun_RESTART(Server &my_server)
 	}
 	free_fun(my_server);
 	my_server.init(my_server.getArgv());
-	return (0);
+	my_server.setBot();
+	my_server.getEv().events = EPOLLIN | EPOLLET;
+	return (2);
 }
 
 
