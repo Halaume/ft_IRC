@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 11:52:09 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:02:27 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 08:39:40 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 
 int is_kill = 0;
 
+int is_restart = 0;
+
 void	signal_handling(int sig)
 {
 	is_kill = sig;
@@ -29,7 +31,7 @@ void	signal_handling(int sig)
 
 int	check_kill(Server& server)
 {
-	if (is_kill != 0)// CTRL + C
+	if (is_kill != 0)
 	{
 		free_fun(server);
 		return (1);
@@ -37,10 +39,6 @@ int	check_kill(Server& server)
 	return (0);
 }
 
-/* TODO
-		tester les nc et CTRL+D
-		CTRL+C dans telnet crashe le serveur
-*/
 int main(int argc, char **argv)
 {
 	Server g_serv;
@@ -51,6 +49,9 @@ int main(int argc, char **argv)
 
 	if(g_serv.init(argv) != 0)
 		return (1);
-	g_serv.run();
+	while (g_serv.run() == 1)
+	{
+		std::cout << "Restarting " << std::endl;
+	}
 	return (1);
 }

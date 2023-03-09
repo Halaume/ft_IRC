@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:48:20 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 19:31:55 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 06:02:16 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,10 @@ class Channel
 		void 							keyModeFct(User *, std::vector<std::vector<unsigned char> >, int &, int);
 		void							topicModeFct(int &, int);
 		void							banModeFct(Server &, User *, std::vector<std::vector<unsigned char> >, int &, int);
+
+		void							delUserOpLst(User *user);
+		void							delUserBanLst(User *);
+		void							delUserUsrLst(User *);
 
 	
 			

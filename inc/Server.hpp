@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:39:58 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 20:51:46 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 08:19:15 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class Server
 		Server &	operator=(const Server & src);
 		
 		int								init(char **);
-		void							run(void);
+		int								run(void);
 		int								accept_socket(int);
 
 		void							printUsersList(void);
@@ -86,6 +86,9 @@ class Server
 		void							delUser(User *);
 		void							delChan(std::vector<Channel>::iterator);
 		int								nbConnectionsWithSameNick(User &);
+		int								nbConnectionsWithSameMask(User &);
+		void							eraseUsr(std::list<User>::iterator);
+		void							eraseUsr(std::vector<unsigned char> nick);
 
 	private:
 		char **						_argv;

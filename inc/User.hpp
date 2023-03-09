@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 17:40:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 19:59:26 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 06:52:02 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ class User
 
 		std::vector<unsigned char>					getRealName(void) const;
 		void										setRegistered(bool);
+		void										setFatalError(int);
+		int											getFatalError(void);
 		void										setPasswd(std::vector<unsigned char>);
 		void										setUserName(std::vector<unsigned char>);
 		void										setRealName(std::vector<unsigned char>);
@@ -96,6 +98,8 @@ class User
 		std::vector<unsigned char>::const_iterator	getUserNamebg(void) const;
 		std::vector<unsigned char>::const_iterator	getUserNameend(void) const;
 
+		void										initialize(void);
+
 	private:
 	
 			int							_fd;
@@ -111,6 +115,7 @@ class User
 			std::vector<unsigned char>	_user_mask;
 			int							_pass_before_nick_user;
 			std::map<char, bool>		_modes;
+			int							_fatal_error;
 };
 
 std::ostream &		operator<<( std::ostream & o, User const & i);

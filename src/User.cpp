@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:10:59 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:34:44 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 06:54:50 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 User::User(void): _fd(0), _registered(false), _passwd(), \
 _user_name(), _real_name(), _nick(), _channels(), _user_mask(), \
-_pass_before_nick_user(WAITING_FOR_PASS), _modes()
+_pass_before_nick_user(WAITING_FOR_PASS), _modes(), _fatal_error(0)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
@@ -36,7 +36,7 @@ _pass_before_nick_user(WAITING_FOR_PASS), _modes()
 
 User::User(int fd): _fd(fd), _registered(false), _passwd(), \
 _user_name(), _real_name(), _nick(), _channels(), _user_mask(), \
-_pass_before_nick_user(WAITING_FOR_PASS), _modes()
+_pass_before_nick_user(WAITING_FOR_PASS), _modes(), _fatal_error(0)
 {
 	_user_name.push_back('*');
 	_nick.push_back('*');
@@ -53,7 +53,7 @@ _pass_before_nick_user(WAITING_FOR_PASS), _modes()
 User::User(const User & copy): _fd(copy._fd), _operator(copy._operator), _registered(copy._registered), \
 _passwd(copy._passwd), _user_name(copy._user_name), _real_name(copy._real_name), \
 _nick(copy._nick), _channels(copy._channels), _user_mask(copy._user_mask), \
-_pass_before_nick_user(copy._pass_before_nick_user), _modes(copy._modes)
+_pass_before_nick_user(copy._pass_before_nick_user), _modes(copy._modes), _fatal_error(0)
 {
 }
 
@@ -125,12 +125,22 @@ std::map<char, bool>::iterator User::getModesbg(void)
 	return (_modes.begin());
 }
 
+void User::setFatalError(int fatal_error)
+{
+	_fatal_error = fatal_error;
+}
+
+int User::getFatalError(void)
+{
+	return (_fatal_error);
+}
+
 std::map<char, bool>::iterator User::getModesend(void)
 {
 	return (_modes.end());
 }
 
-void User::setMode(char c, bool mode)
+void User::setMode(char c, bool mode)	
 {
 	std::map<char, bool>::iterator it;
 
@@ -400,6 +410,7 @@ std::ostream &		operator<<( std::ostream & o, User const & i)
 	o << " fd: " << i.getfd() << " usr reg:" << i.getRegistered() << " passwd:";
 	for (m = 0; m < i.getPasswd().size(); m++)
 		o << i.getPasswd()[m];
+	o << " Is op: " << i.getOperator() << std::endl;
 	o << std::endl;
 	return o;
 }
@@ -499,4 +510,29 @@ std::vector<Channel *>::iterator	User::getChanIt(std::vector<unsigned char> chan
 void	User::del_chan(std::vector<Channel *>::iterator chan)
 {
 	this->_channels.erase(chan);
+}
+
+void User::initialize(void)
+{
+	std::vector<unsigned char> empty;
+	
+	clearCurrCmd();
+	setOperator(false);
+	setRegistered(false);
+	setPasswd(empty);
+	setUserName(empty);
+	setRealName(empty);
+	setNick(empty);
+	setRet(empty);
+	setUserMask(empty);
+	setPassBeforeNickUser(WAITING_FOR_PASS);
+	setFatalError(0);
+	setOperator(false);
+	setMode('a', false);
+	setMode('i', true);
+	setMode('o', false);
+	setMode('O', false);
+	setMode('r', false);
+	setMode('w', false);
+	setMode('s', false);
 }

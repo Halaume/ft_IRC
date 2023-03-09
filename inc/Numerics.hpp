@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:48:32 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:13:10 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 08:38:32 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 # define RPL_WELCOMEmsg(code, client)                           concat_resp(code, client,                   to_vector(" :Welcome to gim irc\r\n"))
 # define RPL_YOURHOSTmsg(code, client, server_name)             concat_resp(code, client,                   to_vector(" :Your host is " + server_name + ", running version 1.0\r\n"))
 # define RPL_CREATEDmsg(code, client, date_and_time)            concat_resp(code, client,                   to_vector(" :This server creation date and time is " + date_and_time +"\r\n"))
-# define RPL_MYINFOmsg(code, client, server_name)               concat_resp(code, client,                   to_vector(" " + server_name + " 1.0\r\n")) // add user modes and channel modes
+# define RPL_MYINFOmsg(code, client, server_name)               concat_resp(code, client,                   to_vector(" " + server_name + " 1.0\r\n"))
 # define RPL_UMODEISmsg(code, nick, mode)                       concat_resp(code, nick, mode)
 # define RPL_YOUREOPERmsg(code, client)                         concat_resp(code, client,                   to_vector(" :You are now an IRC operator\r\n"))
 
@@ -55,7 +55,7 @@ void push_to_buf(int code, User *user, const std::vector<unsigned char> &param);
 # define ERR_INVITEONLYCHANmsg(code, client, channel)           concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+i)\r\n"))
 # define ERR_BANNEDFROMCHANmsg(code, client, channel)           concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+b)\r\n"))
 # define ERR_BADCHANNELKEYmsg(code, client, channel)            concat_resp(code, client, channel,          to_vector(" :Cannot join channel (+k)\r\n"))
-# define ERR_BADCHANMASKmsg(code, channel)                      concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n")) // add client?
+# define ERR_BADCHANMASKmsg(code, channel)                      concat_resp(code, channel,                  to_vector(" :Bad Channel Mask\r\n"))
 
 # define ERR_NOPRIVILEGESmsg(code, nick)                        concat_resp(code, nick,                     to_vector(" :Permission Denied- You're not an IRC operator\r\n"))
 # define ERR_CHANOPRIVSNEEDEDmsg(code, nick, channel)           concat_resp(code, nick, channel,            to_vector(" :You're not channel operator\r\n"))

@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/07 14:30:27 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 21:13:54 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 08:40:58 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,8 +184,8 @@ std::vector<unsigned char> numeric_response(int num_code, Command cmd, std::stri
 			return (JOINED_CHANNELmsg(cmd.getCmdUser()->getClient(), channel));
 		}
 	}
-	// to clean
-	return (ERR_NEEDMOREPARAMSmsg(ERR_NEEDMOREPARAMS, cmd.getCmdUser()->getNick(), cmd.getParsedCmd()[0]));
+	std::vector<unsigned char> ret;
+	return (ret);
 }
 
 void push_to_buf(int code, User *user, const std::vector<unsigned char> &param)
@@ -219,6 +219,11 @@ std::vector<unsigned char> numeric_response(int num_code, User *user, std::vecto
 		{
 			return (RPL_CHANNELMODEISmsg(RPL_CHANNELMODEIS, user->getNick(), param));
 		}
+		case RPL_UMODEIS:
+		{
+			std::vector<unsigned char> modes = user->getUserModes();
+			return (RPL_UMODEISmsg(RPL_UMODEIS, user->getNick(), modes));
+		}
 		case RPL_BANLIST:
 		{
 			return (RPL_BANLISTmsg(RPL_BANLIST, param));
@@ -237,8 +242,9 @@ std::vector<unsigned char> numeric_response(int num_code, User *user, std::vecto
 		}
 		case MODE_MESSAGE:
 		{
-			return (MODE_MESSAGEmsg(to_vector(" MODE"), param));
+			return (MODE_MESSAGEmsg(to_vector(" MODE "), param));
 		}
 	}
-	return (ERR_NOSUCHNICKmsg(ERR_NOSUCHNICK, user->getNick(), param));
+	std::vector<unsigned char> ret;
+	return (ret);
 }

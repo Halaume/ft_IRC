@@ -6,7 +6,7 @@
 #    By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/06/13 12:52:11 by ghanquer          #+#    #+#              #
-#    Updated: 2023/02/27 11:51:26 by ghanquer         ###   ########.fr        #
+#    Updated: 2023/03/09 08:38:16 by iguscett         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,13 +28,10 @@ CXX = c++ $(CXXFLAGS)
 
 RM = rm -fr
 
-CXXFLAGS = -Wall -Wextra -Werror -O3 -g -std=c++98 #-Wconversion -Wshadow -Wpedantic
+CXXFLAGS = -Wall -Wextra -Werror -O3 -g -std=c++98
 
 .cpp.o:
 	$(CXX) -c $< -o $(<:.cpp=.o)
-
-#HOW TO LIST .cpp
-#	ls -l | awk '{print $9}' | grep -E ".cpp$"| sed "s/\.cpp/ \\\/g" | sed '$s/\\$//g'
 
 SRC_FT = main \
 		 Server \
