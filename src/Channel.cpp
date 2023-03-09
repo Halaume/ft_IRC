@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:26 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 20:29:01 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 00:15:34 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -577,7 +577,7 @@ int Channel::modesMessage(Server &my_server, User *user, std::vector<std::vector
 		}
 	}
 	if (return_value == RET_AND_UMODEIS)
-		push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes()); // add l + k value
+		push_to_buf(RPL_CHANNELMODEIS, user, getChannelModes());
 	if (return_value == NO_RET)
 		return (0);
 	return (1);

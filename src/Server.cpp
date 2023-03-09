@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/31 18:11:10 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 20:51:15 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 01:30:42 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,6 @@ int	Server::init(char **argv)
 	_ev.data.fd = _sct;
 	if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sct, &_ev) == -1)
 		return (close(_sct), close(_epollfd), std::cerr << "Error on epoll_ctl_add listen socket" << std::endl, 1);
-	// std::cout << "0 : epoll fd: " << _epollfd << std::endl;
 	_argv = argv;
 	return (0);
 }
@@ -498,20 +497,20 @@ void	Server::delChan(std::vector<Channel>::iterator itc)
 	this->_channels.erase(itc);
 }
 
-void	Server::delUser(User * Usr)
+void    Server::delUser(User * Usr)
 {
 	while (Usr->getChannelsbg() != Usr->getChannelsend())
-		(*(Usr->getChannelsbg()))->delUserLst(Usr);
+			(*(Usr->getChannelsend() - 1))->delUserLst(Usr);
 	std::vector<Channel>::iterator ite = this->_channels.begin();
 	while (ite != this->_channels.end())
 	{
-		if (ite->getUserList().size() == 0)
-		{
-			this->_channels.erase(ite);
-			ite = this->_channels.begin();
-		}
-		else
-			ite++;
+			if (ite->getUserList().size() == 0)
+			{
+					this->_channels.erase(ite);
+					ite = this->_channels.begin();
+			}
+			else
+					ite++;
 	}
 	_ev.data.fd = Usr->getfd();
 	epoll_ctl(_epollfd, EPOLL_CTL_DEL, Usr->getfd(), &_ev);
@@ -520,6 +519,10 @@ void	Server::delUser(User * Usr)
 	for (it = this->_users.begin(); it->getfd() != Usr->getfd(); it++);
 	this->_users.erase(it);
 }
+
+
+
+
 
 void Server::printUsersList(void)
 {

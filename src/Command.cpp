@@ -6,7 +6,7 @@
 /*   By: iguscett <iguscett@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 12:14:15 by ghanquer          #+#    #+#             */
-/*   Updated: 2023/03/08 22:43:07 by iguscett         ###   ########.fr       */
+/*   Updated: 2023/03/09 01:34:17 by iguscett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include <cstdlib>
 #include <sstream>
 #include <stdlib.h>
-
 #include "../inc/Server.hpp"
 #include "../inc/Command.hpp"
 #include "../inc/User.hpp"
@@ -86,7 +85,7 @@ int Command::register_user(Server &my_server)
 	if (my_server.nbConnectionsWithSameNick(*_cmd_user) > 1)
 	{
 		if (_cmd_user->createNewNick(my_server) == 1)
-			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1); // ERROR msg and disconnect
+			return (push_to_buf(ERR_NICKNAMEINUSE, *this, v), 1);
 	}
 	_cmd_user->setRegistered(true);
 	push_to_buf(RPL_WELCOME, *this, no_param);
@@ -190,7 +189,7 @@ int Command::_fun_JOIN(Server &my_server)
 	std::vector<unsigned char> param;
 	Channel * channel;
 
-	if (_parsedCmd.size() < 2)
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	reparseChannelsKeys(_parsedCmd[1], &channels);
 	if (_parsedCmd.size() > 2)
@@ -200,7 +199,7 @@ int Command::_fun_JOIN(Server &my_server)
 	{
 		if (channels[it].empty() == false && ((channels[it][0] != '#' && channels[it][0] != '&') || contains_ctrl_g(channels[it]) == true))
 			return (push_to_buf(ERR_BADCHANMASK, *this, channels[it]), 1);
-		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // verifier si on quitte un channel si on arrive a rerentrer
+		else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
 			return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
 		else if (my_server.channelExists(channels[it]) == false)
 		{
@@ -222,17 +221,17 @@ int Command::_fun_JOIN(Server &my_server)
 			channel = my_server.findChan(channels[it]); 
 			if (channel == NULL)
 				return (push_to_buf(ERR_NOSUCHCHANNEL, *this, channels[it]), 1);
-			else if (channel->getMode('k') == true // to verify in irssi
+			else if (channel->getMode('k') == true
 				&& (keys_size == 0 || (keys_size > 0 && keys_size >= it && my_compare(keys[it], channel->getChanPassword()))))
 				return (push_to_buf(ERR_BADCHANNELKEY, *this, channels[it]), 1);
-			else if (channel->getMode('l') == true // to verify in irssi
+			else if (channel->getMode('l') == true
 				&& channel->getNbUsers() >= channel->getNbUsersLimit())
 				return (push_to_buf(ERR_CHANNELISFULL, *this, channels[it]), 1);
-			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN) // to verify in irssi
+			else if (_cmd_user->getNbChan() >= MAX_NB_CHAN)
 				return (push_to_buf(ERR_TOOMANYCHANNELS, *this, channels[it]), 1);
-			else if (channel->isUserBanned(&(*_cmd_user))) // to verify in irssi
+			else if (channel->isUserBanned(&(*_cmd_user)))
 				return (push_to_buf(ERR_BANNEDFROMCHAN, *this, channels[it]), 1);
-			else if (channel->getMode('i') == true	// voir pour channel operator // to verify in irssi
+			else if (channel->getMode('i') == true
 				&& (channel->isUserInvited(&(*_cmd_user)) == false
 				&& channel->isOp(*_cmd_user) == false))
 				return (push_to_buf(ERR_INVITEONLYCHAN, *this, channels[it]), 1);
@@ -255,7 +254,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	std::vector<Channel>::iterator								chan;
 	bool									is_op = false;
 
-	std::cerr << "JE SUIS UN CHANNEL" << std::endl;
 	if (dest[0] != '#')
 	{
 		for (; it != dest.end(); it++)
@@ -267,7 +265,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 			}
 			else if (*it == '@' || *it == '+')
 			{
-				std::cerr << "Setting op as true" << std::endl;
 				is_op = true;
 			}
 			else if (*it != '@' || *it != '+')
@@ -286,7 +283,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 		_botMessage(my_server, msg);
 
 	//Build Message
-
 	std::vector<unsigned char> ret;
 	std::vector<std::vector<unsigned char> >::size_type i;
 	unsigned char text[] = " PRIVMSG ";
@@ -303,7 +299,6 @@ void	Command::do_chan(std::vector<unsigned char> dest, Server &my_server, std::v
 	msg.insert(msg.begin(), ret.begin(), ret.end());
 
 	//Message Built
-
 	if (is_op)
 	{
 				for (std::list<User *>::iterator itc = chan->getOpListbg(); itc != chan->getOpListend(); itc++)
@@ -369,7 +364,7 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 {
 	std::vector<unsigned char>	msg;
 	std::list<User>::iterator	itu;
-	if (_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 	{
 		insert_all(_cmd_user->getRet(), ":No text to send\r\n");
 		return (1);
@@ -380,8 +375,6 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		insert_all(_cmd_user->getRet(), " :Duplicate recipients. No message delivered\r\n");
 		return (1);
 	}
-
-
 	if (_parsedCmd[2][0] == ':')
 	{
 		msg = std::vector<unsigned char>(_parsedCmd[2].begin() + 1, _parsedCmd[2].end());
@@ -395,7 +388,8 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 		msg = _parsedCmd[2];
 	msg.push_back('\r');
 	msg.push_back('\n');
-	std::vector<std::vector<unsigned char> >	target = splitOnComa(_parsedCmd[1]);
+	std::vector<std::vector<unsigned char> > target = splitOnComa(_parsedCmd[1]);
+	print_vector2("SPPPPPPPIIILT ONNNN COMAAAAAAAAAAAAAAAA", target);
 	for (std::vector<std::vector<unsigned char> >::iterator it = target.begin(); it != target.end(); it++)
 	{
 		std::vector<unsigned char> tmp2 = msg;
@@ -408,17 +402,17 @@ int	Command::_fun_PRIVMSG(Server &my_server)
 				push_to_buf(ERR_NOSUCHNICK, *this, *it);
 			else
 			{
-				std::vector<unsigned char>	tmp = msg;
+				std::vector<unsigned char> tmp;
+				std::vector<unsigned char> client = _cmd_user->getClient();
 				tmp.push_back(':');
-				tmp.insert(tmp.begin() + 1, _cmd_user->getNickbg(), _cmd_user->getNickend());
-				unsigned char text[] = " PRIVMSG ";
-				for (int j = 0; text[j]; j++)
-					tmp.push_back(text[j]);
-				tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
+				add_to_v(tmp, client);
+				std::string prvmsg = " PRIVMSG ";
+				add_to_v(tmp, to_vector(prvmsg));
+				add_to_v(tmp, itu->getNick());
 				tmp.push_back(' ');
 				tmp.push_back(':');
-				tmp2.insert(tmp2.begin(), tmp.begin(), tmp.end());
-				itu->setRet(tmp2);
+				tmp.insert(tmp.end(), msg.begin(), msg.end());
+				itu->setRet(tmp);
 				my_server.getEv().events = EPOLLOUT | EPOLLET;
 				my_server.getEv().data.fd = itu->getfd();
 				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
@@ -436,12 +430,10 @@ int	Command::_fun_NOTICE(Server &my_server) // TODO Reprendre privmsg
 {
 	std::vector<unsigned char>	msg;
 	std::list<User>::iterator	itu;
-	if (_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 		return (0);
 	if (_parsedCmd.size() > 3 && _parsedCmd[2][0] != ':')
 		return (0);
-
-
 	if (_parsedCmd[2][0] == ':')
 	{
 		msg = std::vector<unsigned char>(_parsedCmd[2].begin() + 1, _parsedCmd[2].end());
@@ -455,7 +447,7 @@ int	Command::_fun_NOTICE(Server &my_server) // TODO Reprendre privmsg
 		msg = _parsedCmd[2];
 	msg.push_back('\r');
 	msg.push_back('\n');
-	std::vector<std::vector<unsigned char> >	target = splitOnComa(_parsedCmd[1]);
+	std::vector<std::vector<unsigned char> > target = splitOnComa(_parsedCmd[1]);
 	for (std::vector<std::vector<unsigned char> >::iterator it = target.begin(); it != target.end(); it++)
 	{
 		std::vector<unsigned char> tmp2 = msg;
@@ -467,17 +459,17 @@ int	Command::_fun_NOTICE(Server &my_server) // TODO Reprendre privmsg
 			if (itu == my_server.getUsersend());
 			else
 			{
-				std::vector<unsigned char>	tmp = msg;
+				std::vector<unsigned char> tmp;
+				std::vector<unsigned char> client = _cmd_user->getClient();
 				tmp.push_back(':');
-				tmp.insert(tmp.begin() + 1, _cmd_user->getNickbg(), _cmd_user->getNickend());
-				unsigned char text[] = " PRIVMSG ";
-				for (int j = 0; text[j]; j++)
-					tmp.push_back(text[j]);
-				tmp.insert(tmp.end(), itu->getNickbg(), itu->getNickend());
+				add_to_v(tmp, client);
+				std::string prvmsg = " PRIVMSG ";
+				add_to_v(tmp, to_vector(prvmsg));
+				add_to_v(tmp, _parsedCmd[1]);
 				tmp.push_back(' ');
 				tmp.push_back(':');
-				tmp2.insert(tmp2.begin(), tmp.begin(), tmp.end());
-				itu->setRet(tmp2);
+				tmp.insert(tmp.end(), msg.begin(), msg.end());
+				itu->setRet(tmp);
 				my_server.getEv().events = EPOLLOUT | EPOLLET;
 				my_server.getEv().data.fd = itu->getfd();
 				if (epoll_ctl(my_server.getEpollfd(), EPOLL_CTL_MOD, itu->getfd(), &my_server.getEv()) == - 1)
@@ -496,7 +488,7 @@ int	Command::_fun_OPER(Server &my_server)
 	std::vector<unsigned char> adminop = to_vector("admin");
 	std::vector<unsigned char> all_modes;
 	
-	if (_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	
 	if (_parsedCmd[1] != adminop)
@@ -588,7 +580,7 @@ void Command::message_to_user(Server &my_server, User *user, std::vector<unsigne
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_INVITE(Server &my_server)
 {
-	if (_parsedCmd.size() < 3) // or empty
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[2]);
 	if (channel == my_server.getChannelsend())
@@ -599,7 +591,7 @@ int	Command::_fun_INVITE(Server &my_server)
 	user = channel->findUser(_parsedCmd[1]);
 	if (user != channel->getUserListend())
 		return (push_to_buf(ERR_USERONCHANNEL, *this, _parsedCmd[1]), 1);
-	if (channel->getMode('i') == true && !channel->isOp(_cmd_user))	// a tester / verifier // voir si rajouter les OPERATEURS
+	if (channel->getMode('i') == true && !channel->isOp(_cmd_user))
 		return (push_to_buf(ERR_CHANOPRIVSNEEDED, *this, _parsedCmd[2]), 1);
 	if (my_server.findUserPtrNick(_parsedCmd[1]) != NULL && channel->isUserInvited(my_server.findUserPtrNick(_parsedCmd[1])) == false)
 	{
@@ -621,11 +613,11 @@ int	Command::_fun_INVITE(Server &my_server)
 }
 
 // /*''''''''''''''''''''''''''''''''''''
-// 				TOPIC
+// 				TOPIC todo vérifier si ok de modifier quand option t est set... problème?
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_TOPIC(Server &my_server)
 {
-	if (_parsedCmd.size() < 2)
+	if (_parsedCmd.size() < 2 || _parsedCmd[1].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[1]);
 	if (channel == my_server.getChannelsend())
@@ -676,7 +668,7 @@ int	Command::_fun_KICK(Server &my_server)
 {
 	std::vector<Channel>::iterator channel =  my_server.findExistingChan(_parsedCmd[1]);
 
-	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty())
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 		return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 	if (channel == my_server.getChannelsend())
 		return (push_to_buf(ERR_NOSUCHCHANNEL, *this, _parsedCmd[1]), 1);
@@ -716,7 +708,7 @@ int	Command::_fun_KICK(Server &my_server)
 // ''''''''''''''''''''''''''''''''''''''*/
 int	Command::_fun_KILL(Server &my_server)
 {
-	if (_parsedCmd.size() < 3)
+	if (_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
 	if (!_cmd_user->getOperator())
 		return (push_to_buf(ERR_NOPRIVILEGES, *this, no_param), 1);
 	if (_parsedCmd.size() < 3)
@@ -752,7 +744,7 @@ int    Command::_fun_PART(Server &my_server)
 {
     std::vector<unsigned char>    ret;
 
-    if (this->_parsedCmd.size() < 3)
+    if (this->_parsedCmd.size() < 3 || _parsedCmd[2].empty() == true)
         return (push_to_buf(ERR_NEEDMOREPARAMS, *this, no_param), 1);
 
     std::vector<std::vector<unsigned char> >    chans = splitOnComa(this->_parsedCmd[1]);
