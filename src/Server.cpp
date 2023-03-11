@@ -220,8 +220,6 @@ int Server::run(void)
 						{
 							case EPOLLOUT:
 								std::cerr << "Sending data" << std::endl;
-								printUsersList();
-								std::cout << *this;
 								epoll_int = 0;
 								// Usr->clearCurrCmd();
 								sendto(Usr->getfd(), Usr->getRet());
@@ -359,8 +357,6 @@ int Server::run(void)
 								break;							
 							case EPOLLIN:
 								std::cerr << "Receiving data" << std::endl;
-								printUsersList();
-								std::cout << *this;
 								if (isUserInList(_events[k].data.fd) == false)
 								{
 									User new_user(_events[k].data.fd);
@@ -473,6 +469,10 @@ int Server::run(void)
 										_users.erase(Usr);	
 								}
 								break;
+							case default:
+								delUser(&(*Usr));
+								_users.erase(Usr);
+								
 						}
 					}
 					catch (std::exception & e)
